@@ -1,0 +1,5 @@
+.gradle
+.idea
+#/build/
+#/src/main/resources/application.yml
+#/src/main/java/com/example/demo/config/secret/
