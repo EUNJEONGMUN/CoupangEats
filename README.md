@@ -20,3 +20,4 @@ Rising Test
 - validation 구현
 - 로그인 API 구현
 - 인가 구현
+- 사용자 관련, 배달 관련 더미데이터 추가
