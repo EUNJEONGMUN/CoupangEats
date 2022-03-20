@@ -3,6 +3,7 @@ package com.example.demo.src.user;
 import com.example.demo.config.BaseException;
 import com.example.demo.config.BaseResponse;
 import com.example.demo.src.user.model.Req.*;
+import com.example.demo.src.user.model.Res.*;
 import com.example.demo.utils.JwtService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -43,7 +44,7 @@ public class UserController {
     @PostMapping("/sign-up")
     public BaseResponse<String> createUser(@RequestParam double userX, @RequestParam double userY, @Valid @RequestBody PostUserReq postUserReq){
         try{
-            // 이메일 정규식 확인
+            // 이메일(아이디) 정규식 확인
             if(!isRegexEmail(postUserReq.getEmail())){
                 return new BaseResponse<>(POST_USERS_INVALID_EMAIL);
             }
@@ -72,6 +73,30 @@ public class UserController {
 
 
     }
+
+    /**
+     * 로그인 API
+     * [POST] /users/sign-in
+     * @return BaseResponse<PostSignInRes>
+     */
+    @ResponseBody
+    @PostMapping("/sign-in")
+    public BaseResponse<PostSignInRes> signIn(@Valid @RequestBody PostSignInReq postSignInReq) throws BaseException {
+        try{
+            // 이메일(아이디) 정규식 확인
+            if(!isRegexEmail(postSignInReq.getEmail())){
+                return new BaseResponse<>(POST_SIGN_IN_INVALID_EMAIL);
+            }
+
+        PostSignInRes postSignInRes = userService.signIn(postSignInReq);
+        return new BaseResponse<>(postSignInRes);
+        } catch(BaseException exception){
+            return new BaseResponse<>((exception.getStatus()));
+        }
+
+
+    }
+
 
 
 }

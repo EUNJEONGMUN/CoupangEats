@@ -1,7 +1,10 @@
 package com.example.demo.src.user;
 
 import com.example.demo.config.BaseException;
+import com.example.demo.src.user.model.Req.PostSignInReq;
 import com.example.demo.src.user.model.Req.PostUserReq;
+import com.example.demo.src.user.model.Res.PostSignInRes;
+import com.example.demo.src.user.model.User;
 import com.example.demo.utils.JwtService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -63,4 +66,37 @@ public class UserService {
 
     }
 
+    /**
+     * 로그인 API
+     * [POST] /users/sign-in
+     * @return BaseResponse<PostSignInRes>
+     */
+    public PostSignInRes signIn(PostSignInReq postSignInReq) throws BaseException {
+        String encryptPwd;
+        try {
+            // 사용자에게 바디값으로 받은 비밀번호 암호화
+            encryptPwd = new SHA256().encrypt(postSignInReq.getPassward());
+            postSignInReq.setPassward(encryptPwd);
+        } catch (Exception ignored) {
+            throw new BaseException(PASSWORD_DECRYPTION_ERROR);
+        }
+
+        // 사용자가 존재하는지 확인
+        // 존재하지 않을 때
+        if(userProvider.checkPassward(postSignInReq.getEmail(),encryptPwd) != 1){
+            throw new BaseException(FAILED_TO_LOGIN);
+        }
+
+        // DB로부터 정보를 가져옴
+        User user = userDao.getUserInfo(postSignInReq);
+
+
+        try {
+            int userIdx = user.getUserIdx();
+            String jwt = jwtService.createJwt(userIdx);
+            return new PostSignInRes(userIdx,jwt);
+        } catch (Exception exception) {
+            throw new BaseException(DATABASE_ERROR);
+        }
+    }
 }

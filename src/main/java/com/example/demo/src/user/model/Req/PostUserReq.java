@@ -16,7 +16,7 @@ import javax.validation.constraints.Size;
 @NoArgsConstructor
 public class PostUserReq {
 
-    @NotEmpty(message="이메일을 입력해주세요.")
+    @NotBlank(message="이메일을 입력하세요.")
     private String email;
 
     @NotBlank(message="비밀번호를 입력해주세요.")

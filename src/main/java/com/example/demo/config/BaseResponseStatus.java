@@ -31,12 +31,12 @@ public enum BaseResponseStatus {
     USERS_EMPTY_USER_ID(false, 2010, "유저 아이디 값을 확인해주세요."),
 
     // [POST] /users
-    POST_USERS_EMPTY_EMAIL(false, 2015, "이메일을 입력해주세요."),
-    POST_USERS_INVALID_EMAIL(false, 2016, "이메일 형식을 확인해주세요."),
+    POST_USERS_EMPTY_EMAIL(false, 2015, "이메일을 입력하세요."),
+    POST_USERS_INVALID_EMAIL(false, 2016, "이메일을 올바르게 입력해주세요."),
     POST_USERS_EXISTS_EMAIL(false,2017,"이미 가입된 이메일 주소입니다. 다른 이메일을 입력하여 주세요."),
     PWD_CONTAINS_EMAIL(false, 2018, "아이디(이메일) 제외"),
     POST_USERS_INVALID_PWD(false, 2019, "영문/숫자/특수문자 2가지 이상 조합"),
-    POST_USERS_EXISTS_PHONE(false, 2020, "이미 가입된 휴대폰 번호입니다."),
+    POST_SIGN_IN_INVALID_EMAIL(false, 2020, "아이디는 이메일 주소 형식으로 입력해주세요."),
 
     /**
      * 3000 : Response 오류
@@ -46,8 +46,8 @@ public enum BaseResponseStatus {
 
     // [POST] /users
     DUPLICATED_EMAIL(false, 3013, "중복된 이메일입니다."),
-    FAILED_TO_LOGIN(false,3014,"없는 아이디거나 비밀번호가 틀렸습니다."),
-
+    FAILED_TO_LOGIN(false,3014,"입력하신 아이디 또는 비밀번호가 일치하지 않습니다."),
+    POST_USERS_EXISTS_PHONE(false, 3015, "이미 가입된 휴대폰 번호입니다."),
 
 
     /**

@@ -38,4 +38,14 @@ public class UserProvider {
             throw new BaseException(DATABASE_ERROR);
         }
     }
+
+    // 사용자 존재 여부 확인
+    public int checkPassward(String email, String encryptPwd) throws BaseException  {
+        try {
+            return userDao.checkPassward(email, encryptPwd);
+        } catch (Exception exception){
+            throw new BaseException(DATABASE_ERROR);
+        }
+    }
+
 }
