@@ -18,3 +18,5 @@ Rising Test
 - RESTful API 리스트업
 - 회원가입 API 구현
 - validation 구현
+- 로그인 API 구현
+- 인가 구현
