@@ -2,6 +2,7 @@ package com.example.demo.src.user;
 
 import com.example.demo.config.BaseException;
 import com.example.demo.config.BaseResponse;
+import com.example.demo.src.UnAuth;
 import com.example.demo.src.user.model.Req.*;
 import com.example.demo.src.user.model.Res.*;
 import com.example.demo.utils.JwtService;
@@ -40,6 +41,7 @@ public class UserController {
      * /sign-up?userX=&userY
      * @return BaseResponse<String>
      */
+    @UnAuth
     @ResponseBody
     @PostMapping("/sign-up")
     public BaseResponse<String> createUser(@RequestParam double userX, @RequestParam double userY, @Valid @RequestBody PostUserReq postUserReq){
@@ -79,6 +81,7 @@ public class UserController {
      * [POST] /users/sign-in
      * @return BaseResponse<PostSignInRes>
      */
+    @UnAuth
     @ResponseBody
     @PostMapping("/sign-in")
     public BaseResponse<PostSignInRes> signIn(@Valid @RequestBody PostSignInReq postSignInReq) throws BaseException {
