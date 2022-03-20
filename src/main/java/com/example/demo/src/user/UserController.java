@@ -44,35 +44,31 @@ public class UserController {
     @UnAuth
     @ResponseBody
     @PostMapping("/sign-up")
-    public BaseResponse<String> createUser(@RequestParam double userX, @RequestParam double userY, @Valid @RequestBody PostUserReq postUserReq){
-        try{
-            // 이메일(아이디) 정규식 확인
-            if(!isRegexEmail(postUserReq.getEmail())){
-                return new BaseResponse<>(POST_USERS_INVALID_EMAIL);
-            }
+    public BaseResponse<String> createUser(@RequestParam double userX, @RequestParam double userY, @Valid @RequestBody PostUserReq postUserReq) throws BaseException {
 
-            // 비밀번호 정규식 확인
-            if(!isRegexPwd(postUserReq.getPassward())){
-                return new BaseResponse<>(POST_USERS_INVALID_PWD);
-            }
-
-            String userEmail = postUserReq.getEmail().substring(0,postUserReq.getEmail().lastIndexOf("@"));
-
-            // 아이디(이메일)와 비밀번호 동일 여부 체크
-            if (postUserReq.getPassward().contains(userEmail)) {
-                return new BaseResponse<>(PWD_CONTAINS_EMAIL);
-            }
-
-            // 3개 이상 동일 여부 체크
-            // 구현 해야 함.
-
-            userService.createUser(userX, userY, postUserReq);
-            String result ="";
-            return new BaseResponse<>(result);
-         }catch(BaseException exception){
-            return new BaseResponse<>((exception.getStatus()));
+        // 이메일(아이디) 정규식 확인
+        if(!isRegexEmail(postUserReq.getEmail())){
+            return new BaseResponse<>(POST_USERS_INVALID_EMAIL);
         }
 
+        // 비밀번호 정규식 확인
+        if(!isRegexPwd(postUserReq.getPassward())){
+            return new BaseResponse<>(POST_USERS_INVALID_PWD);
+        }
+
+        String userEmail = postUserReq.getEmail().substring(0,postUserReq.getEmail().lastIndexOf("@"));
+
+        // 아이디(이메일)와 비밀번호 동일 여부 체크
+        if (postUserReq.getPassward().contains(userEmail)) {
+            return new BaseResponse<>(PWD_CONTAINS_EMAIL);
+        }
+
+        // 3개 이상 동일 여부 체크
+        // 구현 해야 함.
+
+        userService.createUser(userX, userY, postUserReq);
+        String result ="";
+        return new BaseResponse<>(result);
 
     }
 
@@ -85,18 +81,14 @@ public class UserController {
     @ResponseBody
     @PostMapping("/sign-in")
     public BaseResponse<PostSignInRes> signIn(@Valid @RequestBody PostSignInReq postSignInReq) throws BaseException {
-        try{
-            // 이메일(아이디) 정규식 확인
-            if(!isRegexEmail(postSignInReq.getEmail())){
-                return new BaseResponse<>(POST_SIGN_IN_INVALID_EMAIL);
-            }
+
+        // 이메일(아이디) 정규식 확인
+        if(!isRegexEmail(postSignInReq.getEmail())){
+            return new BaseResponse<>(POST_SIGN_IN_INVALID_EMAIL);
+        }
 
         PostSignInRes postSignInRes = userService.signIn(postSignInReq);
         return new BaseResponse<>(postSignInRes);
-        } catch(BaseException exception){
-            return new BaseResponse<>((exception.getStatus()));
-        }
-
 
     }
 

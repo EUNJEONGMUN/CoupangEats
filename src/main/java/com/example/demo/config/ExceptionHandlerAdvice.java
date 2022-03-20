@@ -14,6 +14,12 @@ import static com.example.demo.config.BaseResponseStatus.*;
 @RestControllerAdvice
 public class ExceptionHandlerAdvice {
 
+    @ExceptionHandler(BaseException.class)
+    public BaseResponse BaseException(BaseException exception){
+        return new BaseResponse<>(exception.getStatus());
+    }
+
+
     @ExceptionHandler(MethodArgumentNotValidException.class)
     public ResponseEntity<BaseResponse> methodValidException(MethodArgumentNotValidException e, HttpServletRequest request){
         BaseResponse baseResponse = makeErrorResponse(e.getBindingResult());
