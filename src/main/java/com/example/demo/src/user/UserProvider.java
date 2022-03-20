@@ -30,6 +30,12 @@ public class UserProvider {
 
     }
 
-
-
+    // 휴대폰 번호 중복 확인
+    public int checkPhoneNum(String phoneNumber) throws BaseException {
+        try {
+            return userDao.checkPhoneNum(phoneNumber);
+        } catch (Exception exception){
+            throw new BaseException(DATABASE_ERROR);
+        }
+    }
 }

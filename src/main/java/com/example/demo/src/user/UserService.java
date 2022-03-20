@@ -40,6 +40,11 @@ public class UserService {
             throw new BaseException(POST_USERS_EXISTS_EMAIL);
         }
 
+        // 휴대폰 번호 중복 확인
+        if(userProvider.checkPhoneNum(postUserReq.getPhoneNumber()) == 1) {
+            throw new BaseException(POST_USERS_EXISTS_PHONE);
+        }
+
         String pwd;
 
         try {
@@ -50,7 +55,7 @@ public class UserService {
         }
 
         try {
-            int userIdx = userDao.createUser(userX, userY, postUserReq);
+            userDao.createUser(userX, userY, postUserReq);
         } catch (Exception exception) {
             throw new BaseException(DATABASE_ERROR);
         }

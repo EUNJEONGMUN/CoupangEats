@@ -50,5 +50,13 @@ public class UserDao {
                 Param);
     }
 
+    // 휴대폰 번호 중복 확인
+    public int checkPhoneNum(String phoneNumber) {
+        String Query = "SELECT EXISTS(SELECT * FROM User WHERE User.phoneNumber=?);";
+        String Param = phoneNumber;
 
+        return this.jdbcTemplate.queryForObject(Query,
+                int.class,
+                Param);
+    }
 }

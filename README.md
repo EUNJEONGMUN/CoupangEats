@@ -17,3 +17,4 @@ Rising Test
 - DB 테이블 생성
 - RESTful API 리스트업
 - 회원가입 API 구현
+- validation 구현
