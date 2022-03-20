@@ -1,0 +1,14 @@
+server:
+  port: 9009
+
+spring:
+  application:
+    name: demo
+
+  datasource:
+    platform: mysql
+    url: jdbc:mysql://database-1.copcz9wffyhz.ap-northeast-2.rds.amazonaws.com/CoupangEatsDB?autoReconnect=true # 변경해주세요
+    username: hannah_eats
+    password: coupang&hannah1420*
+    driver-class-name: com.mysql.cj.jdbc.Driver # mysql 8버전
+    # driver-class-name: com.mysql.jdbc.Driver # mysql 5버전

@@ -11,3 +11,9 @@ Rising Test
 - ERD 설계 완료
     - https://aquerytool.com/aquerymain/index/?rurl=e4a2c069-adcf-423d-9e44-11c53c677c0b
     - passward : a74vd2
+
+
+## 2022-03-20 진행상황
+- DB 테이블 생성
+- RESTful API 리스트업
+- 회원가입 API 구현
