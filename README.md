@@ -16,6 +16,7 @@ Rising Test
 ## 2022-03-20 진행상황
 - DB 테이블 생성
 - RESTful API 리스트업
+  - https://docs.google.com/spreadsheets/d/1VIkuCFoaXgTUkJoDqHE50YlTO9RZGANg/edit?usp=sharing&ouid=108228008875958634623&rtpof=true&sd=true
 - 회원가입 API 구현
 - validation 구현
 - 로그인 API 구현
