@@ -18,5 +18,7 @@ public class GetStoreHomeRes {
     private String timeDelivery;
     private double reviewScore;
     private int reviewCount;
+    private int fee;
+    private String isToGo;
     private List<String> menuImgUrl;
 }

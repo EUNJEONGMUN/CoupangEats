@@ -3,14 +3,12 @@ package com.example.demo.src.store;
 import com.example.demo.config.BaseException;
 import com.example.demo.config.BaseResponse;
 import com.example.demo.src.UnAuth;
+import com.example.demo.src.store.model.StoreHome;
 import com.example.demo.src.store.model.Res.GetStoreHomeRes;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.ResponseBody;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
@@ -37,8 +35,8 @@ public class StoreController {
     @UnAuth
     @ResponseBody
     @GetMapping("/home")
-    public BaseResponse<List<GetStoreHomeRes>> getStoreHome() throws BaseException{
-        List<GetStoreHomeRes> getStoreHomeRes = storeProvider.getStoreHome();
+    public BaseResponse<List<GetStoreHomeRes>> getStoreHome(StoreHome storeHome) throws BaseException{
+        List<GetStoreHomeRes> getStoreHomeRes = storeProvider.getStoreHome(storeHome);
         return new BaseResponse<>(getStoreHomeRes);
     }
 

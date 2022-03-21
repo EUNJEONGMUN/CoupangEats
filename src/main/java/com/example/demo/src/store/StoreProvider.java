@@ -2,6 +2,7 @@ package com.example.demo.src.store;
 
 import com.example.demo.config.BaseException;
 import com.example.demo.src.store.model.Res.GetStoreHomeRes;
+import com.example.demo.src.store.model.StoreHome;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -25,11 +26,12 @@ public class StoreProvider {
      * [GET] /stores/home
      * @return BaseResponse<List<GetStoreHomeRes>>
      */
-    public List<GetStoreHomeRes> getStoreHome() throws BaseException {
+    public List<GetStoreHomeRes> getStoreHome(StoreHome storeHome) throws BaseException {
         try {
-            List<GetStoreHomeRes> getStoreHomeRes = storeDao.getStoreHome();
+            List<GetStoreHomeRes> getStoreHomeRes = storeDao.getStoreHome(storeHome);
             return getStoreHomeRes;
         } catch (Exception exception) {
+            System.out.println("storehome-> "+ exception);
             throw new BaseException(DATABASE_ERROR);
         }
     }
