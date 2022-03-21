@@ -20,5 +20,6 @@ public class GetStoreHomeRes {
     private int reviewCount;
     private int fee;
     private String isToGo;
+    private String isCoupon;
     private List<String> menuImgUrl;
 }

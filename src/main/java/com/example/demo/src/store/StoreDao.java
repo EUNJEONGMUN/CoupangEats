@@ -27,7 +27,7 @@ public class StoreDao {
     public List<GetStoreHomeRes> getStoreHome(StoreHome storeHome) {
 
         // 주문 많은 순
-        String Query1 = "SELECT S.storeIdx, S.storeImgUrl,S.storeName, S.isCheetah, S.timeDelivery, R.reviewScore, R.reviewCount, F.fee, S.isToGo\n" +
+        String Query1 = "SELECT S.storeIdx, S.storeImgUrl,S.storeName, S.isCheetah, S.timeDelivery, R.reviewScore, R.reviewCount, F.fee, S.isToGo, S.isCoupon\n" +
                 "FROM Store S\n" +
                 "LEFT JOIN (\n" +
                 "    SELECT StoreIdx, IFNULL(MIN(deliveryFee),0) AS fee\n" +
@@ -45,7 +45,7 @@ public class StoreDao {
                 "ORDER BY OC.orderCount DESC;";
 
         // 별점 높은 순
-        String Query2 = "SELECT S.storeIdx, S.storeImgUrl,S.storeName, S.isCheetah, S.timeDelivery, R.reviewScore, R.reviewCount, F.fee, S.isToGo\n" +
+        String Query2 = "SELECT S.storeIdx, S.storeImgUrl,S.storeName, S.isCheetah, S.timeDelivery, R.reviewScore, R.reviewCount, F.fee, S.isToGo, S.isCoupon\n" +
                 "FROM Store S\n" +
                 "LEFT JOIN (\n" +
                 "    SELECT StoreIdx, IFNULL(MIN(deliveryFee),0) AS fee\n" +
@@ -59,7 +59,7 @@ public class StoreDao {
                 "ORDER BY R.reviewScore DESC;";
 
         // 신규 매장 순
-        String Query3 = "SELECT S.storeIdx, S.storeImgUrl,S.storeName, S.isCheetah, S.timeDelivery, R.reviewScore, R.reviewCount, F.fee, S.isToGo\n" +
+        String Query3 = "SELECT S.storeIdx, S.storeImgUrl,S.storeName, S.isCheetah, S.timeDelivery, R.reviewScore, R.reviewCount, F.fee, S.isToGo, S.isCoupon\n" +
                 "FROM Store S\n" +
                 "LEFT JOIN (\n" +
                 "    SELECT StoreIdx, IFNULL(MIN(deliveryFee),0) AS fee\n" +
@@ -107,6 +107,7 @@ public class StoreDao {
                         rs1.getInt("reviewCount"),
                         rs1.getInt("fee"),
                         rs1.getString("isToGo"),
+                        rs1.getString("isCoupon"),
                         this.jdbcTemplate.query(StoreMenuImgQuery,
                                 (rs2, rowNum2) -> new String(
                                         rs2.getString("menuImgUrl")
@@ -125,6 +126,7 @@ public class StoreDao {
                             rs1.getInt("reviewCount"),
                             rs1.getInt("fee"),
                             rs1.getString("isToGo"),
+                            rs1.getString("isCoupon"),
                             this.jdbcTemplate.query(StoreMenuImgQuery,
                                     (rs2, rowNum2) -> new String(
                                             rs2.getString("menuImgUrl")
@@ -144,6 +146,7 @@ public class StoreDao {
                         rs1.getInt("reviewCount"),
                         rs1.getInt("fee"),
                         rs1.getString("isToGo"),
+                        rs1.getString("isCoupon"),
                         this.jdbcTemplate.query(StoreMenuImgQuery,
                                 (rs2, rowNum2) -> new String(
                                         rs2.getString("menuImgUrl")
