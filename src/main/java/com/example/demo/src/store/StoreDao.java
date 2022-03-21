@@ -103,14 +103,6 @@ public class StoreDao {
 
         Object[] Params = new Object[]{storeHome.getIsCheetah(),"Y", storeHome.getIsToGo(),"Y", storeHome.getIsCoupon(),"Y", storeHome.getFee(), storeHome.getMinimum()};
 
-        System.out.println("-------------------------");
-        System.out.println(storeHome.getIsCheetah());
-        System.out.println(storeHome.getMinimum());
-        System.out.println(storeHome.getIsToGo());
-        System.out.println(storeHome.getFee());
-        System.out.println(storeHome.getIsCoupon());
-        System.out.println("-------------------------");
-
         if (storeHome.getSort().equals("score")){
             return this.jdbcTemplate.query(Query2,
                 (rs1, rowNum1) -> new GetStoreHomeRes(
@@ -195,7 +187,8 @@ public class StoreDao {
      * @return BaseResponse<List<GetStoreHomeRes>>
      */
     public GetStoreDetailRes getStoreDetail(int storeIdx) {
-        String StoreInfoQuery = "SELECT S.storeIdx, S.storeImgUrl,S.storeName, S.isCheetah, S.timeDelivery, R.reviewScore, R.reviewCount, F.fee, S.minimumPrice\n" +
+        String StoreInfoQuery = "SELECT S.storeIdx, S.storeImgUrl,S.storeName, S.isCheetah, S.timeDelivery, R.reviewScore, R.reviewCount, F.fee, S.minimumPrice,\n" +
+                "       CASE WHEN S.isToGo='Y' THEN S.timeToGo ELSE 'N' END AS timeToGo, S.storeLongitude, S.storeLatitude\n" +
                 "FROM Store S\n" +
                 "LEFT JOIN (\n" +
                 "    SELECT StoreIdx, IFNULL(MIN(deliveryFee),0) AS fee\n" +
@@ -205,13 +198,17 @@ public class StoreDao {
                 "    SELECT UO.storeIdx, ROUND(AVG(R.score),1) AS reviewScore, COUNT(R.reviewIdx) AS reviewCount\n" +
                 "    FROM Review R JOIN UserOrder UO on R.userOrderIdx=UO.userOrderIdx\n" +
                 "    GROUP BY UO.storeIdx) R ON R.storeIdx=S.storeIdx\n" +
-                "WHERE S.status!='N' AND S.storeIdx=?;";
+                "WHERE S.status != 'N' AND S.storeIdx=?;";
 
-        String StoreCouponQuery = "SELECT CONCAT('최대 ',C.discountPrice,'원 쿠폰 받기') AS maxDiscountCoupon\n" +
-                "FROM Coupon C\n" +
-                "WHERE C.storeIdx=?\n" +
-                "ORDER BY C.discountPrice DESC\n" +
-                "LIMIT 1;";
+        String StoreCouponQuery = "SELECT S.storeIdx, IFNULL(C.discountPrice,0) AS maxDiscountPrice, IFNULL(C.couponType,'N') AS couponType\n" +
+                "FROM Store S\n" +
+                "LEFT JOIN (SELECT RankRow.storeIdx, RankRow.discountPrice, RankRow.couponType\n" +
+                "            FROM (SELECT*, RANK() OVER (PARTITION BY storeIdX ORDER BY discountPrice DESC, couponIdx ASC) AS a\n" +
+                "                  FROM Coupon\n" +
+                "                WHERE status='Y' AND  DATEDIFF(endDate, CURRENT_DATE())>=0\n" +
+                "                 ) AS RankRow\n" +
+                "            WHERE RankRow.a <= 1) C ON C.storeIdx = S.storeIdx\n" +
+                "WHERE S.storeIdx = ?;";
 
         String MenuCategoryQuery = "SELECT MC.menuCategoryIdx, storeIdx, categoryName\n" +
                 "FROM MenuCategory MC\n" +
@@ -233,9 +230,13 @@ public class StoreDao {
                         rs1.getInt("reviewCount"),
                         rs1.getInt("fee"),
                         rs1.getInt("minimumPrice"),
+                        rs1.getString("timeToGo"),
+                        rs1.getDouble("storeLongitude"),
+                        rs1.getDouble("storeLatitude"),
                         this.jdbcTemplate.queryForObject(StoreCouponQuery,
-                                (rs2, rowNum2) -> new String(
-                                        rs2.getString("maxDiscountCoupon")
+                                (rs2, rowNum2) -> new StoreCouponInfo(
+                                        rs2.getInt("maxDiscountPrice"),
+                                        rs2.getString("couponType")
                                 ), Param),
                         this.jdbcTemplate.query(MenuCategoryQuery,
                                 (rs3, rowNum3) -> new MenuCategory(
