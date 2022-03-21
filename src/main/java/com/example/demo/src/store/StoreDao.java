@@ -250,4 +250,14 @@ public class StoreDao {
                 ), Param);
 
     }
+
+    // 가게 존재 여부 확인
+    public int checkStore(int storeIdx) {
+        String Query = "SELECT EXISTS( SELECT * FROM Store WHERE status='Y' AND storeIdx=?);";
+        int Param = storeIdx;
+
+        return this.jdbcTemplate.queryForObject(Query,
+                int.class,
+                Param);
+    }
 }

@@ -13,6 +13,8 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
+import static com.example.demo.config.BaseResponseStatus.*;
+
 @RestController
 @RequestMapping("/stores")
 public class StoreController {
@@ -49,13 +51,18 @@ public class StoreController {
     @UnAuth
     @ResponseBody
     @GetMapping("/detail")
-    public BaseResponse<GetStoreDetailRes> getStoreDetail(@RequestParam (required = false) int storeIdx) throws BaseException{
+    public BaseResponse<GetStoreDetailRes> getStoreDetail(@RequestParam(required = false) String storeIdx) throws BaseException{
 
-        // 없을 경우 어떻게 처리?
-        //        if (storeId==null){
-//            return new BaseResponse<>(EMPTY_STOREIDX_PARAM);
-//        }
-        GetStoreDetailRes getStoreDetailRes = storeProvider.getStoreDetail(storeIdx);
+        // int는 null 값이 될 수 없기 때문에 String으로 받는다.
+        // storeIdx
+        if (storeIdx == null){
+            return new BaseResponse<>(EMPTY_STOREIDX_PARAM);
+        }
+        if (storeProvider.checkStore(Integer.parseInt(storeIdx))==0){
+            return new BaseResponse<>(EMPTY_STORE);
+        }
+
+        GetStoreDetailRes getStoreDetailRes = storeProvider.getStoreDetail(Integer.parseInt(storeIdx));
         return new BaseResponse<>(getStoreDetailRes);
     }
 

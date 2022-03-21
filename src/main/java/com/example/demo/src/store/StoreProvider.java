@@ -51,4 +51,13 @@ public class StoreProvider {
             throw new BaseException(DATABASE_ERROR);
         }
     }
+
+    // 가게 존재 여부 확인
+    public int checkStore(int storeIdx) throws BaseException{
+        try {
+            return storeDao.checkStore(storeIdx);
+        } catch (Exception exception) {
+            throw new BaseException(DATABASE_ERROR);
+        }
+    }
 }
