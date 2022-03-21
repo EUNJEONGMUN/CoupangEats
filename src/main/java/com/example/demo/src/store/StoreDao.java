@@ -4,6 +4,7 @@ import com.example.demo.src.store.model.MenuCategory;
 import com.example.demo.src.store.model.MenuDetail;
 import com.example.demo.src.store.model.Res.GetStoreDetailRes;
 import com.example.demo.src.store.model.Res.GetStoreHomeRes;
+import com.example.demo.src.store.model.StoreCouponInfo;
 import com.example.demo.src.store.model.StoreHome;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -29,7 +30,7 @@ public class StoreDao {
     public List<GetStoreHomeRes> getStoreHome(StoreHome storeHome) {
 
         // 주문 많은 순
-        String Query1 = "SELECT S.storeIdx, S.storeImgUrl,S.storeName, S.isCheetah, S.timeDelivery, R.reviewScore, R.reviewCount, F.fee, S.isToGo, S.isCoupon\n" +
+        String Query1 = "SELECT S.storeIdx, S.storeImgUrl,S.storeName, S.isCheetah, S.timeDelivery, R.reviewScore, R.reviewCount, F.fee, S.isToGo, S.storeLongitude, S.storeLatitude\n" +
                 "FROM Store S\n" +
                 "LEFT JOIN (\n" +
                 "    SELECT StoreIdx, IFNULL(MIN(deliveryFee),0) AS fee\n" +
@@ -47,7 +48,7 @@ public class StoreDao {
                 "ORDER BY OC.orderCount DESC;";
 
         // 별점 높은 순
-        String Query2 = "SELECT S.storeIdx, S.storeImgUrl,S.storeName, S.isCheetah, S.timeDelivery, R.reviewScore, R.reviewCount, F.fee, S.isToGo, S.isCoupon\n" +
+        String Query2 = "SELECT S.storeIdx, S.storeImgUrl,S.storeName, S.isCheetah, S.timeDelivery, R.reviewScore, R.reviewCount, F.fee, S.isToGo, S.storeLongitude, S.storeLatitude\n" +
                 "FROM Store S\n" +
                 "LEFT JOIN (\n" +
                 "    SELECT StoreIdx, IFNULL(MIN(deliveryFee),0) AS fee\n" +
@@ -61,7 +62,7 @@ public class StoreDao {
                 "ORDER BY R.reviewScore DESC;";
 
         // 신규 매장 순
-        String Query3 = "SELECT S.storeIdx, S.storeImgUrl,S.storeName, S.isCheetah, S.timeDelivery, R.reviewScore, R.reviewCount, F.fee, S.isToGo, S.isCoupon\n" +
+        String Query3 = "SELECT S.storeIdx, S.storeImgUrl,S.storeName, S.isCheetah, S.timeDelivery, R.reviewScore, R.reviewCount, F.fee, S.isToGo, S.storeLongitude, S.storeLatitude\n" +
                 "FROM Store S\n" +
                 "LEFT JOIN (\n" +
                 "    SELECT StoreIdx, IFNULL(MIN(deliveryFee),0) AS fee\n" +
@@ -74,11 +75,23 @@ public class StoreDao {
                 "WHERE S.status != 'N' AND  (S.isCheetah=? OR S.isCheetah=?) AND (S.isToGo=? OR S.isToGo=?) AND (S.isCoupon=? OR S.isCoupon=?) AND F.fee <= ? AND S.minimumPrice <=?\n" +
                 "ORDER BY S.createdAt DESC;";
 
+        String StoreCouponQuery = "SELECT S.storeIdx, IFNULL(C.discountPrice,0) AS maxDiscountPrice, IFNULL(C.couponType,'N') AS couponType\n" +
+                "FROM Store S\n" +
+                "LEFT JOIN (SELECT RankRow.storeIdx, RankRow.discountPrice, RankRow.couponType\n" +
+                "            FROM (SELECT*, RANK() OVER (PARTITION BY storeIdX ORDER BY discountPrice DESC, couponIdx ASC) AS a\n" +
+                "                  FROM Coupon\n" +
+                "                WHERE status='Y' AND  DATEDIFF(endDate, CURRENT_DATE())>=0\n" +
+                "                 ) AS RankRow\n" +
+                "            WHERE RankRow.a <= 1) C ON C.storeIdx = S.storeIdx\n" +
+                "WHERE S.storeIdx = ?;";
+
         String StoreMenuImgQuery = "SELECT RankRow.storeIdx, RankRow.menuImgUrl\n" +
                 "FROM (SELECT*, RANK() OVER (PARTITION BY M.storeIdX ORDER BY M.menuIdx) AS a\n" +
                 "      FROM Menu M\n" +
                 "     ) AS RankRow\n" +
                 "WHERE RankRow.a <= 2 AND RankRow.storeIdx=?;";
+
+
 
 
         if (storeHome.getSort()==null){storeHome.setSort("default");}
@@ -109,10 +122,16 @@ public class StoreDao {
                         rs1.getInt("reviewCount"),
                         rs1.getInt("fee"),
                         rs1.getString("isToGo"),
-                        rs1.getString("isCoupon"),
+                        rs1.getDouble("storeLongitude"),
+                        rs1.getDouble("storeLatitude"),
+                        this.jdbcTemplate.queryForObject(StoreCouponQuery,
+                                (rs2, rowNum2) -> new StoreCouponInfo(
+                                        rs2.getInt("maxDiscountPrice"),
+                                        rs2.getString("couponType")
+                                ), rs1.getInt("storeIdx")),
                         this.jdbcTemplate.query(StoreMenuImgQuery,
-                                (rs2, rowNum2) -> new String(
-                                        rs2.getString("menuImgUrl")
+                                (rs3, rowNum3) -> new String(
+                                        rs3.getString("menuImgUrl")
                                 ), rs1.getInt("storeIdx"))
 
                 ), Params);
@@ -128,7 +147,13 @@ public class StoreDao {
                             rs1.getInt("reviewCount"),
                             rs1.getInt("fee"),
                             rs1.getString("isToGo"),
-                            rs1.getString("isCoupon"),
+                            rs1.getDouble("storeLongitude"),
+                            rs1.getDouble("storeLatitude"),
+                            this.jdbcTemplate.queryForObject(StoreCouponQuery,
+                                    (rs2, rowNum2) -> new StoreCouponInfo(
+                                            rs2.getInt("maxDiscountPrice"),
+                                            rs2.getString("couponType")
+                                    ), rs1.getInt("storeIdx")),
                             this.jdbcTemplate.query(StoreMenuImgQuery,
                                     (rs2, rowNum2) -> new String(
                                             rs2.getString("menuImgUrl")
@@ -148,7 +173,13 @@ public class StoreDao {
                         rs1.getInt("reviewCount"),
                         rs1.getInt("fee"),
                         rs1.getString("isToGo"),
-                        rs1.getString("isCoupon"),
+                        rs1.getDouble("storeLongitude"),
+                        rs1.getDouble("storeLatitude"),
+                        this.jdbcTemplate.queryForObject(StoreCouponQuery,
+                                (rs2, rowNum2) -> new StoreCouponInfo(
+                                        rs2.getInt("maxDiscountPrice"),
+                                        rs2.getString("couponType")
+                                ), rs1.getInt("storeIdx")),
                         this.jdbcTemplate.query(StoreMenuImgQuery,
                                 (rs2, rowNum2) -> new String(
                                         rs2.getString("menuImgUrl")
@@ -156,36 +187,6 @@ public class StoreDao {
 
                 ), Params);
 
-//        String StoreInfoQuery = "SELECT S.storeIdx, S.storeImgUrl,S.storeName, S.isCheetah, S.timeDelivery, R.reviewScore, R.reviewCount\n" +
-//                "FROM Store S\n" +
-//                "LEFT JOIN (\n" +
-//                "    SELECT UO.storeIdx, ROUND(AVG(R.score),1) AS reviewScore, COUNT(R.reviewIdx) AS reviewCount\n" +
-//                "    FROM Review R JOIN UserOrder UO on R.userOrderIdx=UO.userOrderIdx\n" +
-//                "    GROUP BY UO.storeIdx) R ON R.storeIdx=S.storeIdx\n" +
-//                "WHERE S.status!='N';";
-//
-//        String StoreMenuImgQuery = "SELECT RankRow.storeIdx, RankRow.menuImgUrl\n" +
-//                "FROM (SELECT*, RANK() OVER (PARTITION BY M.storeIdX ORDER BY M.menuIdx) AS a\n" +
-//                "      FROM Menu M\n" +
-//                "     ) AS RankRow\n" +
-//                "WHERE RankRow.a <= 2 AND RankRow.storeIdx=?;";
-//
-//
-//        Object[] Params = new Object[]{storeHome.getIsCheetah(), storeHome.getMinimum(), storeHome.getIsTogo(), storeHome.getFee()}
-//        return this.jdbcTemplate.query(StoreInfoQuery,
-//                (rs1, rowNum1) -> new GetStoreHomeRes(
-//                        rs1.getString("storeImgUrl"),
-//                        rs1.getString("storeName"),
-//                        rs1.getString("isCheetah"),
-//                        rs1.getString("timeDelivery"),
-//                        rs1.getDouble("reviewScore"),
-//                        rs1.getInt("reviewCount"),
-//                        this.jdbcTemplate.query(StoreMenuImgQuery,
-//                                (rs2, rowNum2) -> new String(
-//                                        rs2.getString("menuImgUrl")
-//                                ), rs1.getInt("storeIdx"))
-//
-//                ));
     }
 
     /**

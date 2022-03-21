@@ -44,10 +44,13 @@ public class StoreProvider {
      */
     public GetStoreDetailRes getStoreDetail(int storeIdx) throws BaseException {
         try {
+
+            // 쿠폰 있을 때랑 없을 때 나누기
+
             GetStoreDetailRes getStoreDetailRes = storeDao.getStoreDetail(storeIdx);
             return getStoreDetailRes;
         } catch (Exception exception) {
-            System.out.println("storedetail-> "+ exception);
+            System.out.println("store_detail-> "+ exception);
             throw new BaseException(DATABASE_ERROR);
         }
     }

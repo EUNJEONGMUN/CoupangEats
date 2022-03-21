@@ -1,5 +1,6 @@
 package com.example.demo.src.store.model.Res;
 
+import com.example.demo.src.store.model.StoreCouponInfo;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -20,6 +21,8 @@ public class GetStoreHomeRes {
     private int reviewCount;
     private int fee;
     private String isToGo;
-    private String isCoupon;
+    private double storeLongitude;
+    private double storeLatitude;
+    private StoreCouponInfo storeCouponInfo;
     private List<String> menuImgUrl;
 }

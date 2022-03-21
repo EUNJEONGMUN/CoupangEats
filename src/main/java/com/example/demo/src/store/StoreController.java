@@ -62,6 +62,7 @@ public class StoreController {
             return new BaseResponse<>(EMPTY_STORE);
         }
 
+
         GetStoreDetailRes getStoreDetailRes = storeProvider.getStoreDetail(Integer.parseInt(storeIdx));
         return new BaseResponse<>(getStoreDetailRes);
     }
