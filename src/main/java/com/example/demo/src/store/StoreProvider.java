@@ -1,6 +1,7 @@
 package com.example.demo.src.store;
 
 import com.example.demo.config.BaseException;
+import com.example.demo.src.store.model.Res.GetStoreDetailRes;
 import com.example.demo.src.store.model.Res.GetStoreHomeRes;
 import com.example.demo.src.store.model.StoreHome;
 import org.slf4j.Logger;
@@ -32,6 +33,21 @@ public class StoreProvider {
             return getStoreHomeRes;
         } catch (Exception exception) {
             System.out.println("storehome-> "+ exception);
+            throw new BaseException(DATABASE_ERROR);
+        }
+    }
+
+    /**
+     * 가게 상세 화면 조회 조회 API
+     * [GET] /stores/detail?storeIdx=
+     * @return BaseResponse<List<GetStoreHomeRes>>
+     */
+    public GetStoreDetailRes getStoreDetail(int storeIdx) throws BaseException {
+        try {
+            GetStoreDetailRes getStoreDetailRes = storeDao.getStoreDetail(storeIdx);
+            return getStoreDetailRes;
+        } catch (Exception exception) {
+            System.out.println("storedetail-> "+ exception);
             throw new BaseException(DATABASE_ERROR);
         }
     }

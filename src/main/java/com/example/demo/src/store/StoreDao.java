@@ -1,5 +1,8 @@
 package com.example.demo.src.store;
 
+import com.example.demo.src.store.model.MenuCategory;
+import com.example.demo.src.store.model.MenuDetail;
+import com.example.demo.src.store.model.Res.GetStoreDetailRes;
 import com.example.demo.src.store.model.Res.GetStoreHomeRes;
 import com.example.demo.src.store.model.StoreHome;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -7,7 +10,6 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Repository;
 
 import javax.sql.DataSource;
-import java.awt.*;
 import java.util.List;
 
 @Repository
@@ -184,5 +186,68 @@ public class StoreDao {
 //                                ), rs1.getInt("storeIdx"))
 //
 //                ));
+    }
+
+    /**
+     * 가게 상세 화면 조회 조회 API
+     * [GET] /stores/detail?storeIdx=
+     * @return BaseResponse<List<GetStoreHomeRes>>
+     */
+    public GetStoreDetailRes getStoreDetail(int storeIdx) {
+        String StoreInfoQuery = "SELECT S.storeIdx, S.storeImgUrl,S.storeName, S.isCheetah, S.timeDelivery, R.reviewScore, R.reviewCount, F.fee, S.minimumPrice\n" +
+                "FROM Store S\n" +
+                "LEFT JOIN (\n" +
+                "    SELECT StoreIdx, IFNULL(MIN(deliveryFee),0) AS fee\n" +
+                "    FROM DeliveryFee\n" +
+                "    WHERE DeliveryFee.status='Y' GROUP BY storeIdx) F ON F.storeIdx = S.storeIdx\n" +
+                "LEFT JOIN (\n" +
+                "    SELECT UO.storeIdx, ROUND(AVG(R.score),1) AS reviewScore, COUNT(R.reviewIdx) AS reviewCount\n" +
+                "    FROM Review R JOIN UserOrder UO on R.userOrderIdx=UO.userOrderIdx\n" +
+                "    GROUP BY UO.storeIdx) R ON R.storeIdx=S.storeIdx\n" +
+                "WHERE S.status!='N' AND S.storeIdx=?;";
+
+        String StoreCouponQuery = "SELECT CONCAT('최대 ',C.discountPrice,'원 쿠폰 받기') AS maxDiscountCoupon\n" +
+                "FROM Coupon C\n" +
+                "WHERE C.storeIdx=?\n" +
+                "ORDER BY C.discountPrice DESC\n" +
+                "LIMIT 1;";
+
+        String MenuCategoryQuery = "SELECT MC.menuCategoryIdx, storeIdx, categoryName\n" +
+                "FROM MenuCategory MC\n" +
+                "WHERE MC.storeIdx=?;";
+
+        String MenuDetailQuery = "SELECT menuName, menuPrice, menuDetail, menuImgUrl, isOption\n" +
+                "FROM Menu\n" +
+                "WHERE Menu.menuCategoryIdx=?;";
+
+        int Param = storeIdx;
+
+        return this.jdbcTemplate.queryForObject(StoreInfoQuery,
+                (rs1, rowNum1) -> new GetStoreDetailRes(
+                        rs1.getString("storeImgUrl"),
+                        rs1.getString("storeName"),
+                        rs1.getString("isCheetah"),
+                        rs1.getString("timeDelivery"),
+                        rs1.getDouble("reviewScore"),
+                        rs1.getInt("reviewCount"),
+                        rs1.getInt("fee"),
+                        rs1.getInt("minimumPrice"),
+                        this.jdbcTemplate.queryForObject(StoreCouponQuery,
+                                (rs2, rowNum2) -> new String(
+                                        rs2.getString("maxDiscountCoupon")
+                                ), Param),
+                        this.jdbcTemplate.query(MenuCategoryQuery,
+                                (rs3, rowNum3) -> new MenuCategory(
+                                        rs3.getString("categoryName"),
+                                        this.jdbcTemplate.query(MenuDetailQuery,
+                                                (rs4, rowNum4) -> new MenuDetail(
+                                                        rs4.getString("menuName"),
+                                                        rs4.getInt("menuPrice"),
+                                                        rs4.getString("menuDetail"),
+                                                        rs4.getString("menuImgUrl")
+                                                ), rs3.getInt("menuCategoryIdx"))
+                                ), Param)
+                ), Param);
+
     }
 }
