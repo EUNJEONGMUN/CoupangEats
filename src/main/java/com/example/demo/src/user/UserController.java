@@ -38,13 +38,12 @@ public class UserController {
     /**
      * 회원 가입 API
      * [POST] /users/sign-up
-     * /sign-up?userX=&userY
      * @return BaseResponse<String>
      */
     @UnAuth
     @ResponseBody
     @PostMapping("/sign-up")
-    public BaseResponse<String> createUser(@RequestParam double userX, @RequestParam double userY, @Valid @RequestBody PostUserReq postUserReq) throws BaseException {
+    public BaseResponse<String> createUser(@Valid @RequestBody PostUserReq postUserReq) throws BaseException {
 
         // 이메일(아이디) 정규식 확인
         if(!isRegexEmail(postUserReq.getEmail())){
@@ -66,7 +65,7 @@ public class UserController {
         // 3개 이상 동일 여부 체크
         // 구현 해야 함.
 
-        userService.createUser(userX, userY, postUserReq);
+        userService.createUser(postUserReq);
         String result ="";
         return new BaseResponse<>(result);
 

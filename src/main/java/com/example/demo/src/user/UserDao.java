@@ -22,23 +22,13 @@ public class UserDao {
     /**
      * 회원 가입 API
      * [POST] /users/sign-up
-     * /sign-up?userX=&userY
      * @return BaseResponse<String>
      */
-    public int createUser(double userX, double userY, PostUserReq postUserReq) {
+    public int createUser(PostUserReq postUserReq) {
         // 사용자 정보 insert
         String UserInfoQuery = "INSERT INTO User (userName, email, passward, phoneNumber) VALUES (?,?,?,?);";
         Object[] UserInfoParams = new Object[]{postUserReq.getUserName(), postUserReq.getEmail(), postUserReq.getPassward(), postUserReq.getPhoneNumber()};
-        this.jdbcTemplate.update(UserInfoQuery, UserInfoParams);
-
-
-        String lastInsertIdQuery = "select last_insert_id()";
-        int userIdx = this.jdbcTemplate.queryForObject(lastInsertIdQuery,int.class);
-
-        String UserLocationQuery = "INSERT INTO UserLocation (userIdx, userLongitude, userLatitude) VALUES (?,?,?);";
-        Object[] UserLocationParams = new Object[]{userIdx, userX, userY};
-
-        return this.jdbcTemplate.update(UserLocationQuery, UserLocationParams);
+        return this.jdbcTemplate.update(UserInfoQuery, UserInfoParams);
     }
 
 

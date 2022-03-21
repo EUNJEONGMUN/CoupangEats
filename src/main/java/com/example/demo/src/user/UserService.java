@@ -33,10 +33,9 @@ public class UserService {
     /**
      * 회원 가입 API
      * [POST] /users/sign-up
-     * /sign-up?userX=&userY
      * @return BaseResponse<String>
      */
-    public void createUser(double userX, double userY, PostUserReq postUserReq) throws BaseException {
+    public void createUser(PostUserReq postUserReq) throws BaseException {
 
         // email 중복 확인
         if(userProvider.checkEmail(postUserReq.getEmail()) == 1){
@@ -58,7 +57,7 @@ public class UserService {
         }
 
         try {
-            userDao.createUser(userX, userY, postUserReq);
+            userDao.createUser(postUserReq);
         } catch (Exception exception) {
             throw new BaseException(DATABASE_ERROR);
         }
