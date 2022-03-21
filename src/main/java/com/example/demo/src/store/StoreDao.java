@@ -1,6 +1,5 @@
 package com.example.demo.src.store;
 
-import com.example.demo.src.store.model.GetMenuImg;
 import com.example.demo.src.store.model.Res.GetStoreHomeRes;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -47,7 +46,7 @@ public class StoreDao {
                         rs1.getDouble("reviewScore"),
                         rs1.getInt("reviewCount"),
                         this.jdbcTemplate.query(StoreMenuImgQuery,
-                                (rs2, rowNum2) -> new GetMenuImg(
+                                (rs2, rowNum2) -> new String(
                                         rs2.getString("menuImgUrl")
                                 ), rs1.getInt("storeIdx"))
 

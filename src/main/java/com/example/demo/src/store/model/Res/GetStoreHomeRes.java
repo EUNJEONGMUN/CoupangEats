@@ -1,6 +1,5 @@
 package com.example.demo.src.store.model.Res;
 
-import com.example.demo.src.store.model.GetMenuImg;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -19,6 +18,5 @@ public class GetStoreHomeRes {
     private String timeDelivery;
     private double reviewScore;
     private int reviewCount;
-    private List<GetMenuImg> getMenuImg;
-
+    private List<String> menuImgUrl;
 }
