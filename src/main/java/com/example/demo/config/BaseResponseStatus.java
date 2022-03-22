@@ -50,6 +50,8 @@ public enum BaseResponseStatus {
     FAILED_TO_LOGIN(false,3014,"입력하신 아이디 또는 비밀번호가 일치하지 않습니다."),
     POST_USERS_EXISTS_PHONE(false, 3015, "이미 가입된 휴대폰 번호입니다."),
     USER_NOT_EXISTS(false, 3016, "존재하지 않는 사용자입니다."),
+    ADDRESS_NOT_EXISTS(false, 3017, "주소가 존재하지 않습니다."),
+    INCONSISTENCY_ADDRESS_USER(false, 3018, "해당 사용자의 주소가 아닙니다."),
 
 
     EMPTY_STORE(false, 3100, "존재하지 않는 가게입니다."),
@@ -69,8 +71,10 @@ public enum BaseResponseStatus {
     PASSWORD_ENCRYPTION_ERROR(false, 4011, "비밀번호 암호화에 실패하였습니다."),
     PASSWORD_DECRYPTION_ERROR(false, 4012, "비밀번호 복호화에 실패하였습니다."),
 
-    EMPTY_STOREIDX_PARAM(false, 4100, "storeIdx를 입력하지 않았습니다."),
-    EMPTY_MENUIDX_PARAM(false, 4101, "menuIdx를 입력하지 않았습니다.");
+    POST_ADDRESS_INVALID_STATUS(false, 4100, "HTTP Method를 확인해주세요."),
+
+    EMPTY_STOREIDX_PARAM(false, 4200, "storeIdx를 입력하지 않았습니다."),
+    EMPTY_MENUIDX_PARAM(false, 4201, "menuIdx를 입력하지 않았습니다.");
 
     // 5000 : 필요시 만들어서 쓰세요
     // 6000 : 필요시 만들어서 쓰세요

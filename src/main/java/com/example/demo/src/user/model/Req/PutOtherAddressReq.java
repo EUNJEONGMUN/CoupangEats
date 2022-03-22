@@ -12,9 +12,8 @@ import javax.validation.constraints.NotNull;
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
-public class PutAddressReq {
-
-    @NotNull(message = "not null address")
+public class PutOtherAddressReq {
+    @NotBlank(message = "not blank address")
     private String address;
 
     @NotNull(message = "not null addressDetail")
@@ -28,4 +27,8 @@ public class PutAddressReq {
 
     @NotNull(message = "not null userLatitude")
     private double userLatitude;
+
+    private String addressTitle;
+
+    private String status;
 }

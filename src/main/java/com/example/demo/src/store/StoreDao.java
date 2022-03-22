@@ -28,7 +28,7 @@ public class StoreDao {
     public List<GetStoreHomeRes> getStoreHome(StoreHome storeHome) {
 
         // 주문 많은 순
-        String Query1 = "SELECT S.storeIdx, S.storeImgUrl,S.storeName, S.isCheetah, S.timeDelivery, R.reviewScore, R.reviewCount, F.fee, S.isToGo, S.storeLongitude, S.storeLatitude\n" +
+        String Query1 = "SELECT S.storeIdx, S.storeImgUrl,S.storeName, S.isCheetah, S.timeDelivery, R.reviewScore, R.reviewCount, F.fee, S.isToGo, S.storeLongitude, S.storeLatitude, S.status\n" +
                 "FROM Store S\n" +
                 "LEFT JOIN (\n" +
                 "    SELECT StoreIdx, IFNULL(MIN(deliveryFee),0) AS fee\n" +
@@ -46,7 +46,7 @@ public class StoreDao {
                 "ORDER BY OC.orderCount DESC;";
 
         // 별점 높은 순
-        String Query2 = "SELECT S.storeIdx, S.storeImgUrl,S.storeName, S.isCheetah, S.timeDelivery, R.reviewScore, R.reviewCount, F.fee, S.isToGo, S.storeLongitude, S.storeLatitude\n" +
+        String Query2 = "SELECT S.storeIdx, S.storeImgUrl,S.storeName, S.isCheetah, S.timeDelivery, R.reviewScore, R.reviewCount, F.fee, S.isToGo, S.storeLongitude, S.storeLatitude, S.status\n" +
                 "FROM Store S\n" +
                 "LEFT JOIN (\n" +
                 "    SELECT StoreIdx, IFNULL(MIN(deliveryFee),0) AS fee\n" +
@@ -60,7 +60,7 @@ public class StoreDao {
                 "ORDER BY R.reviewScore DESC;";
 
         // 신규 매장 순
-        String Query3 = "SELECT S.storeIdx, S.storeImgUrl,S.storeName, S.isCheetah, S.timeDelivery, R.reviewScore, R.reviewCount, F.fee, S.isToGo, S.storeLongitude, S.storeLatitude\n" +
+        String Query3 = "SELECT S.storeIdx, S.storeImgUrl,S.storeName, S.isCheetah, S.timeDelivery, R.reviewScore, R.reviewCount, F.fee, S.isToGo, S.storeLongitude, S.storeLatitude, S.status\n" +
                 "FROM Store S\n" +
                 "LEFT JOIN (\n" +
                 "    SELECT StoreIdx, IFNULL(MIN(deliveryFee),0) AS fee\n" +
@@ -74,7 +74,7 @@ public class StoreDao {
                 "ORDER BY S.createdAt DESC;";
 
         // 주문 많은 순 + 카테고리
-        String Query1_Category = "SELECT S.storeIdx, S.storeImgUrl,S.storeName, S.isCheetah, S.timeDelivery, R.reviewScore, R.reviewCount, F.fee, S.isToGo, S.isCoupon, S.storeLongitude, S.storeLatitude\n" +
+        String Query1_Category = "SELECT S.storeIdx, S.storeImgUrl,S.storeName, S.isCheetah, S.timeDelivery, R.reviewScore, R.reviewCount, F.fee, S.isToGo, S.isCoupon, S.storeLongitude, S.storeLatitude, S.status\n" +
                 "FROM Store S\n" +
                 "JOIN (\n" +
                 "    SELECT SCM.storeIdx, SCM.storeCategoryIdx, SC.categoryName\n" +
@@ -96,7 +96,7 @@ public class StoreDao {
                 "ORDER BY OC.orderCount DESC;";
 
         // 별점 높은 순 + 카테고리
-        String Query2_Category = "SELECT S.storeIdx, S.storeImgUrl,S.storeName, S.isCheetah, S.timeDelivery, R.reviewScore, R.reviewCount, F.fee, S.isToGo, S.isCoupon, S.storeLongitude, S.storeLatitude\n" +
+        String Query2_Category = "SELECT S.storeIdx, S.storeImgUrl,S.storeName, S.isCheetah, S.timeDelivery, R.reviewScore, R.reviewCount, F.fee, S.isToGo, S.isCoupon, S.storeLongitude, S.storeLatitude, S.status\n" +
                 "FROM Store S\n" +
                 "JOIN (\n" +
                 "    SELECT SCM.storeIdx, SCM.storeCategoryIdx, SC.categoryName\n" +
@@ -114,7 +114,7 @@ public class StoreDao {
                 "ORDER BY R.reviewScore DESC;";
 
         // 신규 매장 순 + 카테고리
-        String Query3_Category = "SELECT S.storeIdx, S.storeImgUrl,S.storeName, S.isCheetah, S.timeDelivery, R.reviewScore, R.reviewCount, F.fee, S.isToGo, S.isCoupon, S.storeLongitude, S.storeLatitude\n" +
+        String Query3_Category = "SELECT S.storeIdx, S.storeImgUrl,S.storeName, S.isCheetah, S.timeDelivery, R.reviewScore, R.reviewCount, F.fee, S.isToGo, S.isCoupon, S.storeLongitude, S.storeLatitude, S.status\n" +
                 "FROM Store S\n" +
                 "JOIN (\n" +
                 "    SELECT SCM.storeIdx, SCM.storeCategoryIdx, SC.categoryName\n" +
@@ -177,6 +177,7 @@ public class StoreDao {
                                 rs1.getString("isToGo"),
                                 rs1.getDouble("storeLongitude"),
                                 rs1.getDouble("storeLatitude"),
+                                rs1.getString("status"),
                                 this.jdbcTemplate.queryForObject(StoreCouponQuery,
                                         (rs2, rowNum2) -> new StoreCouponInfo(
                                                 rs2.getInt("maxDiscountPrice"),
@@ -202,6 +203,7 @@ public class StoreDao {
                                 rs1.getString("isToGo"),
                                 rs1.getDouble("storeLongitude"),
                                 rs1.getDouble("storeLatitude"),
+                                rs1.getString("status"),
                                 this.jdbcTemplate.queryForObject(StoreCouponQuery,
                                         (rs2, rowNum2) -> new StoreCouponInfo(
                                                 rs2.getInt("maxDiscountPrice"),
@@ -228,6 +230,7 @@ public class StoreDao {
                             rs1.getString("isToGo"),
                             rs1.getDouble("storeLongitude"),
                             rs1.getDouble("storeLatitude"),
+                            rs1.getString("status"),
                             this.jdbcTemplate.queryForObject(StoreCouponQuery,
                                     (rs2, rowNum2) -> new StoreCouponInfo(
                                             rs2.getInt("maxDiscountPrice"),
@@ -254,6 +257,7 @@ public class StoreDao {
                         rs1.getString("isToGo"),
                         rs1.getDouble("storeLongitude"),
                         rs1.getDouble("storeLatitude"),
+                        rs1.getString("status"),
                         this.jdbcTemplate.queryForObject(StoreCouponQuery,
                                 (rs2, rowNum2) -> new StoreCouponInfo(
                                         rs2.getInt("maxDiscountPrice"),
@@ -279,6 +283,7 @@ public class StoreDao {
                             rs1.getString("isToGo"),
                             rs1.getDouble("storeLongitude"),
                             rs1.getDouble("storeLatitude"),
+                            rs1.getString("status"),
                             this.jdbcTemplate.queryForObject(StoreCouponQuery,
                                     (rs2, rowNum2) -> new StoreCouponInfo(
                                             rs2.getInt("maxDiscountPrice"),
@@ -305,6 +310,7 @@ public class StoreDao {
                         rs1.getString("isToGo"),
                         rs1.getDouble("storeLongitude"),
                         rs1.getDouble("storeLatitude"),
+                        rs1.getString("status"),
                         this.jdbcTemplate.queryForObject(StoreCouponQuery,
                                 (rs2, rowNum2) -> new StoreCouponInfo(
                                         rs2.getInt("maxDiscountPrice"),
@@ -352,9 +358,9 @@ public class StoreDao {
                 "FROM MenuCategory MC\n" +
                 "WHERE MC.storeIdx=?;";
 
-        String MenuDetailQuery = "SELECT menuName, menuPrice, menuDetail, menuImgUrl, isOption\n" +
+        String MenuDetailQuery = "SELECT menuName, menuPrice, menuDetail, menuImgUrl, isOption, status\n" +
                 "FROM Menu\n" +
-                "WHERE Menu.menuCategoryIdx=?;";
+                "WHERE status!='N' AND menuCategoryIdx=?;";
 
         int Param = storeIdx;
 
@@ -385,7 +391,8 @@ public class StoreDao {
                                                         rs4.getInt("menuPrice"),
                                                         rs4.getString("menuDetail"),
                                                         rs4.getString("menuImgUrl"),
-                                                        rs4.getString("isOption")
+                                                        rs4.getString("isOption"),
+                                                        rs4.getString("status")
                                                 ), rs3.getInt("menuCategoryIdx"))
                                 ), Param)
                 ), Param);

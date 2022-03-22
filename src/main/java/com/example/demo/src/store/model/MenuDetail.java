@@ -15,4 +15,5 @@ public class MenuDetail {
     private String menuDetail;
     private String menuImgUrl;
     private String isOption;
+    private String status;
 }

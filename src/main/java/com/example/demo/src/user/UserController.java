@@ -3,6 +3,7 @@ package com.example.demo.src.user;
 import com.example.demo.config.BaseException;
 import com.example.demo.config.BaseResponse;
 import com.example.demo.src.UnAuth;
+import com.example.demo.src.user.model.Address;
 import com.example.demo.src.user.model.Req.*;
 import com.example.demo.src.user.model.Res.*;
 import com.example.demo.src.user.model.UserLocationRes;
@@ -25,13 +26,13 @@ public class UserController {
     final Logger logger = LoggerFactory.getLogger(this.getClass());
 
     @Autowired
-    private final  UserProvider userProvider;
+    private final UserProvider userProvider;
     @Autowired
     private final UserService userService;
     @Autowired
     private final JwtService jwtService;
 
-    public UserController(UserProvider userProvider, UserService userService, JwtService jwtService){
+    public UserController(UserProvider userProvider, UserService userService, JwtService jwtService) {
         this.userProvider = userProvider;
         this.userService = userService;
         this.jwtService = jwtService;
@@ -40,6 +41,7 @@ public class UserController {
     /**
      * 회원 가입 API
      * [POST] /users/sign-up
+     *
      * @return BaseResponse<String>
      */
     @UnAuth
@@ -48,16 +50,16 @@ public class UserController {
     public BaseResponse<String> createUser(@Valid @RequestBody PostUserReq postUserReq) throws BaseException {
 
         // 이메일(아이디) 정규식 확인
-        if(!isRegexEmail(postUserReq.getEmail())){
+        if (!isRegexEmail(postUserReq.getEmail())) {
             return new BaseResponse<>(POST_USERS_INVALID_EMAIL);
         }
 
         // 비밀번호 정규식 확인
-        if(!isRegexPwd(postUserReq.getPassward())){
+        if (!isRegexPwd(postUserReq.getPassward())) {
             return new BaseResponse<>(POST_USERS_INVALID_PWD);
         }
 
-        String userEmail = postUserReq.getEmail().substring(0,postUserReq.getEmail().lastIndexOf("@"));
+        String userEmail = postUserReq.getEmail().substring(0, postUserReq.getEmail().lastIndexOf("@"));
 
         // 아이디(이메일)와 비밀번호 동일 여부 체크
         if (postUserReq.getPassward().contains(userEmail)) {
@@ -68,7 +70,7 @@ public class UserController {
         // 구현 해야 함.
 
         userService.createUser(postUserReq);
-        String result ="";
+        String result = "";
         return new BaseResponse<>(result);
 
     }
@@ -76,6 +78,7 @@ public class UserController {
     /**
      * 로그인 API
      * [POST] /users/sign-in
+     *
      * @return BaseResponse<PostSignInRes>
      */
     @UnAuth
@@ -84,7 +87,7 @@ public class UserController {
     public BaseResponse<PostSignInRes> signIn(@Valid @RequestBody PostSignInReq postSignInReq) throws BaseException {
 
         // 이메일(아이디) 정규식 확인
-        if(!isRegexEmail(postSignInReq.getEmail())){
+        if (!isRegexEmail(postSignInReq.getEmail())) {
             return new BaseResponse<>(POST_SIGN_IN_INVALID_EMAIL);
         }
 
@@ -94,43 +97,64 @@ public class UserController {
     }
 
     /**
-     * 집 주소지 관리 API
-     * [PUT] /users/home-address
+     * 집, 회사, 기타 주소지 관리 API
+     * [PUT] /users/address?otherIdx=
      * @return BaseResponse<UserLocationRes>
      */
     @ResponseBody
-    @PutMapping("/home-address")
-    public BaseResponse<UserLocationRes> putHomeAddress(HttpServletRequest request, @Valid @RequestBody PutAddressReq putAddressReq) throws BaseException{
+    @PutMapping("/address")
+    public BaseResponse<UserLocationRes> putAddress(HttpServletRequest request,@RequestParam(required = false, defaultValue = "0") int otherIdx,
+                                                    @Valid @RequestBody Address address) throws BaseException {
+
         int userIdx = (int) request.getAttribute("userIdx");
 
-        if (userProvider.checkUser(userIdx)==0){
+        if (userProvider.checkUser(userIdx) == 0) {
             return new BaseResponse<>(USER_NOT_EXISTS);
         }
 
-        UserLocationRes userLocationRes = userService.putHomeAddress(userIdx, putAddressReq);
+        if (address.getAddressType().equals("H")) {
+            UserLocationRes userLocationRes = userService.putHomeAddress(userIdx, address);
+            return new BaseResponse<>(userLocationRes);
+        } else if (address.getAddressType().equals("C")) {
+            UserLocationRes userLocationRes = userService.putCompanyAddress(userIdx, address);
+            return new BaseResponse<>(userLocationRes);
+        }
 
+        // 주소 존재 여부 확인
+        if (userProvider.checkOtherAddress(otherIdx) == 0) {
+            return new BaseResponse<>(ADDRESS_NOT_EXISTS);
+        }
+
+        // 주소의 소유자 확인
+        if (userProvider.checkAddressUser(userIdx, otherIdx)==0){
+            return new BaseResponse<>(INCONSISTENCY_ADDRESS_USER);
+        }
+        UserLocationRes userLocationRes = userService.putOtherAddress(userIdx, otherIdx, address);
         return new BaseResponse<>(userLocationRes);
+
     }
 
-
+    
     /**
-     * 회사 주소지 관리 API
-     * [PUT] /users/company-address
+     * 기타 주소지 추가 API
+     * [POST] /users/address
      * @return BaseResponse<UserLocationRes>
      */
     @ResponseBody
-    @PutMapping("/company-address")
-    public BaseResponse<UserLocationRes> putCompanyAddress(HttpServletRequest request, @Valid @RequestBody PutAddressReq putAddressReq) throws BaseException{
+    @PostMapping("/address")
+    public BaseResponse<UserLocationRes> postOtherAddress(HttpServletRequest request, @Valid @RequestBody PostAddressReq postAddressReq) throws BaseException {
         int userIdx = (int) request.getAttribute("userIdx");
 
         if (userProvider.checkUser(userIdx)==0){
             return new BaseResponse<>(USER_NOT_EXISTS);
         }
 
-        UserLocationRes userLocationRes = userService.putCompanyAddress(userIdx, putAddressReq);
+        if (postAddressReq.getAddressType().equals("H") || postAddressReq.getAddressType().equals("C")){
+            return new BaseResponse<>(POST_ADDRESS_INVALID_STATUS);
+        }
 
+        UserLocationRes userLocationRes = userService.postOtherAddress(userIdx, postAddressReq);
         return new BaseResponse<>(userLocationRes);
     }
-
 
 }

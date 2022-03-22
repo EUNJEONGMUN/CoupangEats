@@ -1,9 +1,8 @@
 package com.example.demo.src.user;
 
 import com.example.demo.config.BaseException;
-import com.example.demo.src.user.model.Req.PostSignInReq;
-import com.example.demo.src.user.model.Req.PostUserReq;
-import com.example.demo.src.user.model.Req.PutAddressReq;
+import com.example.demo.src.user.model.Address;
+import com.example.demo.src.user.model.Req.*;
 import com.example.demo.src.user.model.Res.PostSignInRes;
 import com.example.demo.src.user.model.User;
 import com.example.demo.src.user.model.UserLocationRes;
@@ -102,13 +101,13 @@ public class UserService {
     }
 
     /**
-     * 집 주소지 관리 API
-     * [PUT] /users/home-address
+     * 집, 회사, 기타 주소지 관리 API - 집
+     * [PUT] /users/address?otherIdx=
      * @return BaseResponse<UserLocationRes>
      */
-    public UserLocationRes putHomeAddress(int userIdx, PutAddressReq putAddressReq) throws BaseException {
+    public UserLocationRes putHomeAddress(int userIdx, Address address) throws BaseException {
         try {
-            UserLocationRes userLocationRes = userDao.putHomeAddress(userIdx, putAddressReq);
+            UserLocationRes userLocationRes = userDao.putHomeAddress(userIdx, address);
             return  userLocationRes;
         } catch (Exception exception) {
             System.out.println("putHomeAddress"+exception);
@@ -118,13 +117,13 @@ public class UserService {
     }
 
     /**
-     * 회사 주소지 관리 API
-     * [PUT] /users/company-address
+     * 집, 회사, 기타 주소지 관리 API - 회사
+     * [PUT] /users/address?otherIdx=
      * @return BaseResponse<UserLocationRes>
      */
-    public UserLocationRes putCompanyAddress(int userIdx, PutAddressReq putAddressReq) throws BaseException {
+    public UserLocationRes putCompanyAddress(int userIdx, Address address) throws BaseException {
         try {
-            UserLocationRes userLocationRes = userDao.putCompanyAddress(userIdx, putAddressReq);
+            UserLocationRes userLocationRes = userDao.putCompanyAddress(userIdx, address);
             return userLocationRes;
         } catch (Exception exception) {
             System.out.println("putCompanyAddress"+exception);
@@ -132,4 +131,35 @@ public class UserService {
         }
 
     }
+
+    /**
+     * 집, 회사, 기타 주소지 관리 API - 기타
+     * [PUT] /users/address
+     * @return BaseResponse<UserLocationRes>
+     */
+    public UserLocationRes putOtherAddress(int userIdx, int otherIdx, Address address) throws BaseException {
+        try {
+            UserLocationRes userLocationRes = userDao.putOtherAddress(userIdx, otherIdx, address);
+            return userLocationRes;
+        } catch (Exception exception) {
+            System.out.println("putOtherAddress"+exception);
+            throw new BaseException(DATABASE_ERROR);
+        }
+    }
+
+    /**
+     * 기타 주소지 추가 API
+     * [POST] /users/address
+     * @return BaseResponse<UserLocationRes>
+     */
+    public UserLocationRes postOtherAddress(int userIdx, PostAddressReq postAddressReq) throws BaseException {
+        try {
+            UserLocationRes userLocationRes = userDao.postOtherAddress(userIdx, postAddressReq);
+            return userLocationRes;
+        } catch (Exception exception) {
+            System.out.println("postOtherAddress"+exception);
+            throw new BaseException(DATABASE_ERROR);
+        }
+    }
+
 }

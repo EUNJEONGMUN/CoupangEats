@@ -23,6 +23,7 @@ public class GetStoreHomeRes {
     private String isToGo;
     private double storeLongitude;
     private double storeLatitude;
+    private String status;
     private StoreCouponInfo storeCouponInfo;
     private List<String> menuImgUrl;
 }
