@@ -1,6 +1,7 @@
 package com.example.demo.src.user;
 
 import com.example.demo.config.BaseException;
+import com.example.demo.src.user.model.Res.GetUserAddressRes;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -17,6 +18,23 @@ public class UserProvider {
     @Autowired
     public UserProvider(UserDao userDao) {
         this.userDao = userDao;
+    }
+
+
+    /**
+     * 주소지 조회 API
+     * [GET] /users/address
+     * @return BaseResponse<GetUserAddressRes>
+     */
+    public GetUserAddressRes getUserAddress(int userIdx) throws BaseException {
+        try {
+            GetUserAddressRes getUserAddressRes = userDao.getUserAddress(userIdx);
+            return getUserAddressRes;
+        } catch (Exception exception) {
+            System.out.println("getUserAddress-> "+ exception);
+            throw new BaseException(DATABASE_ERROR);
+        }
+
     }
 
 
@@ -77,4 +95,6 @@ public class UserProvider {
             throw new BaseException(DATABASE_ERROR);
         }
     }
+
+
 }

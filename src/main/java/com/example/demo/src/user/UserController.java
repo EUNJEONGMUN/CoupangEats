@@ -174,4 +174,22 @@ public class UserController {
         return new BaseResponse<>(userLocationRes);
     }
 
+    /**
+     * 주소지 조회 API
+     * [GET] /users/address
+     * @return BaseResponse<GetUserAddressRes>
+     */
+    @ResponseBody
+    @GetMapping("/address")
+    public BaseResponse<GetUserAddressRes> getUserAddress(HttpServletRequest request) throws BaseException {
+        int userIdx = (int) request.getAttribute("userIdx");
+
+        if (userProvider.checkUser(userIdx)==0){
+            return new BaseResponse<>(USER_NOT_EXISTS);
+        }
+
+        GetUserAddressRes getUserAddressRes = userProvider.getUserAddress(userIdx);
+        return new BaseResponse<>(getUserAddressRes);
+    }
+
 }

@@ -1,7 +1,9 @@
 package com.example.demo.src.user;
 
 import com.example.demo.src.user.model.Address;
+import com.example.demo.src.user.model.OtherAddress;
 import com.example.demo.src.user.model.Req.*;
+import com.example.demo.src.user.model.Res.GetUserAddressRes;
 import com.example.demo.src.user.model.User;
 import com.example.demo.src.user.model.UserLocationRes;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -125,6 +127,39 @@ public class UserDao {
 
     }
 
+    /**
+     * 주소지 조회 API
+     * [GET] /users/address
+     * @return BaseResponse<GetUserAddressRes>
+     */
+    public GetUserAddressRes getUserAddress(int userIdx) {
+        // 집주소, 회사주소
+        String Query1 = "SELECT userIdx, homeAddress, homeDetail, homeGuide, companyAddress, companyDetail, companyGuide FROM User U WHERE U.userIdx=?;";
+
+        // 기타주소
+        String Query2 = "SELECT userAddressIdx, address, addressDetail, addressGuide, addressTitle FROM UserOtherAddress UOA WHERE UOA.userIdx=? AND UOA.status='Y';";
+
+        int Param = userIdx;
+        return this.jdbcTemplate.queryForObject(Query1,
+                (rs1, rowNum1) -> new GetUserAddressRes(
+                        rs1.getString("homeAddress"),
+                        rs1.getString("homeDetail"),
+                        rs1.getString("homeGuide"),
+                        rs1.getString("companyAddress"),
+                        rs1.getString("companyDetail"),
+                        rs1.getString("companyGuide"),
+                        this.jdbcTemplate.query(Query2,
+                                (rs2, rowNum2) -> new OtherAddress(
+                                        rs2.getInt("userAddressIdx"),
+                                        rs2.getString("address"),
+                                        rs2.getString("addressDetail"),
+                                        rs2.getString("addressGuide"),
+                                        rs2.getString("addressTitle"))
+                        , Param)
+                ), Param);
+
+    }
+
 
     // 이메일 중복 확인
     public int checkEmail(String email) {
@@ -207,4 +242,5 @@ public class UserDao {
                 int.class,
                 Params);
     }
+
 }
