@@ -31,6 +31,7 @@ public class CertificationInterceptor implements HandlerInterceptor {
 
         String requestURI = request.getRequestURI();
         System.out.println(">>>>>requestURI<<<<<"+requestURI);
+
         if (requestURI.equals("/error")) {
 
             response.setContentType("application/json");

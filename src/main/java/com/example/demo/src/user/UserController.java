@@ -112,6 +112,16 @@ public class UserController {
             return new BaseResponse<>(USER_NOT_EXISTS);
         }
 
+        if (address.getAddressType()==null){
+            address.setAddressType("O");
+        }
+
+        if (address.getStatus()==null){
+            address.setStatus("Y");
+        }
+        if (!(address.getAddressType().equals("H") || address.getAddressType().equals("C") || address.getAddressType().equals("O"))){
+            return new BaseResponse<>(INVALID_STATUS);
+        }
         if (address.getAddressType().equals("H")) {
             UserLocationRes userLocationRes = userService.putHomeAddress(userIdx, address);
             return new BaseResponse<>(userLocationRes);
@@ -121,6 +131,9 @@ public class UserController {
         }
 
         // 주소 존재 여부 확인
+        if (otherIdx == 0){
+            return new BaseResponse<>(EMPTY_OTHER_ADDRESS_IDX);
+        }
         if (userProvider.checkOtherAddress(otherIdx) == 0) {
             return new BaseResponse<>(ADDRESS_NOT_EXISTS);
         }
@@ -149,8 +162,12 @@ public class UserController {
             return new BaseResponse<>(USER_NOT_EXISTS);
         }
 
-        if (postAddressReq.getAddressType().equals("H") || postAddressReq.getAddressType().equals("C")){
-            return new BaseResponse<>(POST_ADDRESS_INVALID_STATUS);
+        if (postAddressReq.getAddressType()==null){
+            postAddressReq.setAddressType("O");
+        }
+
+        if (!(postAddressReq.getAddressType().equals("O"))){
+            return new BaseResponse<>(INVALID_STATUS);
         }
 
         UserLocationRes userLocationRes = userService.postOtherAddress(userIdx, postAddressReq);

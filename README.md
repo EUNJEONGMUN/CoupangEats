@@ -17,7 +17,7 @@ Rising Test
 ### API 리스트 관련
 - 회원가입 API 구현
 - 로그인 API 구현
-- 홈 화면 조회 API 구현 (거리 관련 제외)  
+- 홈 화면 조회 API 구현 (거리 관련 제외)
 <br>
 - validation 구현
 - 인가 구현

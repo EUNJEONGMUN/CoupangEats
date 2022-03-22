@@ -45,9 +45,8 @@ public class UserDao {
         String Query2 = "UPDATE UserLocation SET userLongitude=?, userLatitude=? WHERE userIdx=?;";
         Object[] Params2 = new Object[]{address.getUserLongitude(), address.getUserLatitude(), userIdx};
 
-        String noParam = "";
-        Object[] NoParams1 = new Object[]{noParam,noParam,noParam,userIdx};
-        Object[] NoParams2 = new Object[]{noParam,noParam,userIdx};
+        Object[] NoParams1 = new Object[]{null,null,null,userIdx};
+        Object[] NoParams2 = new Object[]{0.0,0.0,userIdx};
 
         if (address.getStatus().equals("N")){
             this.jdbcTemplate.update(Query1,NoParams1);
@@ -74,9 +73,8 @@ public class UserDao {
         String Query2 = "UPDATE UserLocation SET userLongitude=?, userLatitude=? WHERE userIdx=?;";
         Object[] Params2 = new Object[]{address.getUserLongitude(), address.getUserLatitude(), userIdx};
 
-        String noParam = "";
-        Object[] NoParams1 = new Object[]{noParam,noParam,noParam,userIdx};
-        Object[] NoParams2 = new Object[]{noParam,noParam,userIdx};
+        Object[] NoParams1 = new Object[]{null,null,null,userIdx};
+        Object[] NoParams2 = new Object[]{0.0,0.0,userIdx};
 
         if (address.getStatus().equals("N")){
             this.jdbcTemplate.update(Query1,NoParams1);
@@ -88,7 +86,6 @@ public class UserDao {
         this.jdbcTemplate.update(Query1,Params1);
         this.jdbcTemplate.update(Query2,Params2);
         return new UserLocationRes(address.getUserLongitude(), address.getUserLatitude());
-
 
     }
 

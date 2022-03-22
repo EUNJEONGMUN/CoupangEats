@@ -71,10 +71,11 @@ public enum BaseResponseStatus {
     PASSWORD_ENCRYPTION_ERROR(false, 4011, "비밀번호 암호화에 실패하였습니다."),
     PASSWORD_DECRYPTION_ERROR(false, 4012, "비밀번호 복호화에 실패하였습니다."),
 
-    POST_ADDRESS_INVALID_STATUS(false, 4100, "HTTP Method를 확인해주세요."),
+    INVALID_STATUS(false, 4100, "상태값을 확인해주세요."),
 
     EMPTY_STOREIDX_PARAM(false, 4200, "storeIdx를 입력하지 않았습니다."),
-    EMPTY_MENUIDX_PARAM(false, 4201, "menuIdx를 입력하지 않았습니다.");
+    EMPTY_MENUIDX_PARAM(false, 4201, "menuIdx를 입력하지 않았습니다."),
+    EMPTY_OTHER_ADDRESS_IDX(false, 4202, "otherIdx를 입력하지 않았습니다.");
 
     // 5000 : 필요시 만들어서 쓰세요
     // 6000 : 필요시 만들어서 쓰세요
