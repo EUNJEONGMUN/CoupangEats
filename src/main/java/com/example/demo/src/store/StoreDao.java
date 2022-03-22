@@ -468,7 +468,7 @@ public class StoreDao {
 
     // 가게 카테고리 존재 여부 확인
     public int checkStoreCategory(int categoryIdx) {
-        String Query = "SELECT EXISTS(SELECT * FROM StoreCategory WHERE storeCategoryIdx=?);";
+        String Query = "SELECT EXISTS(SELECT * FROM StoreCategory WHERE storeCategoryIdx=? AND status='Y');";
         int Param = categoryIdx;
         return this.jdbcTemplate.queryForObject(Query,
                 int.class,

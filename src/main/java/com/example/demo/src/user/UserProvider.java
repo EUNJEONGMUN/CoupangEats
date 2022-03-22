@@ -39,7 +39,7 @@ public class UserProvider {
         }
     }
 
-    // 사용자 존재 여부 확인
+    // 회원가입 시 사용자 존재 여부 확인
     public int checkPassward(String email, String encryptPwd) throws BaseException  {
         try {
             return userDao.checkPassward(email, encryptPwd);
@@ -48,4 +48,13 @@ public class UserProvider {
         }
     }
 
+    // 사용자 존재 여부 확인
+    public int checkUser(int userIdx) throws BaseException {
+        try {
+            return userDao.checkUser(userIdx);
+        } catch (Exception exception){
+            System.out.println("checkUser"+exception);
+            throw new BaseException(DATABASE_ERROR);
+        }
+    }
 }

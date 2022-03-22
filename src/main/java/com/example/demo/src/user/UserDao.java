@@ -2,7 +2,9 @@ package com.example.demo.src.user;
 
 import com.example.demo.src.user.model.Req.PostSignInReq;
 import com.example.demo.src.user.model.Req.PostUserReq;
+import com.example.demo.src.user.model.Req.PutAddressReq;
 import com.example.demo.src.user.model.User;
+import com.example.demo.src.user.model.UserLocationRes;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Repository;
@@ -31,6 +33,43 @@ public class UserDao {
         return this.jdbcTemplate.update(UserInfoQuery, UserInfoParams);
     }
 
+    /**
+     * 집 주소지 관리 API
+     * [PUT] /users/home-address
+     * @return BaseResponse<UserLocationRes>
+     */
+    public UserLocationRes putHomeAddress(int userIdx, PutAddressReq putAddressReq) {
+        String Query1 = "UPDATE User SET homeAddress=?, homeDetail=?,  homeGuide=? WHERE userIdx=?;";
+        Object[] Params1 = new Object[]{putAddressReq.getAddress(), putAddressReq.getAddressDetail(), putAddressReq.getAddressGuide(), userIdx};
+
+        String Query2 = "UPDATE UserLocation SET userLongitude=?, userLatitude=? WHERE userIdx=?;";
+        Object[] Params2 = new Object[]{putAddressReq.getUserLongitude(), putAddressReq.getUserLatitude(), userIdx};
+
+        this.jdbcTemplate.update(Query1,Params1);
+        this.jdbcTemplate.update(Query2,Params2);
+        return new UserLocationRes(putAddressReq.getUserLongitude(), putAddressReq.getUserLatitude());
+
+    }
+
+    /**
+     * 회사 주소지 관리 API
+     * [PUT] /users/company-address
+     * @return BaseResponse<UserLocationRes>
+     */
+    public UserLocationRes putCompanyAddress(int userIdx, PutAddressReq putAddressReq) {
+        String Query1 = "UPDATE User SET companyAddress=?, companyDetail=?,  companyGuide=? WHERE userIdx=?;";
+        Object[] Params1 = new Object[]{putAddressReq.getAddress(), putAddressReq.getAddressDetail(), putAddressReq.getAddressGuide(), userIdx};
+
+        String Query2 = "UPDATE UserLocation SET userLongitude=?, userLatitude=? WHERE userIdx=?;";
+        Object[] Params2 = new Object[]{putAddressReq.getUserLongitude(), putAddressReq.getUserLatitude(), userIdx};
+
+        this.jdbcTemplate.update(Query1,Params1);
+        this.jdbcTemplate.update(Query2,Params2);
+        return new UserLocationRes(putAddressReq.getUserLongitude(), putAddressReq.getUserLatitude());
+
+
+    }
+
 
     // 이메일 중복 확인
     public int checkEmail(String email) {
@@ -52,7 +91,7 @@ public class UserDao {
                 Param);
     }
 
-    // 사용자 존재 여부 확인
+    // 회원가입 시 사용자 존재 여부 확인
     public int checkPassward(String email, String encryptPwd) {
         String Query = "SELECT EXISTS(SELECT * FROM User WHERE User.email=? AND User.passward=? AND User.status='Y');";
         Object[] Params = new Object[]{email, encryptPwd};
@@ -82,4 +121,17 @@ public class UserDao {
         );
 
     }
+
+    // 사용자 존재 여부 확인
+    public int checkUser(int userIdx) {
+        String Query = "SELECT EXISTS(SELECT * FROM User WHERE status='Y' AND userIdx=?);";
+        int Param = userIdx;
+
+        return this.jdbcTemplate.queryForObject(Query,
+                int.class,
+                Param);
+
+    }
+
+
 }

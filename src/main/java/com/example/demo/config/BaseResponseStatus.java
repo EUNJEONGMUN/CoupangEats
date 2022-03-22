@@ -27,6 +27,7 @@ public enum BaseResponseStatus {
     PATTERN(false, 2007, "PATTERN"),
     MIN_VALUE(false, 2008, "MIN"),
     SIZE(false, 2009, "SIZE"),
+    NOT_NULL(false, 2010, "NOT_NULL"),
     // users
     USERS_EMPTY_USER_ID(false, 2010, "유저 아이디 값을 확인해주세요."),
 
@@ -48,6 +49,7 @@ public enum BaseResponseStatus {
     DUPLICATED_EMAIL(false, 3013, "중복된 이메일입니다."),
     FAILED_TO_LOGIN(false,3014,"입력하신 아이디 또는 비밀번호가 일치하지 않습니다."),
     POST_USERS_EXISTS_PHONE(false, 3015, "이미 가입된 휴대폰 번호입니다."),
+    USER_NOT_EXISTS(false, 3016, "존재하지 않는 사용자입니다."),
 
 
     EMPTY_STORE(false, 3100, "존재하지 않는 가게입니다."),

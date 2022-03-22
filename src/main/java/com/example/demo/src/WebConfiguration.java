@@ -17,7 +17,7 @@ public class WebConfiguration implements WebMvcConfigurer {
     public void addInterceptors(InterceptorRegistry registry) {
         registry.addInterceptor(new CertificationInterceptor(jwtService, objectMapper))
                 .order(1)
-                .addPathPatterns("/*");
+                .addPathPatterns("/**");
     }
 //    public void addInterceptors(InterceptorRegistry registry) {
 //        registry.addInterceptor(new CertificationInterceptor(jwtService))

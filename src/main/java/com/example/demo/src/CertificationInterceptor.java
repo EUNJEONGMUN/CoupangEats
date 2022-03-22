@@ -30,7 +30,7 @@ public class CertificationInterceptor implements HandlerInterceptor {
         // Object handler : 핸들러 매핑이 찾은 컨트롤러 클래스 객체
 
         String requestURI = request.getRequestURI();
-
+        System.out.println(">>>>>requestURI<<<<<"+requestURI);
         if (requestURI.equals("/error")) {
 
             response.setContentType("application/json");
@@ -43,21 +43,19 @@ public class CertificationInterceptor implements HandlerInterceptor {
         }
 
 
-        HandlerMethod handlerMethod = (HandlerMethod) handler;
-        UnAuth unAuth = handlerMethod.getMethodAnnotation(UnAuth.class);
+//        HandlerMethod handlerMethod = (HandlerMethod) handler;
+//        UnAuth unAuth = handlerMethod.getMethodAnnotation(UnAuth.class);
 
 
-        if (unAuth != null) {
+        if (checkAnnotation(handler, UnAuth.class)) {  // 로그인 회원만 이용 가능
             return true;
+
         }
-        try {
-            //jwt에서 idx 추출.
-            int userIdxByJwt = jwtService.getUserIdx();
+        try{
+            Integer userIdxByJwt = jwtService.getUserIdx();
+            System.out.println(">>>>>userIdxByJwt<<<<<"+userIdxByJwt);
             request.setAttribute("userIdx", userIdxByJwt); // 사용자의 idx 추출하여 request값 으로 설정
-
-        } catch (BaseException exception) {
-//                String requestURI = request.getRequestURI();
-
+        } catch (BaseException exception){
             Map<String, String> map = new HashMap<>();
             map.put("requestURI", "/users/sign-in?redirectURI=" + requestURI);
             String json = objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(map);
@@ -71,5 +69,13 @@ public class CertificationInterceptor implements HandlerInterceptor {
 
         return true;
 
+    }
+
+    private boolean checkAnnotation(Object handler, Class<UnAuth> unAuthClass) {
+        HandlerMethod handlerMethod = (HandlerMethod) handler;
+        if (handlerMethod.getMethodAnnotation(unAuthClass)!=null){
+            return true;
+        }
+        return false;
     }
 }

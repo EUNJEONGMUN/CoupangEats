@@ -47,6 +47,8 @@ public class ExceptionHandlerAdvice {
                 return new BaseResponse(MIN_VALUE, detail);
             case "Size":
                 return new BaseResponse(SIZE, detail);
+            case "NotNull":
+                return new BaseResponse(NOT_NULL, detail);
         }
 
         return new BaseResponse(DEFAULT_ERROR);

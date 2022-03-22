@@ -5,12 +5,14 @@ import com.example.demo.config.BaseResponse;
 import com.example.demo.src.UnAuth;
 import com.example.demo.src.user.model.Req.*;
 import com.example.demo.src.user.model.Res.*;
+import com.example.demo.src.user.model.UserLocationRes;
 import com.example.demo.utils.JwtService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
+import javax.servlet.http.HttpServletRequest;
 import javax.validation.Valid;
 
 import static com.example.demo.config.BaseResponseStatus.*;
@@ -91,6 +93,44 @@ public class UserController {
 
     }
 
+    /**
+     * 집 주소지 관리 API
+     * [PUT] /users/home-address
+     * @return BaseResponse<UserLocationRes>
+     */
+    @ResponseBody
+    @PutMapping("/home-address")
+    public BaseResponse<UserLocationRes> putHomeAddress(HttpServletRequest request, @Valid @RequestBody PutAddressReq putAddressReq) throws BaseException{
+        int userIdx = (int) request.getAttribute("userIdx");
+
+        if (userProvider.checkUser(userIdx)==0){
+            return new BaseResponse<>(USER_NOT_EXISTS);
+        }
+
+        UserLocationRes userLocationRes = userService.putHomeAddress(userIdx, putAddressReq);
+
+        return new BaseResponse<>(userLocationRes);
+    }
+
+
+    /**
+     * 회사 주소지 관리 API
+     * [PUT] /users/company-address
+     * @return BaseResponse<UserLocationRes>
+     */
+    @ResponseBody
+    @PutMapping("/company-address")
+    public BaseResponse<UserLocationRes> putCompanyAddress(HttpServletRequest request, @Valid @RequestBody PutAddressReq putAddressReq) throws BaseException{
+        int userIdx = (int) request.getAttribute("userIdx");
+
+        if (userProvider.checkUser(userIdx)==0){
+            return new BaseResponse<>(USER_NOT_EXISTS);
+        }
+
+        UserLocationRes userLocationRes = userService.putCompanyAddress(userIdx, putAddressReq);
+
+        return new BaseResponse<>(userLocationRes);
+    }
 
 
 }
