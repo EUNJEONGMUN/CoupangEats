@@ -246,7 +246,8 @@ public class StoreDao {
                                                         rs4.getString("menuName"),
                                                         rs4.getInt("menuPrice"),
                                                         rs4.getString("menuDetail"),
-                                                        rs4.getString("menuImgUrl")
+                                                        rs4.getString("menuImgUrl"),
+                                                        rs4.getString("isOption")
                                                 ), rs3.getInt("menuCategoryIdx"))
                                 ), Param)
                 ), Param);

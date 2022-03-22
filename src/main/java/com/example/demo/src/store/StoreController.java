@@ -67,4 +67,9 @@ public class StoreController {
         return new BaseResponse<>(getStoreDetailRes);
     }
 
+    /**
+     * 메뉴 상세 화면 조회 조회 API
+     * [GET] /stores/detail?storeIdx=&menuIdx=
+     * @return BaseResponse<GetStoreMenuOptionsRes>
+     */
 }
