@@ -32,12 +32,16 @@ public class StoreController {
     /**
      * 홈 화면 조회 API
      * [GET] /stores/home
+     * /home?sort=&isCheetah&fee=&minimum=&isTogo=&isCoupon&categoryIdx=
      * @return BaseResponse<List<GetStoreHomeRes>>
      */
     @UnAuth
     @ResponseBody
     @GetMapping("/home")
     public BaseResponse<List<GetStoreHomeRes>> getStoreHome(StoreHome storeHome) throws BaseException{
+        if (storeHome.getCategoryIdx()!=0 && storeProvider.checkStoreCategory(storeHome.getCategoryIdx())==0){
+            return new BaseResponse<>(EMPTY_STORE_CATEGORY);
+        }
         List<GetStoreHomeRes> getStoreHomeRes = storeProvider.getStoreHome(storeHome);
         return new BaseResponse<>(getStoreHomeRes);
     }

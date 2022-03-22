@@ -96,5 +96,12 @@ public class StoreProvider {
         }
     }
 
-
+    // 가게 카테고리 존재 여부 확인
+    public int checkStoreCategory(int categoryIdx) throws BaseException {
+        try {
+            return storeDao.checkStoreCategory(categoryIdx);
+        } catch (Exception exception) {
+            throw new BaseException(DATABASE_ERROR);
+        }
+    }
 }

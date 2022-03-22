@@ -53,6 +53,7 @@ public enum BaseResponseStatus {
     EMPTY_STORE(false, 3100, "존재하지 않는 가게입니다."),
     EMPTY_MENU(false, 3101, "존재하지 않는 메뉴입니다."),
     INCONSISTENCY_STORE_OWNER(false, 3102, "해당 가게의 메뉴가 아닙니다."),
+    EMPTY_STORE_CATEGORY(false, 3103, "존재하지 않는 카테고리입니다."),
 
     /**
      * 4000 : Database, Server 오류

@@ -12,4 +12,5 @@ public class StoreHome {
     private int minimum;
     private String isToGo;
     private String isCoupon;
+    private int categoryIdx;
 }
