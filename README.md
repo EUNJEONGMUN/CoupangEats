@@ -49,6 +49,9 @@ Rising Test
 ```Optional int parameter 'storeIdx' is present but cannot be translated into a null value due to being declared as a primitive type.```
 - storeIdx를 RequestParam으로 받을 때 int일 경우 null 값으로 처리할 수 없기 때문에 발생한 에러
     - -> String 값으로 받아 null 값을 확인한 후, 아닐 경우 int로 바꾸어 진행할 수 있게 하였다.
+    - **22-03-22 수정**
+      - requestParam 값에 default 값을 설정해주면 int 형으로 받아도 해결 가능하였다.
+      - `@RequstParam(value='', required='false', defaultValue="0")`
 
 ### 위클리 스크럼 내용
 #### 작업한 부분 공유
@@ -84,3 +87,4 @@ Rising Test
 
 
 ## 2022-03-22 진행상황
+- 메뉴 상세화면 조회 API 구현

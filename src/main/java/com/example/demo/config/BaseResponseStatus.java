@@ -51,6 +51,8 @@ public enum BaseResponseStatus {
 
 
     EMPTY_STORE(false, 3100, "존재하지 않는 가게입니다."),
+    EMPTY_MENU(false, 3101, "존재하지 않는 메뉴입니다."),
+    INCONSISTENCY_STORE_OWNER(false, 3102, "해당 가게의 메뉴가 아닙니다."),
 
     /**
      * 4000 : Database, Server 오류
@@ -64,7 +66,8 @@ public enum BaseResponseStatus {
     PASSWORD_ENCRYPTION_ERROR(false, 4011, "비밀번호 암호화에 실패하였습니다."),
     PASSWORD_DECRYPTION_ERROR(false, 4012, "비밀번호 복호화에 실패하였습니다."),
 
-    EMPTY_STOREIDX_PARAM(false, 4100, "storeIdx를 입력하지 않았습니다.");
+    EMPTY_STOREIDX_PARAM(false, 4100, "storeIdx를 입력하지 않았습니다."),
+    EMPTY_MENUIDX_PARAM(false, 4101, "menuIdx를 입력하지 않았습니다.");
 
     // 5000 : 필요시 만들어서 쓰세요
     // 6000 : 필요시 만들어서 쓰세요

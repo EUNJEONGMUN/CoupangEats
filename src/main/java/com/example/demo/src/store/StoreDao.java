@@ -1,11 +1,9 @@
 package com.example.demo.src.store;
 
-import com.example.demo.src.store.model.MenuCategory;
-import com.example.demo.src.store.model.MenuDetail;
+import com.example.demo.src.store.model.*;
 import com.example.demo.src.store.model.Res.GetStoreDetailRes;
 import com.example.demo.src.store.model.Res.GetStoreHomeRes;
-import com.example.demo.src.store.model.StoreCouponInfo;
-import com.example.demo.src.store.model.StoreHome;
+import com.example.demo.src.store.model.Res.GetStoreMenuOptionsRes;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Repository;
@@ -254,6 +252,50 @@ public class StoreDao {
 
     }
 
+    /**
+     * 메뉴 상세 화면 조회 조회 API
+     * [GET] /stores/detail?storeIdx=&menuIdx=
+     * @return BaseResponse<GetStoreMenuOptionsRes>
+     */
+    public GetStoreMenuOptionsRes getMenuOptions(int menuIdx) {
+
+        String MenuInfoQuery = "SELECT M.menuIdx, M.menuImgUrl, M.menuName, M.menuDetail, M.menuPrice\n" +
+                "FROM Menu M\n" +
+                "WHERE M.menuIdx=?;";
+
+        String MenuOptionsQuery = "SELECT O.optionsIdx, O.optionsTitle, O.isRequired, O.choiceCount\n" +
+                "FROM MenuOptionsMapping MOM JOIN Options O on MOM.optionsIdx = O.optionsIdx\n" +
+                "WHERE MOM.menuIdx =?;";
+
+        String MenuOptionsDetailQuery ="SELECT optionsContent, addPrice\n" +
+                "FROM OptionsDetail\n" +
+                "WHERE optionsIdx=?;";
+
+        int Param = menuIdx;
+
+        return this.jdbcTemplate.queryForObject(MenuInfoQuery,
+                (rs1, rowNum1) -> new GetStoreMenuOptionsRes(
+                        rs1.getString("menuImgUrl"),
+                        rs1.getString("menuName"),
+                        rs1.getString("menuDetail"),
+                        rs1.getInt("menuPrice"),
+                        this.jdbcTemplate.query(MenuOptionsQuery,
+                                (rs2, rowNum2) -> new MenuOptions(
+                                        rs2.getString("optionsTitle"),
+                                        rs2.getString("isRequired"),
+                                        rs2.getInt("choiceCount"),
+                                        this.jdbcTemplate.query(MenuOptionsDetailQuery,
+                                                (rs3, rowNum3) -> new MenuOptionsDetail(
+                                                        rs3.getString("optionsContent"),
+                                                        rs3.getInt("addPrice"))
+                                                , rs2.getInt("optionsIdx"))
+                                ), Param)
+                ), Param);
+
+    }
+
+
+
     // 가게 존재 여부 확인
     public int checkStore(int storeIdx) {
         String Query = "SELECT EXISTS( SELECT * FROM Store WHERE status='Y' AND storeIdx=?);";
@@ -263,4 +305,25 @@ public class StoreDao {
                 int.class,
                 Param);
     }
+
+    // 메뉴 존재 여부 확인
+    public int checkMenu(int menuIdx) {
+        String Query = "SELECT EXISTS( SELECT * FROM Menu WHERE status='Y' AND menuIdx=?);";
+        int Param = menuIdx;
+
+        return this.jdbcTemplate.queryForObject(Query,
+                int.class,
+                Param);
+    }
+
+    // 메뉴가 속한 가게 아이디 확인
+    public int checkMenuOwner(int menuIdx) {
+        String Query = "SELECT storeIdx FROM Menu WHERE menuIdx=?;";
+        int Param = menuIdx;
+
+        return this.jdbcTemplate.queryForObject(Query,
+                int.class,
+                Param);
+    }
+
 }
