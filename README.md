@@ -91,6 +91,8 @@ Rising Test
 - 홈화면 조회 API에 카테고리 별 조회 추가
 - 집 주소, 회사, 기타 주소 관리 API 구현
 - 기타 주소 추가 API 구현
+- 주소 조회 API 구현
+- build 시도 ->  `gradle build daemon disappeared unexpectedly (it may have been killed or may have crashed)`에러 발생 -> 내일 다시 시도
 
 ### 서버 피드백 내용
 - API 구축 순서는 클라이언트와 상의해서 클라이언트의 진행 상황에 맞게 맞추어 나가는 것이 좋다.
