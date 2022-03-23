@@ -60,6 +60,7 @@ public class UserService {
         try {
             userDao.createUser(postUserReq);
         } catch (Exception exception) {
+            System.out.println("createUser --> "+exception);
             throw new BaseException(DATABASE_ERROR);
         }
 

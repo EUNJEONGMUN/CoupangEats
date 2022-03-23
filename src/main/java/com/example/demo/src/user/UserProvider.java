@@ -96,5 +96,34 @@ public class UserProvider {
         }
     }
 
+    // 가입된 회원 확인 - 이메일
+    public int checkUserByEmail(String email) throws BaseException  {
+        try {
+            return userDao.checkUserByEmail(email);
+        } catch (Exception exception){
+            System.out.println("checkUserByEmail"+exception);
+            throw new BaseException(DATABASE_ERROR);
+        }
+    }
+
+    // 가입된 회원 획인 - 휴대폰 번호
+    public int checkUserByPhone(String phoneNumber) throws BaseException {
+        try {
+            return userDao.checkUserByPhone(phoneNumber);
+        } catch (Exception exception){
+            System.out.println("checkUserByPhone"+exception);
+            throw new BaseException(DATABASE_ERROR);
+        }
+    }
+    // 휴대폰 번호로 가입된 이메일 가져오기
+    public String getUserEmailByPhone(String phoneNumber) throws BaseException {
+        try {
+            return userDao.getUserEmailByPhone(phoneNumber);
+        } catch (Exception exception){
+            System.out.println("getUserEmailByPhone"+exception);
+            throw new BaseException(DATABASE_ERROR);
+        }
+    }
+
 
 }

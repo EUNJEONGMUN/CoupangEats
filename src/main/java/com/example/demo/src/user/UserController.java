@@ -17,8 +17,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.validation.Valid;
 
 import static com.example.demo.config.BaseResponseStatus.*;
-import static com.example.demo.utils.ValidationRegex.isRegexEmail;
-import static com.example.demo.utils.ValidationRegex.isRegexPwd;
+import static com.example.demo.utils.ValidationRegex.*;
 
 @RestController
 @RequestMapping("/users")
@@ -49,14 +48,41 @@ public class UserController {
     @PostMapping("/sign-up")
     public BaseResponse<String> createUser(@Valid @RequestBody PostUserReq postUserReq) throws BaseException {
 
-        // 이메일(아이디) 정규식 확인
-        if (!isRegexEmail(postUserReq.getEmail())) {
-            return new BaseResponse<>(POST_USERS_INVALID_EMAIL);
+
+        if (postUserReq.getEmail()!=null){
+            // 이메일(아이디) 정규식 확인
+            if (!isRegexEmail(postUserReq.getEmail())) {
+                return new BaseResponse<>(POST_USERS_INVALID_EMAIL);
+            }
+            if (userProvider.checkUserByEmail(postUserReq.getEmail()) != 0){
+                return new BaseResponse<>(DUPLICATED_EMAIL);
+            }
         }
+
+        if (postUserReq.getPhoneNumber()!=null){
+            // 휴대폰 번호 정규식 확인
+            if (!isRegexPhone(postUserReq.getPhoneNumber())) {
+                return new BaseResponse<>(POST_USERS_INVALID_PHONE);
+            }
+            if (userProvider.checkUserByPhone(postUserReq.getPhoneNumber()) != 0){
+                String duplicatedEmail = userProvider.getUserEmailByPhone(postUserReq.getPhoneNumber());
+                return new BaseResponse<>(DUPLICATED_PHONE, duplicatedEmail+" 아이디(이메일)로 가입된 휴대폰 번호입니다.");
+            }
+        }
+
 
         // 비밀번호 정규식 확인
         if (!isRegexPwd(postUserReq.getPassward())) {
             return new BaseResponse<>(POST_USERS_INVALID_PWD);
+        }
+
+        if (!isRegexPwdLen(postUserReq.getPassward())){
+            return new BaseResponse<>(POST_USERS_INVALID_PWD_LEN);
+        }
+
+        // 3개 이상연속 되거나 동일한 문자/숫자 체크
+        if (!isRegexPwdContinuous(postUserReq.getPassward()) || isRegexPwdThreeSame(postUserReq.getPassward())){
+            return new BaseResponse<>(POST_USERS_INVALID_PWD_CONTINUOUS);
         }
 
         String userEmail = postUserReq.getEmail().substring(0, postUserReq.getEmail().lastIndexOf("@"));
@@ -66,9 +92,15 @@ public class UserController {
             return new BaseResponse<>(PWD_CONTAINS_EMAIL);
         }
 
-        // 3개 이상 동일 여부 체크
-        // 구현 해야 함.
-
+        if (postUserReq.getEmail()==null){
+            return new BaseResponse<>(POST_USERS_EMPTY_EMAIL);
+        }
+        if (postUserReq.getPhoneNumber()==null){
+            return new BaseResponse<>(POST_USERS_INVALID_PHONE);
+        }
+        if (postUserReq.getUserName()==null){
+            return new BaseResponse<>(POST_USERS_EMPTY_NAME);
+        }
         userService.createUser(postUserReq);
         String result = "";
         return new BaseResponse<>(result);

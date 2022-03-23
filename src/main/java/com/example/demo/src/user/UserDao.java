@@ -243,4 +243,27 @@ public class UserDao {
                 Params);
     }
 
+    // 가입된 회원 확인 - 이메일
+    public int checkUserByEmail(String email) {
+        String Query = "SELECT EXISTS(SELECT * FROM User WHERE email=?);";
+        return this.jdbcTemplate.queryForObject(Query,
+                int.class,
+                email);
+    }
+
+    // 휴대폰 번호로 가입된 이메일 가져오기
+    public String getUserEmailByPhone(String phoneNumber) {
+        String Query = "SELECT email FROM User WHERE phoneNumber=?;";
+        return this.jdbcTemplate.queryForObject(Query,
+                String.class,
+                phoneNumber);
+    }
+
+    // 가입된 회원 획인 - 휴대폰 번호
+    public int checkUserByPhone(String phoneNumber) {
+        String Query = "SELECT EXISTS(SELECT * FROM User WHERE phoneNumber=?);";
+        return this.jdbcTemplate.queryForObject(Query,
+                int.class,
+                phoneNumber);
+    }
 }
