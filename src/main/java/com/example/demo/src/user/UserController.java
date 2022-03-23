@@ -18,7 +18,7 @@ import static com.example.demo.config.BaseResponseStatus.*;
 import static com.example.demo.utils.ValidationRegex.*;
 
 @RestController
-@RequestMapping("/users")
+@RequestMapping(value = "/users", method = {RequestMethod.GET, RequestMethod.POST, RequestMethod.PUT})
 public class UserController {
     final Logger logger = LoggerFactory.getLogger(this.getClass());
 
@@ -211,7 +211,7 @@ public class UserController {
      * @return BaseResponse<GetUserAddressRes>
      */
     @ResponseBody
-    @GetMapping("/address")
+    @GetMapping("/address-list")
     public BaseResponse<GetUserAddressRes> getUserAddress() throws BaseException {
 //        int userIdx = (int) request.getAttribute("userIdx");
         int userIdx= jwtService.getUserIdx();
