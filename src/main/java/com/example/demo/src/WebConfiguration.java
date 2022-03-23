@@ -13,12 +13,12 @@ public class WebConfiguration implements WebMvcConfigurer {
     private final JwtService jwtService;
     private final ObjectMapper objectMapper;
 
-    @Override
-    public void addInterceptors(InterceptorRegistry registry) {
-        registry.addInterceptor(new CertificationInterceptor(jwtService, objectMapper))
-                .order(1)
-                .addPathPatterns("/**");
-    }
+//    @Override
+//    public void addInterceptors(InterceptorRegistry registry) {
+//        registry.addInterceptor(new CertificationInterceptor(jwtService, objectMapper))
+//                .order(1)
+//                .addPathPatterns("/**");
+//    }
 //    public void addInterceptors(InterceptorRegistry registry) {
 //        registry.addInterceptor(new CertificationInterceptor(jwtService))
 //                .order(1)

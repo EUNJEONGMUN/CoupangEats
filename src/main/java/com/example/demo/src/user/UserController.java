@@ -135,10 +135,11 @@ public class UserController {
      */
     @ResponseBody
     @PutMapping("/address")
-    public BaseResponse<UserLocationRes> putAddress(HttpServletRequest request,@RequestParam(required = false, defaultValue = "0") int otherIdx,
+    public BaseResponse<UserLocationRes> putAddress(@RequestParam(required = false, defaultValue = "0") int otherIdx,
                                                     @Valid @RequestBody Address address) throws BaseException {
 
-        int userIdx = (int) request.getAttribute("userIdx");
+//        int userIdx = (int) request.getAttribute("userIdx");
+        int userIdx= jwtService.getUserIdx();
 
         if (userProvider.checkUser(userIdx) == 0) {
             return new BaseResponse<>(USER_NOT_EXISTS);
@@ -187,9 +188,9 @@ public class UserController {
      */
     @ResponseBody
     @PostMapping("/address")
-    public BaseResponse<UserLocationRes> postOtherAddress(HttpServletRequest request, @Valid @RequestBody PostAddressReq postAddressReq) throws BaseException {
-        int userIdx = (int) request.getAttribute("userIdx");
-
+    public BaseResponse<UserLocationRes> postOtherAddress(@Valid @RequestBody PostAddressReq postAddressReq) throws BaseException {
+//        int userIdx = (int) request.getAttribute("userIdx");
+        int userIdx= jwtService.getUserIdx();
         if (userProvider.checkUser(userIdx)==0){
             return new BaseResponse<>(USER_NOT_EXISTS);
         }
@@ -213,9 +214,9 @@ public class UserController {
      */
     @ResponseBody
     @GetMapping("/address")
-    public BaseResponse<GetUserAddressRes> getUserAddress(HttpServletRequest request) throws BaseException {
-        int userIdx = (int) request.getAttribute("userIdx");
-
+    public BaseResponse<GetUserAddressRes> getUserAddress() throws BaseException {
+//        int userIdx = (int) request.getAttribute("userIdx");
+        int userIdx= jwtService.getUserIdx();
         if (userProvider.checkUser(userIdx)==0){
             return new BaseResponse<>(USER_NOT_EXISTS);
         }
@@ -231,13 +232,12 @@ public class UserController {
      */
     @ResponseBody
     @PutMapping("/address/choice")
-    public BaseResponse<UserLocationRes> putAddressChoice(HttpServletRequest request, @Valid @RequestBody PutAddressChoiceReq putAddressChoiceReq) throws BaseException {
-        int userIdx = (int) request.getAttribute("userIdx");
-
+    public BaseResponse<UserLocationRes> putAddressChoice(@Valid @RequestBody PutAddressChoiceReq putAddressChoiceReq) throws BaseException {
+//        int userIdx = (int) request.getAttribute("userIdx");
+        int userIdx= jwtService.getUserIdx();
         if (userProvider.checkUser(userIdx)==0){
             return new BaseResponse<>(USER_NOT_EXISTS);
         }
-
 
         UserLocationRes userLocationRes = userService.putAddressChoice(userIdx, putAddressChoiceReq);
         return new BaseResponse<>(userLocationRes);
