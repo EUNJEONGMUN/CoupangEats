@@ -43,7 +43,7 @@ public class UserController {
      *
      * @return BaseResponse<String>
      */
-    @UnAuth
+//    @UnAuth
     @ResponseBody
     @PostMapping("/sign-up")
     public BaseResponse<String> createUser(@Valid @RequestBody PostUserReq postUserReq) throws BaseException {
@@ -113,7 +113,7 @@ public class UserController {
      *
      * @return BaseResponse<PostSignInRes>
      */
-    @UnAuth
+//    @UnAuth
     @ResponseBody
     @PostMapping("/sign-in")
     public BaseResponse<PostSignInRes> signIn(@Valid @RequestBody PostSignInReq postSignInReq) throws BaseException {
@@ -183,11 +183,11 @@ public class UserController {
     
     /**
      * 기타 주소지 추가 API
-     * [POST] /users/address
+     * [POST] /users/address/other
      * @return BaseResponse<UserLocationRes>
      */
     @ResponseBody
-    @PostMapping("/address")
+    @PostMapping("/address/other")
     public BaseResponse<UserLocationRes> postOtherAddress(@Valid @RequestBody PostAddressReq postAddressReq) throws BaseException {
 //        int userIdx = (int) request.getAttribute("userIdx");
         int userIdx= jwtService.getUserIdx();

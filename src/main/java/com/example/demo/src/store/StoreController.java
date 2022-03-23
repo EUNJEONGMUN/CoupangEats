@@ -35,7 +35,7 @@ public class StoreController {
      * /home?sort=&isCheetah&fee=&minimum=&isTogo=&isCoupon&categoryIdx=
      * @return BaseResponse<List<GetStoreHomeRes>>
      */
-    @UnAuth
+//    @UnAuth
     @ResponseBody
     @GetMapping("/home")
     public BaseResponse<List<GetStoreHomeRes>> getStoreHome(StoreHome storeHome) throws BaseException{
@@ -51,7 +51,7 @@ public class StoreController {
      * [GET] /stores/detail?storeIdx=
      * @return BaseResponse<GetStoreDetailRes>
      */
-    @UnAuth
+//    @UnAuth
     @ResponseBody
     @GetMapping("/detail")
     public BaseResponse<GetStoreDetailRes> getStoreDetail(@RequestParam(required = false, defaultValue = "0") int storeIdx) throws BaseException{
@@ -74,7 +74,7 @@ public class StoreController {
      * [GET] /stores/options?storeIdx=&menuIdx=
      * @return BaseResponse<GetStoreMenuOptionsRes>
      */
-    @UnAuth
+//    @UnAuth
     @ResponseBody
     @GetMapping("/options")
     public BaseResponse<GetStoreMenuOptionsRes> getMenuOptions(@RequestParam(required = false, defaultValue = "0") int storeIdx,
