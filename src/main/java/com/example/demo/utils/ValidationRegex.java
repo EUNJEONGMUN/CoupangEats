@@ -48,7 +48,7 @@ public class ValidationRegex {
             char thirdVal = target.charAt(i+2);
             first =secondVal-firstVal;
             second = thirdVal-secondVal;
-            if(first==1 && second==1){
+            if(Math.abs(first)==1 && Math.abs(second)==1){
                 return false;
             }
         }

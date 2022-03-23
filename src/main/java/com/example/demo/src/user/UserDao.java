@@ -31,7 +31,13 @@ public class UserDao {
         // 사용자 정보 insert
         String UserInfoQuery = "INSERT INTO User (userName, email, passward, phoneNumber) VALUES (?,?,?,?);";
         Object[] UserInfoParams = new Object[]{postUserReq.getUserName(), postUserReq.getEmail(), postUserReq.getPassward(), postUserReq.getPhoneNumber()};
-        return this.jdbcTemplate.update(UserInfoQuery, UserInfoParams);
+        this.jdbcTemplate.update(UserInfoQuery, UserInfoParams);
+
+        String lastInsertIdQuery = "select last_insert_id()";
+        int userIdx = this.jdbcTemplate.queryForObject(lastInsertIdQuery,int.class);
+
+        String UserLocationInsert = "INSERT INTO UserLocation (userIdx, userLongitude, userLatitude) VALUES (?, 0.0, 0.0);";
+        return this.jdbcTemplate.update(UserLocationInsert, userIdx);
     }
 
     /**
