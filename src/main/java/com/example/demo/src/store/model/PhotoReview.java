@@ -10,6 +10,7 @@ import lombok.Setter;
 @AllArgsConstructor
 @NoArgsConstructor
 public class PhotoReview {
+    private int reviewIdx;
     private String reviewImgUrl;
     private String content;
     private int score;

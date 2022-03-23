@@ -434,24 +434,25 @@ public class StoreDao {
                 "FROM Menu\n" +
                 "WHERE status!='N' AND menuCategoryIdx=?;";
 
-        String PhotoReviewQuery = "SELECT P.reviewImgUrl, P.content, P.score\n" +
+        String PhotoReviewQuery = "SELECT PhotoReview.reviewIdx, PhotoReview.reviewImgUrl, PhotoReview.content, PhotoReview.score\n" +
                 "FROM UserOrder UO\n" +
-                "JOIN (SELECT PHOTO.reviewIdx, PHOTO.reviewImgUrl, R.content, R.score, R.userOrderIdx\n" +
+                "JOIN (SELECT R.reviewIdx,FirstPhoto.reviewImgUrl,R.content,R.score,R.userOrderIdx\n" +
                 "FROM Review R\n" +
-                "JOIN (SELECT RankRow.reviewIdx, RankRow.reviewImgUrl\n" +
+                "JOIN (SELECT First.reviewIdx, First.reviewImgUrl\n" +
                 "        FROM (SELECT*, RANK() OVER (PARTITION BY RI.reviewIdx ORDER BY RI.reviewImgIdx) AS a\n" +
                 "              FROM ReviewImg RI\n" +
                 "            WHERE RI.status='Y'\n" +
-                "             ) AS RankRow\n" +
-                "        WHERE RankRow.a <= 1) PHOTO ON PHOTO.reviewIdx = R.reviewIdx) P ON P.userOrderIdx = UO.userOrderIdx\n" +
-                "WHERE UO.storeIdx IN (SELECT S.storeIdx\n" +
+                "             ) AS First\n" +
+                "        WHERE First.a <= 1) FirstPhoto ON FirstPhoto.reviewIdx = R.reviewIdx\n" +
+                "    WHERE R.isPhoto='Y' AND R.status='Y') PhotoReview ON PhotoReview.userOrderIdx = UO.userOrderIdx\n" +
+                "WHERE UO.status='Y' AND UO.storeIdx IN (SELECT S.storeIdx\n" +
                 "                        FROM Store S JOIN (\n" +
                 "                            SELECT UO.storeIdx, COUNT(storeIdx) AS photoReviewCount\n" +
                 "                            FROM Review R JOIN UserOrder UO on R.userOrderIdx = UO.userOrderIdx\n" +
                 "                            WHERE R.isPhoto='Y' AND R.status='Y' AND UO.status='Y'\n" +
                 "                            GROUP BY storeIdx) PR ON PR.storeIdx = S.storeIdx\n" +
                 "                        WHERE S.status='Y' AND PR.photoReviewCount>=3 AND S.storeIdx=?)\n" +
-                "LIMIT 3;";
+                "LIMIT 3";
 
 
         int Param = storeIdx;
@@ -472,6 +473,7 @@ public class StoreDao {
                             rs1.getDouble("storeLatitude"),
                             this.jdbcTemplate.query(PhotoReviewQuery,
                                     (rs4, rowNum4) -> new PhotoReview(
+                                            rs4.getInt("reviewIdx"),
                                             rs4.getString("reviewImgUrl"),
                                             rs4.getString("content"),
                                             rs4.getInt("score")
