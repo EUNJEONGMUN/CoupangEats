@@ -1,6 +1,7 @@
 package com.example.demo.src.store.model.Res;
 
 import com.example.demo.src.store.model.MenuCategory;
+import com.example.demo.src.store.model.PhotoReview;
 import com.example.demo.src.store.model.StoreCouponInfo;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -23,6 +24,7 @@ public class GetStoreDetailRes {
     private String timeToGo;
     private double storeLongitude;
     private double storeLatitude;
+    private List<PhotoReview> photoReview;
     private StoreCouponInfo storeCouponInfo;
     private List<MenuCategory> menuCategory;
 }
