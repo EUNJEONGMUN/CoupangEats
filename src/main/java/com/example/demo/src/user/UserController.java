@@ -224,4 +224,25 @@ public class UserController {
         return new BaseResponse<>(getUserAddressRes);
     }
 
+    /**
+     * 주소지 설정 API
+     * [PUT] /users/address/choice
+     * @return BaseResponse<UserLocationRes>
+     */
+    @ResponseBody
+    @PutMapping("/address/choice")
+    public BaseResponse<UserLocationRes> putAddressChoice(HttpServletRequest request, @Valid @RequestBody PutAddressChoiceReq putAddressChoiceReq) throws BaseException {
+        int userIdx = (int) request.getAttribute("userIdx");
+
+        if (userProvider.checkUser(userIdx)==0){
+            return new BaseResponse<>(USER_NOT_EXISTS);
+        }
+
+
+        UserLocationRes userLocationRes = userService.putAddressChoice(userIdx, putAddressChoiceReq);
+        return new BaseResponse<>(userLocationRes);
+
+    }
+
+
 }

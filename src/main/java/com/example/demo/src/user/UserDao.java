@@ -160,6 +160,20 @@ public class UserDao {
 
     }
 
+    /**
+     * 주소지 설정 API
+     * [PUT] /users/address/choice
+     * /choice?otherIdx=
+     * @return BaseResponse<UserLocationRes>
+     */
+    public UserLocationRes putAddressChoice(int userIdx, PutAddressChoiceReq putAddressChoiceReq) {
+        String Query = "UPDATE UserLocation SET userLongitude=?, userLatitude=? WHERE userIdx=?;";
+        Object[] Params = new Object[]{putAddressChoiceReq.getUserLongitude(), putAddressChoiceReq.getUserLatitude(), userIdx};
+        this.jdbcTemplate.update(Query, Params);
+        return new UserLocationRes(putAddressChoiceReq.getUserLongitude(), putAddressChoiceReq.getUserLatitude());
+
+
+    }
 
     // 이메일 중복 확인
     public int checkEmail(String email) {
@@ -266,4 +280,5 @@ public class UserDao {
                 int.class,
                 phoneNumber);
     }
+
 }

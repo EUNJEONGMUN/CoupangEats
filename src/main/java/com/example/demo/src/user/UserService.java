@@ -163,4 +163,19 @@ public class UserService {
         }
     }
 
+    /**
+     * 주소지 설정 API
+     * [PUT] /users/address/choice
+     * @return BaseResponse<UserLocationRes>
+     */
+    public UserLocationRes putAddressChoice(int userIdx, PutAddressChoiceReq putAddressChoiceReq) throws BaseException {
+        try {
+            UserLocationRes userLocationRes = userDao.putAddressChoice(userIdx, putAddressChoiceReq);
+            return userLocationRes;
+        } catch (Exception exception) {
+            System.out.println("putAddressChoice"+exception);
+            throw new BaseException(DATABASE_ERROR);
+        }
+
+    }
 }
