@@ -4,6 +4,7 @@ import com.example.demo.config.BaseException;
 import com.example.demo.config.BaseResponse;
 import com.example.demo.src.store.model.Res.*;
 import com.example.demo.src.store.model.StoreHome;
+import com.example.demo.utils.JwtService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -22,10 +23,13 @@ public class StoreController {
     private final StoreProvider storeProvider;
     @Autowired
     private final StoreService storeService;
+    @Autowired
+    private final JwtService jwtService;
 
-    public StoreController(StoreProvider storeProvider, StoreService storeService){
+    public StoreController(StoreProvider storeProvider, StoreService storeService, JwtService jwtService){
         this.storeProvider = storeProvider;
         this.storeService = storeService;
+        this.jwtService = jwtService;
     }
 
     /**
