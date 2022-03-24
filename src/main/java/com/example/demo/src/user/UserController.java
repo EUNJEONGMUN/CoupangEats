@@ -19,7 +19,7 @@ import static com.example.demo.utils.ValidationRegex.*;
 
 @RestController
 @CrossOrigin(origins = "http://localhost:9009")
-@RequestMapping("/users")
+//@RequestMapping("/users")
 public class UserController {
     final Logger logger = LoggerFactory.getLogger(this.getClass());
 
@@ -43,8 +43,9 @@ public class UserController {
      * @return BaseResponse<String>
      */
 //    @UnAuth
+    //    @PostMapping("/sign-up")
     @ResponseBody
-    @PostMapping("/sign-up")
+    @RequestMapping(value="/users/sign-up", method = RequestMethod.POST)
     public BaseResponse<String> createUser(@Valid @RequestBody PostUserReq postUserReq) throws BaseException {
 
 
@@ -114,7 +115,8 @@ public class UserController {
      */
 //    @UnAuth
     @ResponseBody
-    @PostMapping("/users/sign-in")
+//    @PostMapping("/users/sign-in")
+    @RequestMapping(value="/users/sign-in", method = RequestMethod.POST)
     public BaseResponse<PostSignInRes> signIn(@Valid @RequestBody PostSignInReq postSignInReq) throws BaseException {
 
         // 이메일(아이디) 정규식 확인
@@ -133,7 +135,8 @@ public class UserController {
      * @return BaseResponse<UserLocationRes>
      */
     @ResponseBody
-    @PutMapping("/address")
+//    @PutMapping("/address")
+    @RequestMapping(value="/users/address", method = RequestMethod.PUT)
     public BaseResponse<UserLocationRes> putAddress(@RequestParam(required = false, defaultValue = "0") int otherIdx,
                                                     @Valid @RequestBody Address address) throws BaseException {
 
@@ -186,7 +189,8 @@ public class UserController {
      * @return BaseResponse<UserLocationRes>
      */
     @ResponseBody
-    @PostMapping("/address/other")
+//    @PostMapping("/address/other")
+    @RequestMapping(value="/users/address/other", method = RequestMethod.POST)
     public BaseResponse<UserLocationRes> postOtherAddress(@Valid @RequestBody PostAddressReq postAddressReq) throws BaseException {
 //        int userIdx = (int) request.getAttribute("userIdx");
         int userIdx= jwtService.getUserIdx();
@@ -208,11 +212,12 @@ public class UserController {
 
     /**
      * 주소지 조회 API
-     * [GET] /users/address
+     * [GET] /users/address-list
      * @return BaseResponse<GetUserAddressRes>
      */
     @ResponseBody
-    @GetMapping("/address-list")
+//    @GetMapping("/address-list")
+    @RequestMapping(value="/users/address-list", method = RequestMethod.GET)
     public BaseResponse<GetUserAddressRes> getUserAddress() throws BaseException {
 //        int userIdx = (int) request.getAttribute("userIdx");
         int userIdx= jwtService.getUserIdx();
@@ -230,7 +235,8 @@ public class UserController {
      * @return BaseResponse<UserLocationRes>
      */
     @ResponseBody
-    @PutMapping("/address/choice")
+//    @PutMapping("/address/choice")
+    @RequestMapping(value="/users/address/choice", method = RequestMethod.PUT)
     public BaseResponse<UserLocationRes> putAddressChoice(@Valid @RequestBody PutAddressChoiceReq putAddressChoiceReq) throws BaseException {
 //        int userIdx = (int) request.getAttribute("userIdx");
         int userIdx= jwtService.getUserIdx();
