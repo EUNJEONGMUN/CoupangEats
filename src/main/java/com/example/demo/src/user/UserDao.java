@@ -63,7 +63,8 @@ public class UserDao {
                             rs.getDouble("addressLongitude"),
                             rs.getDouble("addressLatitude"),
                             rs.getString("addressTitle"),
-                            rs.getString("addressType")
+                            rs.getString("addressType"),
+                            rs.getString("isNowLocation")
                     ), Params1);
         }
 
@@ -79,7 +80,8 @@ public class UserDao {
                             rs.getDouble("addressLongitude"),
                             rs.getDouble("addressLatitude"),
                             rs.getString("addressTitle"),
-                            rs.getString("addressType")
+                            rs.getString("addressType"),
+                            rs.getString("isNowLocation")
                     ), Params2);
         }
 
@@ -93,7 +95,8 @@ public class UserDao {
                       rs.getDouble("addressLongitude"),
                       rs.getDouble("addressLatitude"),
                       rs.getString("addressTitle"),
-                      rs.getString("addressType")
+                      rs.getString("addressType"),
+                      rs.getString("isNowLocation")
               ), Params3);
 
         return new GetUserAddressRes(homeAddress, companyAddress, otherAddress);
