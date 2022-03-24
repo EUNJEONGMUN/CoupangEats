@@ -56,7 +56,9 @@ dependencies {
     // validation
     implementation ('org.springframework.boot:spring-boot-starter-validation')
 
-
+    // cors
+    testImplementation 'org.apache.httpcomponents:httpclient'
+    testImplementation group: 'org.springframework.boot', name: 'spring-boot-starter-test', version: '2.0.0.RELEASE'
 
 
 

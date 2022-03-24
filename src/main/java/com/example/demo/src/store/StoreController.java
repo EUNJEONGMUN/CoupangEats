@@ -15,6 +15,7 @@ import java.util.List;
 import static com.example.demo.config.BaseResponseStatus.*;
 
 @RestController
+@CrossOrigin(origins = "http://localhost:9009")
 @RequestMapping("/stores")
 public class StoreController {
     final Logger logger = LoggerFactory.getLogger(this.getClass());

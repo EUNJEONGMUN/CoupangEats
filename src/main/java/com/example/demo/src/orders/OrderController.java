@@ -15,6 +15,7 @@ import javax.validation.Valid;
 import static com.example.demo.config.BaseResponseStatus.*;
 
 @RestController
+@CrossOrigin(origins = "http://localhost:9009")
 @RequestMapping("/orders")
 public class OrderController {
 
