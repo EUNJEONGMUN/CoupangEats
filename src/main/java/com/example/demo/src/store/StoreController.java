@@ -14,7 +14,7 @@ import java.util.List;
 import static com.example.demo.config.BaseResponseStatus.*;
 
 @RestController
-@RequestMapping(value = "/stores", method = {RequestMethod.GET, RequestMethod.POST, RequestMethod.PUT})
+@RequestMapping("/stores")
 public class StoreController {
     final Logger logger = LoggerFactory.getLogger(this.getClass());
 
