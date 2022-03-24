@@ -1,10 +1,14 @@
 package com.example.demo.src.orders;
 
+import com.example.demo.config.BaseException;
+import com.example.demo.src.orders.model.Req.PostCreateCartReq;
 import com.example.demo.utils.JwtService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+
+import static com.example.demo.config.BaseResponseStatus.*;
 
 @Service
 public class OrderService {
@@ -21,6 +25,66 @@ public class OrderService {
         this.orderDao = orderDao;
         this.jwtService = jwtService;
         this.orderProvider = orderProvider;
+
+    }
+
+    /**
+     * 배달 카트 담기 API
+     * [POST] /order/cart
+     * /cart?storeIdx=&menuIdx=
+     * @return BaseResponse<String>
+     */
+    public void createCart(int userIdx, int storeIdx, int menuIdx, PostCreateCartReq postCreateCartReq) throws BaseException {
+        try {
+            int result = orderDao.createCart(userIdx, storeIdx, menuIdx, postCreateCartReq);
+            if (result == FAIL){
+                throw new BaseException(FAIL_CREATE_CART);
+            }
+        } catch (Exception exception) {
+            System.out.println("createCart"+exception);
+            throw new BaseException(DATABASE_ERROR);
+        }
+    }
+
+    /**
+     * 배달 카트 담기 API - 같은 메뉴
+     * [POST] /orders/cart
+     * /cart?storeIdx=&menuIdx
+     * @return BaseResponse<String>
+     */
+    public void addCart(int sameMenuCartIdx, PostCreateCartReq postCreateCartReq) throws BaseException {
+        try {
+            int result = orderDao.addCart(sameMenuCartIdx, postCreateCartReq);
+            if (result == FAIL){
+                throw new BaseException(FAIL_CREATE_CART);
+            }
+        } catch (Exception exception) {
+            System.out.println("addCart"+exception);
+            throw new BaseException(DATABASE_ERROR);
+        }
+
+
+    }
+    /**
+     * 배달 카트 새로 담기 API
+     * [POST] /order/cart/new
+     * /new?storeIdx=&menuIdx
+     * @return BaseResponse<String>
+     */
+    public void createCartNew(int userIdx, int storeIdx, int menuIdx, int cartStoreIdx, PostCreateCartReq postCreateCartReq) throws BaseException {
+        try {
+            int deleteCart = orderDao.deleteCartStore(userIdx, cartStoreIdx);
+            if (deleteCart == FAIL){
+                throw new BaseException(FAIL_DELETE_CART_STORE);
+            }
+            int result = orderDao.createCart(userIdx, storeIdx, menuIdx, postCreateCartReq);
+            if (result == FAIL){
+                throw new BaseException(FAIL_CREATE_CART);
+            }
+        } catch (Exception exception) {
+            System.out.println("createCartNew"+exception);
+            throw new BaseException(DATABASE_ERROR);
+        }
 
     }
 

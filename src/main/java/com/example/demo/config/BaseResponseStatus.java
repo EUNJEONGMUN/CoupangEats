@@ -44,6 +44,8 @@ public enum BaseResponseStatus {
     POST_USERS_INVALID_PWD_LEN(false, 2024, "8자~20자"),
     POST_USERS_EMPTY_NAME(false, 2025, "이름을 정확히 입력하세요."),
 
+    // orders
+    POST_CART_PARAM_EMPTY(false, 2100, "가게 idx 혹은 메뉴 idx를 입력해주세요."),
     /**
      * 3000 : Response 오류
      */
@@ -64,6 +66,10 @@ public enum BaseResponseStatus {
     INCONSISTENCY_STORE_OWNER(false, 3102, "해당 가게의 메뉴가 아닙니다."),
     EMPTY_STORE_CATEGORY(false, 3103, "존재하지 않는 카테고리입니다."),
 
+    CART_DUPLICATE_STORE(false, 3200, "같은 가게의 메뉴만 담을 수 있습니다."),
+    EMPTY_CART_STORE(false, 3021, "카트에 담긴 가게가 없습니다."),
+    CART_NOT_DUPLICATE_STORE(false, 3022, "가게가 없거나 같은 가게만 있습니다. 다른 API로 접근해주세요."),
+
     /**
      * 4000 : Database, Server 오류
      */
@@ -80,7 +86,10 @@ public enum BaseResponseStatus {
 
     EMPTY_STOREIDX_PARAM(false, 4200, "storeIdx를 입력하지 않았습니다."),
     EMPTY_MENUIDX_PARAM(false, 4201, "menuIdx를 입력하지 않았습니다."),
-    EMPTY_OTHER_ADDRESS_IDX(false, 4202, "otherIdx를 입력하지 않았습니다.");
+    EMPTY_OTHER_ADDRESS_IDX(false, 4202, "otherIdx를 입력하지 않았습니다."),
+
+    FAIL_CREATE_CART(false, 4300, "배달 카트 담기에 실패하였습니다."),
+    FAIL_DELETE_CART_STORE(false, 4301, "기존 카트에 담긴 가게 삭제에 실패하였습니다.");
 
     // 5000 : 필요시 만들어서 쓰세요
     // 6000 : 필요시 만들어서 쓰세요

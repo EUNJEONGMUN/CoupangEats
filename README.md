@@ -107,3 +107,8 @@ Rising Test
 - 가게 상세 화면 API에 포토 리뷰 추가
 
 - build 성공
+  - GET메소드는 성공했지만, POST메소드에서 `Request method 'GET' not supported` 에러 발생
+
+### 2022-03-24 진행상황
+- 배달 카드 담기 API 구현
+- 배탁 카트 새로 담기 API 구현
