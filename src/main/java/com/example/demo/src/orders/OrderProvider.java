@@ -1,10 +1,13 @@
 package com.example.demo.src.orders;
 
 import com.example.demo.config.BaseException;
+import com.example.demo.src.orders.model.Res.GetCartListRes;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+
+import java.util.List;
 
 import static com.example.demo.config.BaseResponseStatus.DATABASE_ERROR;
 
@@ -17,6 +20,23 @@ public class OrderProvider {
 
     @Autowired
     public OrderProvider(OrderDao orderDao) {this.orderDao = orderDao; }
+
+
+    /**
+     * 배달 카트 조회 API
+     * [GET] /orders/cart-list
+     * @return BaseResponse<List<GetCartListRes>>
+     */
+    public GetCartListRes getCartList(int userIdx) throws BaseException {
+        try {
+            GetCartListRes getCartListRes = orderDao.getCartList(userIdx);
+            return getCartListRes;
+        } catch (Exception exception) {
+            System.out.println("getCartList-> "+ exception);
+            throw new BaseException(DATABASE_ERROR);
+        }
+    }
+
 
     // 카드에 담겨진 가게 확인
     public int checkCartStore(int userIdx) throws BaseException {
@@ -37,4 +57,6 @@ public class OrderProvider {
             throw new BaseException(DATABASE_ERROR);
         }
     }
+
+
 }
