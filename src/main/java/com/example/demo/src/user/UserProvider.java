@@ -1,7 +1,9 @@
 package com.example.demo.src.user;
 
 import com.example.demo.config.BaseException;
+import com.example.demo.config.BaseResponse;
 import com.example.demo.src.user.model.Res.GetUserAddressRes;
+import com.example.demo.src.user.model.UserNowAddressInfo;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -125,5 +127,34 @@ public class UserProvider {
         }
     }
 
+    // 사용자 현재 주소 가져오기
+    public UserNowAddressInfo getUserNowInfo(int userIdx) throws BaseException {
+        try {
+            UserNowAddressInfo userNowAddressInfo = userDao.getUserNowInfo(userIdx);
+            return userNowAddressInfo;
+        } catch (Exception exception){
+            System.out.println("getUserNowInfo"+exception);
+            throw new BaseException(DATABASE_ERROR);
+        }
+    }
 
+    // 현재 주소 타입 확인
+    public String checkNowAddressType(int userIdx) throws BaseException  {
+        try {
+            return userDao.checkNowAddressType(userIdx);
+        } catch (Exception exception){
+            System.out.println("checkNowAddressType"+exception);
+            throw new BaseException(DATABASE_ERROR);
+        }
+    }
+
+    // addressIdx 확인
+    public int checkAddressNowIdx(int userIdx, String addressType) throws BaseException {
+        try {
+            return userDao.checkAddressNowIdx(userIdx, addressType);
+        } catch (Exception exception){
+            System.out.println("checkAddressNowIdx"+exception);
+            throw new BaseException(DATABASE_ERROR);
+        }
+    }
 }

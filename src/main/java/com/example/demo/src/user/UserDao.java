@@ -1,16 +1,15 @@
 package com.example.demo.src.user;
 
-import com.example.demo.src.user.model.Address;
-import com.example.demo.src.user.model.OtherAddress;
+import com.example.demo.src.user.model.*;
 import com.example.demo.src.user.model.Req.*;
 import com.example.demo.src.user.model.Res.GetUserAddressRes;
-import com.example.demo.src.user.model.User;
-import com.example.demo.src.user.model.UserLocationRes;
+import com.example.demo.src.user.model.Res.PutAddressChoiceRes;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Repository;
 
 import javax.sql.DataSource;
+import java.util.List;
 
 @Repository
 public class UserDao {
@@ -31,105 +30,7 @@ public class UserDao {
         // 사용자 정보 insert
         String UserInfoQuery = "INSERT INTO User (userName, email, passward, phoneNumber) VALUES (?,?,?,?);";
         Object[] UserInfoParams = new Object[]{postUserReq.getUserName(), postUserReq.getEmail(), postUserReq.getPassward(), postUserReq.getPhoneNumber()};
-        this.jdbcTemplate.update(UserInfoQuery, UserInfoParams);
-
-        String lastInsertIdQuery = "select last_insert_id()";
-        int userIdx = this.jdbcTemplate.queryForObject(lastInsertIdQuery,int.class);
-
-        String UserLocationInsert = "INSERT INTO UserLocation (userIdx, userLongitude, userLatitude) VALUES (?, 0.0, 0.0);";
-        return this.jdbcTemplate.update(UserLocationInsert, userIdx);
-    }
-
-    /**
-     * 집, 회사, 기타 주소지 관리 API - 집
-     * [PUT] /users/address?otherIdx=
-     * @return BaseResponse<UserLocationRes>
-     */
-    public UserLocationRes putHomeAddress(int userIdx, Address address) {
-
-        String Query1 = "UPDATE User SET homeAddress=?, homeDetail=?,  homeGuide=? WHERE userIdx=?;";
-        Object[] Params1 = new Object[]{address.getAddress(), address.getAddressDetail(), address.getAddressGuide(), userIdx};
-
-        String Query2 = "UPDATE UserLocation SET userLongitude=?, userLatitude=? WHERE userIdx=?;";
-        Object[] Params2 = new Object[]{address.getUserLongitude(), address.getUserLatitude(), userIdx};
-
-        Object[] NoParams1 = new Object[]{null,null,null,userIdx};
-        Object[] NoParams2 = new Object[]{0.0,0.0,userIdx};
-
-        if (address.getStatus().equals("N")){
-            this.jdbcTemplate.update(Query1,NoParams1);
-            this.jdbcTemplate.update(Query2,NoParams2);
-            return new UserLocationRes(0.0,0.0);
-
-        }
-
-        this.jdbcTemplate.update(Query1,Params1);
-        this.jdbcTemplate.update(Query2,Params2);
-        return new UserLocationRes(address.getUserLongitude(), address.getUserLatitude());
-
-    }
-
-    /**
-     * 집, 회사, 기타 주소지 관리 API - 회사
-     * [PUT] /users/address?otherIdx=
-     * @return BaseResponse<UserLocationRes>
-     */
-    public UserLocationRes putCompanyAddress(int userIdx, Address address) {
-        String Query1 = "UPDATE User SET companyAddress=?, companyDetail=?,  companyGuide=? WHERE userIdx=?;";
-        Object[] Params1 = new Object[]{address.getAddress(), address.getAddressDetail(), address.getAddressGuide(), userIdx};
-
-        String Query2 = "UPDATE UserLocation SET userLongitude=?, userLatitude=? WHERE userIdx=?;";
-        Object[] Params2 = new Object[]{address.getUserLongitude(), address.getUserLatitude(), userIdx};
-
-        Object[] NoParams1 = new Object[]{null,null,null,userIdx};
-        Object[] NoParams2 = new Object[]{0.0,0.0,userIdx};
-
-        if (address.getStatus().equals("N")){
-            this.jdbcTemplate.update(Query1,NoParams1);
-            this.jdbcTemplate.update(Query2,NoParams2);
-            return new UserLocationRes(0.0,0.0);
-
-        }
-
-        this.jdbcTemplate.update(Query1,Params1);
-        this.jdbcTemplate.update(Query2,Params2);
-        return new UserLocationRes(address.getUserLongitude(), address.getUserLatitude());
-
-    }
-
-    /**
-     * 집, 회사, 기타 주소지 관리 API - 기타
-     * [PUT] /users/address?otherIdx=
-     * @return BaseResponse<UserLocationRes>
-     */
-    public UserLocationRes putOtherAddress(int userIdx, int otherIdx, Address address) {
-        String Query1 = "UPDATE UserOtherAddress SET address=?, addressDetail=?, addressGuide=?, addressTitle=? , status=? WHERE userAddressIdx=? AND userIdx=?;";
-        Object[] Params1 = new Object[]{address.getAddress(), address.getAddressDetail(), address.getAddressGuide(), address.getAddressTitle(), address.getStatus(), otherIdx, userIdx};
-        this.jdbcTemplate.update(Query1,Params1);
-        if (address.getStatus().equals("N")){
-            return new UserLocationRes(0.0,0.0);
-        }
-        return new UserLocationRes(address.getUserLongitude(), address.getUserLatitude());
-
-    }
-
-
-    /**
-     * 기타 주소지 추가 API
-     * [POST] /users/address
-     * @return BaseResponse<UserLocationRes>
-     */
-    public UserLocationRes postOtherAddress(int userIdx, PostAddressReq postAddressReq) {
-        String Query1 = "INSERT INTO UserOtherAddress (userIdx, address, addressDetail, addressGuide, addressTitle) VALUES(?,?,?,?,?);";
-        Object[] Params1 = new Object[]{userIdx, postAddressReq.getAddress(), postAddressReq.getAddressDetail(), postAddressReq.getAddressGuide(), postAddressReq.getAddressTitle()};
-
-        String Query2 = "UPDATE UserLocation SET userLongitude=?, userLatitude=? WHERE userIdx=?;";
-        Object[] Params2 = new Object[]{postAddressReq.getUserLongitude(), postAddressReq.getUserLatitude(), userIdx};
-
-        this.jdbcTemplate.update(Query1,Params1);
-        this.jdbcTemplate.update(Query2,Params2);
-
-        return new UserLocationRes(postAddressReq.getUserLongitude(), postAddressReq.getUserLatitude());
+        return this.jdbcTemplate.update(UserInfoQuery, UserInfoParams);
 
     }
 
@@ -140,46 +41,65 @@ public class UserDao {
      */
     public GetUserAddressRes getUserAddress(int userIdx) {
         // 집주소, 회사주소
-        String Query1 = "SELECT userIdx, homeAddress, homeDetail, homeGuide, companyAddress, companyDetail, companyGuide FROM User U WHERE U.userIdx=?;";
+        String Query = "SELECT userAddressIdx, buildingName, address, addressDetail, addressGuide, addressTitle, addressLongitude, addressLatitude, addressType, isNowLocation \n" +
+                "FROM UserAddress \n" +
+                "WHERE userIdx=? AND addressType=? AND status='Y';";
 
-        // 기타주소
-        String Query2 = "SELECT userAddressIdx, address, addressDetail, addressGuide, addressTitle FROM UserOtherAddress UOA WHERE UOA.userIdx=? AND UOA.status='Y';";
+        String checkQuery = "SELECT EXISTS(SELECT * FROM UserAddress WHERE userIdx=? AND addressType=? AND status='Y');";
 
-        int Param = userIdx;
-        return this.jdbcTemplate.queryForObject(Query1,
-                (rs1, rowNum1) -> new GetUserAddressRes(
-                        rs1.getString("homeAddress"),
-                        rs1.getString("homeDetail"),
-                        rs1.getString("homeGuide"),
-                        rs1.getString("companyAddress"),
-                        rs1.getString("companyDetail"),
-                        rs1.getString("companyGuide"),
-                        this.jdbcTemplate.query(Query2,
-                                (rs2, rowNum2) -> new OtherAddress(
-                                        rs2.getInt("userAddressIdx"),
-                                        rs2.getString("address"),
-                                        rs2.getString("addressDetail"),
-                                        rs2.getString("addressGuide"),
-                                        rs2.getString("addressTitle"))
-                        , Param)
-                ), Param);
+        Object[] Params1 = new Object[]{userIdx, "H"};
+        Object[] Params2 = new Object[]{userIdx, "C"};
+        Object[] Params3 = new Object[]{userIdx, "O"};
 
+        AddressInfo homeAddress = new AddressInfo();
+        if (this.jdbcTemplate.queryForObject(checkQuery, int.class, Params1) != 0){
+            homeAddress = this.jdbcTemplate.queryForObject(Query,
+                    (rs, rowNum) -> new AddressInfo(
+                            rs.getInt("userAddressIdx"),
+                            rs.getString("buildingName"),
+                            rs.getString("address"),
+                            rs.getString("addressDetail"),
+                            rs.getString("addressGuide"),
+                            rs.getDouble("addressLongitude"),
+                            rs.getDouble("addressLatitude"),
+                            rs.getString("addressTitle"),
+                            rs.getString("addressType")
+                    ), Params1);
+        }
+
+        AddressInfo companyAddress = new AddressInfo();
+        if (this.jdbcTemplate.queryForObject(checkQuery, int.class, Params2) != 0){
+            companyAddress = this.jdbcTemplate.queryForObject(Query,
+                    (rs, rowNum) -> new AddressInfo(
+                            rs.getInt("userAddressIdx"),
+                            rs.getString("buildingName"),
+                            rs.getString("address"),
+                            rs.getString("addressDetail"),
+                            rs.getString("addressGuide"),
+                            rs.getDouble("addressLongitude"),
+                            rs.getDouble("addressLatitude"),
+                            rs.getString("addressTitle"),
+                            rs.getString("addressType")
+                    ), Params2);
+        }
+
+        List<AddressInfo> otherAddress = this.jdbcTemplate.query(Query,
+              (rs, rowNum) -> new AddressInfo(
+                      rs.getInt("userAddressIdx"),
+                      rs.getString("buildingName"),
+                      rs.getString("address"),
+                      rs.getString("addressDetail"),
+                      rs.getString("addressGuide"),
+                      rs.getDouble("addressLongitude"),
+                      rs.getDouble("addressLatitude"),
+                      rs.getString("addressTitle"),
+                      rs.getString("addressType")
+              ), Params3);
+
+        return new GetUserAddressRes(homeAddress, companyAddress, otherAddress);
     }
 
-    /**
-     * 주소지 설정 API
-     * [PUT] /users/address/choice
-     * /choice?otherIdx=
-     * @return BaseResponse<UserLocationRes>
-     */
-    public UserLocationRes putAddressChoice(int userIdx, PutAddressChoiceReq putAddressChoiceReq) {
-        String Query = "UPDATE UserLocation SET userLongitude=?, userLatitude=? WHERE userIdx=?;";
-        Object[] Params = new Object[]{putAddressChoiceReq.getUserLongitude(), putAddressChoiceReq.getUserLatitude(), userIdx};
-        this.jdbcTemplate.update(Query, Params);
-        return new UserLocationRes(putAddressChoiceReq.getUserLongitude(), putAddressChoiceReq.getUserLatitude());
 
-
-    }
 
     // 이메일 중복 확인
     public int checkEmail(String email) {
@@ -287,4 +207,146 @@ public class UserDao {
                 phoneNumber);
     }
 
+
+
+
+
+
+
+
+
+
+
+    // 사용자 현재 주소 가져오기
+    public UserNowAddressInfo getUserNowInfo(int userIdx) {
+
+        String isNowAddressQuery = "SELECT EXISTS(SELECT * FROM UserAddress WHERE userIdx=? AND isNowLocation='Y' AND status='Y');";
+        int isNowAddress = this.jdbcTemplate.queryForObject(isNowAddressQuery, int.class, userIdx);
+        if (isNowAddress == 0){
+            return new UserNowAddressInfo();
+        }
+
+        String getNowAddressQuery = "SELECT userAddressIdx, buildingName, address, addressDetail, addressGuide, addressTitle, addressLongitude, addressLatitude, addressType\n" +
+                "FROM UserAddress\n" +
+                "WHERE userIdx=? AND isNowLocation='Y' AND status='Y';";
+
+        return this.jdbcTemplate.queryForObject(getNowAddressQuery,
+                (rs, rowNum) -> new UserNowAddressInfo(
+                        rs.getInt("userAddressIdx"),
+                        rs.getString("buildingName"),
+                        rs.getString("address"),
+                        rs.getString("addressDetail"),
+                        rs.getString("addressGuide"),
+                        rs.getString("addressTitle"),
+                        rs.getDouble("addressLongitude"),
+                        rs.getDouble("addressLatitude"),
+                        rs.getString("addressType")
+                ), userIdx);
+
+    }
+
+
+    // 현재 주소 타입 확인
+    public String checkNowAddressType(int userIdx) {
+        String isNowAddressQuery = "SELECT EXISTS(SELECT * FROM UserAddress WHERE userIdx=? AND isNowLocation='Y' AND status='Y');";
+        int isNowAddress = this.jdbcTemplate.queryForObject(isNowAddressQuery, int.class, userIdx);
+        if (isNowAddress == 0){
+            return "N";
+        }
+
+        String nowAddressTypeQuery = "SELECT addressType FROM UserAddress WHERE userIdx=? AND isNowLocation='Y' AND status='Y';";
+        return this.jdbcTemplate.queryForObject(nowAddressTypeQuery, String.class, userIdx);
+    }
+
+    // 같은 유형 주소 아이디 확인
+    public int checkAddressNowIdx(int userIdx, String addressType) {
+        String Query1 = "SELECT EXISTS (SELECT * FROM UserAddress WHERE userIdx=? AND addressType=? AND status='Y');";
+        Object[] Params1 = new Object[]{userIdx, addressType};
+        int isAddressIdx = this.jdbcTemplate.queryForObject(Query1, int.class, Params1);
+        if (isAddressIdx == 0){
+            return isAddressIdx;
+        }
+
+        String Query2 = "SELECT userAddressIdx FROM UserAddress WHERE userIdx=? AND addressType=? AND status='Y';";
+        return this.jdbcTemplate.queryForObject(Query2, int.class, Params1);
+    }
+
+    // 기존 주소 삭제
+    public int deleteExistsAddress(int duplicatedAddressIdx) {
+        String Query = "UPDATE UserAddress SET status='N', isNowLocation='N' WHERE userAddressIdx=?;";
+        return this.jdbcTemplate.update(Query, duplicatedAddressIdx);
+    }
+
+    /**
+     * 주소지 추가 API
+     * [POST] /users/address
+     * @return BaseResponse<String>
+     */
+    public int createAddress(int userIdx, PostAddressReq postAddressReq) {
+        String Query = "INSERT INTO UserAddress (userIdx, buildingName, address, addressDetail, addressGuide, addressTitle, addressLongitude, addressLatitude, addressType) VALUES (?,?,?,?,?,?,?,?,?);";
+        Object[] Params = new Object[]{userIdx, postAddressReq.getBuildingName(), postAddressReq.getAddress(), postAddressReq.getAddressDetail(), postAddressReq.getAddressGuide(),
+        postAddressReq.getAddressTitle(), postAddressReq.getAddressLongitude(), postAddressReq.getAddressLatitude(), postAddressReq.getAddressType()};
+        return this.jdbcTemplate.update(Query, Params);
+    }
+
+    /**
+     * 주소지 수정 API
+     * [PUT] /users/address
+     * @return BaseResponse<String>
+     */
+    public int modifyAddress(int userIdx, int addressIdx, PutAddressReq putAddressReq) {
+        String Query = "UPDATE UserAddress \n" +
+                "SET buildingName=?, address=?, addressDetail=?, addressGuide=?, addressTitle=?, addressLongitude=?, addressLatitude=?, addressType=?, status=? \n" +
+                "WHERE userIdx=? AND userAddressIdx=?;";
+        Object[] Params = new Object[]{putAddressReq.getBuildingName(), putAddressReq.getAddress(), putAddressReq.getAddressDetail(),putAddressReq.getAddressGuide(),
+                putAddressReq.getAddressTitle(), putAddressReq.getAddressLongitude(), putAddressReq.getAddressLatitude(), putAddressReq.getAddressType(), putAddressReq.getStatus(),
+        userIdx, addressIdx};
+
+        return this.jdbcTemplate.update(Query, Params);
+
+}
+    /**
+     * 현재 주소지 변경 API
+     * [PUT] /users/address/choice
+     * /choice?addressIdx=
+     * @return BaseResponse<String>
+     */
+    public UserNowAddressInfo putAddressChoice(int userIdx, int addressIdx) {
+        System.out.println(">>진입<<");
+        String Query = "SELECT EXISTS(SELECT * FROM UserAddress WHERE userIdx=? AND isNowLocation='Y' AND status='Y');";
+        int isNowLocationExists = this.jdbcTemplate.queryForObject(Query, int.class, userIdx);
+
+        System.out.println(">><<"+isNowLocationExists);
+
+        if (isNowLocationExists != 0){
+            String findPastLocationQuery = "SELECT userAddressIdx FROM UserAddress WHERE userIdx=? AND isNowLocation='Y' AND status='Y';";
+            int findPastLocation = this.jdbcTemplate.queryForObject(findPastLocationQuery, int.class, userIdx);
+
+            String DeletePastLocation = "UPDATE UserAddress SET isNowLocation='N' WHERE userAddressIdx=?;";
+            this.jdbcTemplate.update(DeletePastLocation, findPastLocation);
+            System.out.println("여기");
+        }
+        System.out.println("여기여기");
+        String updateNowLocation = "UPDATE UserAddress SET isNowLocation='Y' WHERE userIdx=? AND userAddressIdx=?;";
+        Object[] Params = new Object[]{userIdx, addressIdx};
+        this.jdbcTemplate.update(updateNowLocation, Params);
+        System.out.println("여기여기ㅇ기");
+        String getNowAddressQuery = "SELECT userAddressIdx, buildingName, address, addressDetail, addressGuide, addressTitle, addressLongitude, addressLatitude, addressType\n" +
+                "FROM UserAddress\n" +
+                "WHERE userAddressIdx=?;";
+
+        return this.jdbcTemplate.queryForObject(getNowAddressQuery,
+                (rs, rowNum) -> new UserNowAddressInfo(
+                        rs.getInt("userAddressIdx"),
+                        rs.getString("buildingName"),
+                        rs.getString("address"),
+                        rs.getString("addressDetail"),
+                        rs.getString("addressGuide"),
+                        rs.getString("addressTitle"),
+                        rs.getDouble("addressLongitude"),
+                        rs.getDouble("addressLatitude"),
+                        rs.getString("addressType")
+                ), addressIdx);
+
+    }
 }

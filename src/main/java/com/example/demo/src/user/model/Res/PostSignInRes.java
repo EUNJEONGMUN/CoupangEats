@@ -1,5 +1,6 @@
 package com.example.demo.src.user.model.Res;
 
+import com.example.demo.src.user.model.UserNowAddressInfo;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.Setter;
@@ -10,4 +11,5 @@ import lombok.Setter;
 public class PostSignInRes {
     private int userIdx;
     private String jwt;
+    private UserNowAddressInfo userNowAddressInfo;
 }

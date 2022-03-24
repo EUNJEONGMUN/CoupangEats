@@ -43,9 +43,13 @@ public enum BaseResponseStatus {
     POST_USERS_INVALID_PWD_CONTINUOUS(false, 2023, "3개 이상 연속되거나 동일한 문자/숫자 제외"),
     POST_USERS_INVALID_PWD_LEN(false, 2024, "8자~20자"),
     POST_USERS_EMPTY_NAME(false, 2025, "이름을 정확히 입력하세요."),
-
+    PUT_ADDRESS_CHOICE_PARAM_EMPTY(false, 2026, "addressType을 입력해주세요."),
     // orders
     POST_CART_PARAM_EMPTY(false, 2100, "가게 idx 혹은 메뉴 idx를 입력해주세요."),
+
+    EMPTY_STOREIDX_PARAM(false, 2200, "storeIdx를 입력하지 않았습니다."),
+    EMPTY_MENUIDX_PARAM(false, 2201, "menuIdx를 입력하지 않았습니다."),
+    EMPTY_OTHER_ADDRESS_IDX(false, 2202, "addressIdx를 입력하지 않았습니다."),
     /**
      * 3000 : Response 오류
      */
@@ -84,12 +88,15 @@ public enum BaseResponseStatus {
 
     INVALID_STATUS(false, 4100, "상태값을 확인해주세요."),
 
-    EMPTY_STOREIDX_PARAM(false, 4200, "storeIdx를 입력하지 않았습니다."),
-    EMPTY_MENUIDX_PARAM(false, 4201, "menuIdx를 입력하지 않았습니다."),
-    EMPTY_OTHER_ADDRESS_IDX(false, 4202, "otherIdx를 입력하지 않았습니다."),
+
 
     FAIL_CREATE_CART(false, 4300, "배달 카트 담기에 실패하였습니다."),
-    FAIL_DELETE_CART_STORE(false, 4301, "기존 카트에 담긴 가게 삭제에 실패하였습니다.");
+    FAIL_DELETE_CART_STORE(false, 4301, "기존 카트에 담긴 가게 삭제에 실패하였습니다."),
+
+    FAIL_PUT_ADDRESS(false, 4401, "주소지 수정에 실패했습니다."),
+    FAIL_POST_OTHER_ADDRESS(false, 4402, "주소지 추가에 실패했습니다."),
+    FAIL_DELETE_EXISTS_ADDRESS(false, 4403, "기존 주소지 삭제에 실패했습니다."),
+    FAIL_MODIFY_ADDRESS(false, 4404, "주소지 수정에 실패했습니다.");
 
     // 5000 : 필요시 만들어서 쓰세요
     // 6000 : 필요시 만들어서 쓰세요

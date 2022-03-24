@@ -2,10 +2,10 @@ package com.example.demo.src.user;
 
 import com.example.demo.config.BaseException;
 import com.example.demo.config.BaseResponse;
-import com.example.demo.src.user.model.Address;
+import com.example.demo.src.user.model.Req.PostAddressReq;
 import com.example.demo.src.user.model.Req.*;
 import com.example.demo.src.user.model.Res.*;
-import com.example.demo.src.user.model.UserLocationRes;
+import com.example.demo.src.user.model.UserNowAddressInfo;
 import com.example.demo.utils.JwtService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -19,7 +19,7 @@ import static com.example.demo.utils.ValidationRegex.*;
 
 @RestController
 @CrossOrigin(origins = "http://localhost:9009")
-//@RequestMapping("/users")
+@RequestMapping("/users")
 public class UserController {
     final Logger logger = LoggerFactory.getLogger(this.getClass());
 
@@ -43,9 +43,9 @@ public class UserController {
      * @return BaseResponse<String>
      */
 //    @UnAuth
-    //    @PostMapping("/sign-up")
+//    @RequestMapping(value="/users/sign-up", method = RequestMethod.POST)
     @ResponseBody
-    @RequestMapping(value="/users/sign-up", method = RequestMethod.POST)
+    @PostMapping("/sign-up")
     public BaseResponse<String> createUser(@Valid @RequestBody PostUserReq postUserReq) throws BaseException {
 
 
@@ -115,8 +115,8 @@ public class UserController {
      */
 //    @UnAuth
     @ResponseBody
-//    @PostMapping("/users/sign-in")
-    @RequestMapping(value="/users/sign-in", method = RequestMethod.POST)
+//    @RequestMapping(value="/users/sign-in", method = RequestMethod.POST)
+    @PostMapping("/users/sign-in")
     public BaseResponse<PostSignInRes> signIn(@Valid @RequestBody PostSignInReq postSignInReq) throws BaseException {
 
         // 이메일(아이디) 정규식 확인
@@ -130,85 +130,44 @@ public class UserController {
     }
 
     /**
-     * 집, 회사, 기타 주소지 관리 API
-     * [PUT] /users/address?otherIdx=
-     * @return BaseResponse<UserLocationRes>
+     * 주소지 추가 API
+     * [POST] /users/address
+     * @return BaseResponse<String>
      */
     @ResponseBody
-//    @PutMapping("/address")
-    @RequestMapping(value="/users/address", method = RequestMethod.PUT)
-    public BaseResponse<UserLocationRes> putAddress(@RequestParam(required = false, defaultValue = "0") int otherIdx,
-                                                    @Valid @RequestBody Address address) throws BaseException {
+//    @RequestMapping(value="/users/address", method = RequestMethod.POST)
+    @PostMapping("/address")
+    public BaseResponse<String> createAddress(@Valid @RequestBody PostAddressReq postAddressReq) throws BaseException {
 
-//        int userIdx = (int) request.getAttribute("userIdx");
         int userIdx= jwtService.getUserIdx();
 
         if (userProvider.checkUser(userIdx) == 0) {
             return new BaseResponse<>(USER_NOT_EXISTS);
         }
 
-        if (address.getAddressType()==null){
-            address.setAddressType("O");
-        }
-
-        if (address.getStatus()==null){
-            address.setStatus("Y");
-        }
-        if (!(address.getAddressType().equals("H") || address.getAddressType().equals("C") || address.getAddressType().equals("O"))){
-            return new BaseResponse<>(INVALID_STATUS);
-        }
-        if (address.getAddressType().equals("H")) {
-            UserLocationRes userLocationRes = userService.putHomeAddress(userIdx, address);
-            return new BaseResponse<>(userLocationRes);
-        } else if (address.getAddressType().equals("C")) {
-            UserLocationRes userLocationRes = userService.putCompanyAddress(userIdx, address);
-            return new BaseResponse<>(userLocationRes);
-        }
-
-        // 주소 존재 여부 확인
-        if (otherIdx == 0){
-            return new BaseResponse<>(EMPTY_OTHER_ADDRESS_IDX);
-        }
-        if (userProvider.checkOtherAddress(otherIdx) == 0) {
-            return new BaseResponse<>(ADDRESS_NOT_EXISTS);
-        }
-
-        // 주소의 소유자 확인
-        if (userProvider.checkAddressUser(userIdx, otherIdx)==0){
-            return new BaseResponse<>(INCONSISTENCY_ADDRESS_USER);
-        }
-        UserLocationRes userLocationRes = userService.putOtherAddress(userIdx, otherIdx, address);
-        return new BaseResponse<>(userLocationRes);
-
-    }
-
-    
-    /**
-     * 기타 주소지 추가 API
-     * [POST] /users/address/other
-     * @return BaseResponse<UserLocationRes>
-     */
-    @ResponseBody
-//    @PostMapping("/address/other")
-    @RequestMapping(value="/users/address/other", method = RequestMethod.POST)
-    public BaseResponse<UserLocationRes> postOtherAddress(@Valid @RequestBody PostAddressReq postAddressReq) throws BaseException {
-//        int userIdx = (int) request.getAttribute("userIdx");
-        int userIdx= jwtService.getUserIdx();
-        if (userProvider.checkUser(userIdx)==0){
-            return new BaseResponse<>(USER_NOT_EXISTS);
-        }
-
-        if (postAddressReq.getAddressType()==null){
+        if (postAddressReq.getAddressType()==null || postAddressReq.getAddressType().equals("")){
             postAddressReq.setAddressType("O");
         }
 
-        if (!(postAddressReq.getAddressType().equals("O"))){
+        if (!(postAddressReq.getAddressType().equals("H") || postAddressReq.getAddressType().equals("C") || postAddressReq.getAddressType().equals("O"))){
             return new BaseResponse<>(INVALID_STATUS);
         }
 
-        UserLocationRes userLocationRes = userService.postOtherAddress(userIdx, postAddressReq);
-        return new BaseResponse<>(userLocationRes);
+        String result = "";
+
+        if (postAddressReq.getAddressType().equals("H") || postAddressReq.getAddressType().equals("C")){
+            // 현재 주소가 있을 때
+            int duplicatedAddressIdx = userProvider.checkAddressNowIdx(userIdx, postAddressReq.getAddressType());
+            if (duplicatedAddressIdx != 0){
+                userService.deleteExistsAddress(duplicatedAddressIdx);
+            }
+        }
+        userService.createAddress(userIdx, postAddressReq);
+        return new BaseResponse<>(result);
+
     }
+
+
 
     /**
      * 주소지 조회 API
@@ -216,10 +175,9 @@ public class UserController {
      * @return BaseResponse<GetUserAddressRes>
      */
     @ResponseBody
-//    @GetMapping("/address-list")
-    @RequestMapping(value="/users/address-list", method = RequestMethod.GET)
+//    @RequestMapping(value="/users/address-list", method = RequestMethod.GET)
+    @GetMapping("/address-list")
     public BaseResponse<GetUserAddressRes> getUserAddress() throws BaseException {
-//        int userIdx = (int) request.getAttribute("userIdx");
         int userIdx= jwtService.getUserIdx();
         if (userProvider.checkUser(userIdx)==0){
             return new BaseResponse<>(USER_NOT_EXISTS);
@@ -230,22 +188,75 @@ public class UserController {
     }
 
     /**
-     * 주소지 설정 API
-     * [PUT] /users/address/choice
-     * @return BaseResponse<UserLocationRes>
+     * 주소지 수정 API
+     * [PUT] /users/address/status?addressIdx=
+     * @return BaseResponse<String>
      */
     @ResponseBody
-//    @PutMapping("/address/choice")
-    @RequestMapping(value="/users/address/choice", method = RequestMethod.PUT)
-    public BaseResponse<UserLocationRes> putAddressChoice(@Valid @RequestBody PutAddressChoiceReq putAddressChoiceReq) throws BaseException {
-//        int userIdx = (int) request.getAttribute("userIdx");
+    @PutMapping("/address/status")
+    public BaseResponse<String> modifyAddress(@RequestParam(required = false, defaultValue = "0") int addressIdx,
+                                              @Valid @RequestBody PutAddressReq putAddressReq) throws BaseException  {
+
         int userIdx= jwtService.getUserIdx();
         if (userProvider.checkUser(userIdx)==0){
             return new BaseResponse<>(USER_NOT_EXISTS);
         }
 
-        UserLocationRes userLocationRes = userService.putAddressChoice(userIdx, putAddressChoiceReq);
-        return new BaseResponse<>(userLocationRes);
+        if (addressIdx==0){
+            return new BaseResponse<>(EMPTY_OTHER_ADDRESS_IDX);
+        }
+
+        if (putAddressReq.getStatus()==null || putAddressReq.getStatus().equals("")){
+            putAddressReq.setStatus("Y");
+        }
+
+        if (putAddressReq.getAddressType()==null || putAddressReq.getAddressType().equals("")){
+            putAddressReq.setAddressType("O");
+        }
+
+        if (!(putAddressReq.getAddressType().equals("H") || putAddressReq.getAddressType().equals("C") || putAddressReq.getAddressType().equals("O"))){
+            return new BaseResponse<>(INVALID_STATUS);
+        }
+
+        if (putAddressReq.getAddressType().equals("H") || putAddressReq.getAddressType().equals("C")){
+            // 현재 주소가 있을 때
+            int duplicatedAddressIdx = userProvider.checkAddressNowIdx(userIdx, putAddressReq.getAddressType());
+            if (duplicatedAddressIdx != 0 && duplicatedAddressIdx!=addressIdx){
+                userService.deleteExistsAddress(duplicatedAddressIdx);
+            }
+        }
+
+
+        userService.modifyAddress(userIdx, addressIdx, putAddressReq);
+        String result = "";
+        return new BaseResponse<>(result);
+
+
+    }
+
+    /**
+     * 현재 주소지 변경 API
+     * [PUT] /users/address/choice
+     * /choice?addressIdx=
+     * @return BaseResponse<String>
+     */
+    @ResponseBody
+//    @RequestMapping(value="/users/address/choice", method = RequestMethod.PUT)
+    @PutMapping("/address/choice")
+    public BaseResponse<UserNowAddressInfo> putAddressChoice(@RequestParam(required = false, defaultValue = "0") int addressIdx) throws BaseException {
+
+        int userIdx= jwtService.getUserIdx();
+        if (userProvider.checkUser(userIdx)==0){
+            return new BaseResponse<>(USER_NOT_EXISTS);
+        }
+
+        if (addressIdx==0){
+            return new BaseResponse<>(EMPTY_OTHER_ADDRESS_IDX);
+        }
+
+
+        UserNowAddressInfo putAddressChoiceRes = userService.putAddressChoice(userIdx, addressIdx);
+        return new BaseResponse<>(putAddressChoiceRes);
 
     }
 

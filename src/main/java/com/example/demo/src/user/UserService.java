@@ -1,11 +1,12 @@
 package com.example.demo.src.user;
 
 import com.example.demo.config.BaseException;
-import com.example.demo.src.user.model.Address;
+import com.example.demo.src.user.model.Req.PostAddressReq;
 import com.example.demo.src.user.model.Req.*;
 import com.example.demo.src.user.model.Res.PostSignInRes;
+import com.example.demo.src.user.model.Res.PutAddressChoiceRes;
 import com.example.demo.src.user.model.User;
-import com.example.demo.src.user.model.UserLocationRes;
+import com.example.demo.src.user.model.UserNowAddressInfo;
 import com.example.demo.utils.JwtService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -95,87 +96,77 @@ public class UserService {
         try {
             int userIdx = user.getUserIdx();
             String jwt = jwtService.createJwt(userIdx);
-            return new PostSignInRes(userIdx,jwt);
+
+            UserNowAddressInfo userNowAddressInfo = userProvider.getUserNowInfo(userIdx);
+
+            return new PostSignInRes(userIdx,jwt, userNowAddressInfo);
         } catch (Exception exception) {
             throw new BaseException(DATABASE_ERROR);
         }
     }
 
     /**
-     * 집, 회사, 기타 주소지 관리 API - 집
-     * [PUT] /users/address?otherIdx=
-     * @return BaseResponse<UserLocationRes>
-     */
-    public UserLocationRes putHomeAddress(int userIdx, Address address) throws BaseException {
-        try {
-            UserLocationRes userLocationRes = userDao.putHomeAddress(userIdx, address);
-            return  userLocationRes;
-        } catch (Exception exception) {
-            System.out.println("putHomeAddress"+exception);
-            throw new BaseException(DATABASE_ERROR);
-        }
-
-    }
-
-    /**
-     * 집, 회사, 기타 주소지 관리 API - 회사
-     * [PUT] /users/address?otherIdx=
-     * @return BaseResponse<UserLocationRes>
-     */
-    public UserLocationRes putCompanyAddress(int userIdx, Address address) throws BaseException {
-        try {
-            UserLocationRes userLocationRes = userDao.putCompanyAddress(userIdx, address);
-            return userLocationRes;
-        } catch (Exception exception) {
-            System.out.println("putCompanyAddress"+exception);
-            throw new BaseException(DATABASE_ERROR);
-        }
-
-    }
-
-    /**
-     * 집, 회사, 기타 주소지 관리 API - 기타
-     * [PUT] /users/address
-     * @return BaseResponse<UserLocationRes>
-     */
-    public UserLocationRes putOtherAddress(int userIdx, int otherIdx, Address address) throws BaseException {
-        try {
-            UserLocationRes userLocationRes = userDao.putOtherAddress(userIdx, otherIdx, address);
-            return userLocationRes;
-        } catch (Exception exception) {
-            System.out.println("putOtherAddress"+exception);
-            throw new BaseException(DATABASE_ERROR);
-        }
-    }
-
-    /**
-     * 기타 주소지 추가 API
+     * 주소지 추가 API
      * [POST] /users/address
-     * @return BaseResponse<UserLocationRes>
+     * @return BaseResponse<String>
      */
-    public UserLocationRes postOtherAddress(int userIdx, PostAddressReq postAddressReq) throws BaseException {
+    public void createAddress(int userIdx, PostAddressReq postAddressReq) throws BaseException {
         try {
-            UserLocationRes userLocationRes = userDao.postOtherAddress(userIdx, postAddressReq);
-            return userLocationRes;
+            int result = userDao.createAddress(userIdx, postAddressReq);
+            if (result == FAIL){
+                throw new BaseException(FAIL_DELETE_EXISTS_ADDRESS);
+            }
         } catch (Exception exception) {
-            System.out.println("postOtherAddress"+exception);
+            System.out.println("createAddress"+exception);
+            throw new BaseException(DATABASE_ERROR);
+        }
+
+    }
+
+    // 기존 주소 삭제
+    public void deleteExistsAddress(int duplicatedAddressIdx) throws BaseException {
+        try {
+            int result = userDao.deleteExistsAddress(duplicatedAddressIdx);
+            if (result == FAIL){
+                throw new BaseException(FAIL_DELETE_EXISTS_ADDRESS);
+            }
+        } catch (Exception exception) {
+            System.out.println("deleteExistsAddress"+exception);
             throw new BaseException(DATABASE_ERROR);
         }
     }
 
     /**
-     * 주소지 설정 API
-     * [PUT] /users/address/choice
-     * @return BaseResponse<UserLocationRes>
+     * 주소지 수정 API
+     * [PUT] /users/address
+     * @return BaseResponse<String>
      */
-    public UserLocationRes putAddressChoice(int userIdx, PutAddressChoiceReq putAddressChoiceReq) throws BaseException {
+    public void modifyAddress(int userIdx, int addressIdx, PutAddressReq putAddressReq) throws BaseException {
         try {
-            UserLocationRes userLocationRes = userDao.putAddressChoice(userIdx, putAddressChoiceReq);
-            return userLocationRes;
+            int result = userDao.modifyAddress(userIdx, addressIdx, putAddressReq);
+            if (result == FAIL){
+                throw new BaseException(FAIL_MODIFY_ADDRESS);
+            }
+        } catch (Exception exception) {
+            System.out.println("deleteExistsAddress"+exception);
+            throw new BaseException(DATABASE_ERROR);
+        }
+    }
+
+    /**
+     * 현재 주소지 변경 API
+     * [PUT] /users/address/choice
+     * /choice?addressIdx=
+     * @return BaseResponse<String>
+     */
+    public UserNowAddressInfo putAddressChoice(int userIdx, int addressIdx) throws BaseException {
+        try {
+            UserNowAddressInfo putAddressChoiceRes = userDao.putAddressChoice(userIdx, addressIdx);
+            return putAddressChoiceRes;
         } catch (Exception exception) {
             System.out.println("putAddressChoice"+exception);
             throw new BaseException(DATABASE_ERROR);
         }
-
     }
+
 }
