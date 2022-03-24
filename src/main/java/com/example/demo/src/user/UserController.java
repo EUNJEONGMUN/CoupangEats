@@ -18,7 +18,7 @@ import static com.example.demo.config.BaseResponseStatus.*;
 import static com.example.demo.utils.ValidationRegex.*;
 
 @RestController
-//@RequestMapping("/users")
+@RequestMapping("/users")
 public class UserController {
     final Logger logger = LoggerFactory.getLogger(this.getClass());
 
@@ -43,7 +43,7 @@ public class UserController {
      */
 //    @UnAuth
     @ResponseBody
-    @PostMapping("/users/sign-up")
+    @PostMapping("/sign-up")
     public BaseResponse<String> createUser(@Valid @RequestBody PostUserReq postUserReq) throws BaseException {
 
 
@@ -107,7 +107,7 @@ public class UserController {
 
     /**
      * 로그인 API
-     * [POST] /users/sign-in
+     * [POST] /sign-in
      *
      * @return BaseResponse<PostSignInRes>
      */
@@ -132,7 +132,7 @@ public class UserController {
      * @return BaseResponse<UserLocationRes>
      */
     @ResponseBody
-    @PutMapping("/users/address")
+    @PutMapping("/address")
     public BaseResponse<UserLocationRes> putAddress(@RequestParam(required = false, defaultValue = "0") int otherIdx,
                                                     @Valid @RequestBody Address address) throws BaseException {
 
@@ -185,7 +185,7 @@ public class UserController {
      * @return BaseResponse<UserLocationRes>
      */
     @ResponseBody
-    @PostMapping("/users/address/other")
+    @PostMapping("/address/other")
     public BaseResponse<UserLocationRes> postOtherAddress(@Valid @RequestBody PostAddressReq postAddressReq) throws BaseException {
 //        int userIdx = (int) request.getAttribute("userIdx");
         int userIdx= jwtService.getUserIdx();
@@ -211,7 +211,7 @@ public class UserController {
      * @return BaseResponse<GetUserAddressRes>
      */
     @ResponseBody
-    @GetMapping("/users/address-list")
+    @GetMapping("/address-list")
     public BaseResponse<GetUserAddressRes> getUserAddress() throws BaseException {
 //        int userIdx = (int) request.getAttribute("userIdx");
         int userIdx= jwtService.getUserIdx();
@@ -229,7 +229,7 @@ public class UserController {
      * @return BaseResponse<UserLocationRes>
      */
     @ResponseBody
-    @PutMapping("/users/address/choice")
+    @PutMapping("/address/choice")
     public BaseResponse<UserLocationRes> putAddressChoice(@Valid @RequestBody PutAddressChoiceReq putAddressChoiceReq) throws BaseException {
 //        int userIdx = (int) request.getAttribute("userIdx");
         int userIdx= jwtService.getUserIdx();
