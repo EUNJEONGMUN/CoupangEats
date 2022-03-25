@@ -383,6 +383,7 @@ public class StoreDao {
 
         List<DeliveryFeeInfo> deliveryFeeInfo = this.jdbcTemplate.query(DeliveryTimeQuery,
                 (rs1, rowNum1) -> new DeliveryFeeInfo(
+                        rs1.getInt("storeIdx"),
                         rs1.getInt("minPrice"),
                         rs1.getInt("maxPrice"),
                         rs1.getInt("deliveryFee")
@@ -390,6 +391,7 @@ public class StoreDao {
 
         List<StoreCategory> storeCategory = this.jdbcTemplate.query(StoreCategoryQuery,
                 (rs2, rowNum2) -> new StoreCategory(
+                        rs2.getInt("storeIdx"),
                         rs2.getInt("storeCategoryIdx"),
                         rs2.getString("categoryName")
                 ));

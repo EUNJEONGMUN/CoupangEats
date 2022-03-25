@@ -10,6 +10,7 @@ import lombok.Setter;
 @AllArgsConstructor
 @NoArgsConstructor
 public class StoreCategory {
+    private int storeIdx;
     private int storeCategoryIdx;
     private String categoryName;
 }
