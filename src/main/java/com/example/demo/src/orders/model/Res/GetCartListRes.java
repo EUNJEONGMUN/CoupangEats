@@ -1,8 +1,6 @@
 package com.example.demo.src.orders.model.Res;
 
 import com.example.demo.src.orders.model.CartMenu;
-import com.example.demo.src.orders.model.CartStoreInfo;
-import com.example.demo.src.user.model.UserLocationRes;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;

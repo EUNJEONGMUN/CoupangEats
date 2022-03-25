@@ -5,6 +5,7 @@ import com.example.demo.src.store.model.Res.GetStoreDetailRes;
 import com.example.demo.src.store.model.Res.GetStoreHomeRes;
 import com.example.demo.src.store.model.Res.GetStoreMenuOptionsRes;
 import com.example.demo.src.store.model.StoreHome;
+import com.example.demo.src.user.model.UserLocation;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -28,9 +29,9 @@ public class StoreProvider {
      * [GET] /stores/home
      * @return BaseResponse<List<GetStoreHomeRes>>
      */
-    public GetStoreHomeRes getStoreHome() throws BaseException {
+    public GetStoreHomeRes getStoreHome(UserLocation userLocation) throws BaseException {
         try {
-            GetStoreHomeRes getStoreHomeRes = storeDao.getStoreHome();
+            GetStoreHomeRes getStoreHomeRes = storeDao.getStoreHome(userLocation);
             return getStoreHomeRes;
         } catch (Exception exception) {
             System.out.println("storehome-> "+ exception);
@@ -100,6 +101,15 @@ public class StoreProvider {
     public int checkStoreCategory(int categoryIdx) throws BaseException {
         try {
             return storeDao.checkStoreCategory(categoryIdx);
+        } catch (Exception exception) {
+            throw new BaseException(DATABASE_ERROR);
+        }
+    }
+
+    // 사용자의 현재 위치 찾기
+    public UserLocation getNowUserLocation(int userIdx) throws BaseException {
+        try {
+            return storeDao.getNowUserLocation(userIdx);
         } catch (Exception exception) {
             throw new BaseException(DATABASE_ERROR);
         }

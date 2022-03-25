@@ -9,7 +9,7 @@ import lombok.Setter;
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
-public class UserLocationRes {
+public class UserLocation {
     private double userLongitude;
     private double userLatitude;
 }

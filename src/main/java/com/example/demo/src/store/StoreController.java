@@ -4,6 +4,7 @@ import com.example.demo.config.BaseException;
 import com.example.demo.config.BaseResponse;
 import com.example.demo.src.store.model.Res.*;
 import com.example.demo.src.store.model.StoreHome;
+import com.example.demo.src.user.model.UserLocation;
 import com.example.demo.utils.JwtService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -36,16 +37,36 @@ public class StoreController {
     /**
      * 홈 화면 조회 API
      * [GET] /stores/home
-     * /home?sort=&isCheetah&fee=&minimum=&isTogo=&isCoupon&categoryIdx=
+     * /home?longitude=&latitude=
      * @return BaseResponse<List<GetStoreHomeRes>>
      */
     @ResponseBody
     @GetMapping("/home")
-    public BaseResponse<GetStoreHomeRes> getStoreHome() throws BaseException{
+    public BaseResponse<GetStoreHomeRes> getStoreHome(@RequestParam(required = false, defaultValue = "0") double longitude,
+                                                      @RequestParam(required = false, defaultValue = "0") double latitude) throws BaseException{
 //        if (storeHome.getCategoryIdx()!=0 && storeProvider.checkStoreCategory(storeHome.getCategoryIdx())==0){
 //            return new BaseResponse<>(EMPTY_STORE_CATEGORY);
 //        }
-        GetStoreHomeRes getStoreHomeRes = storeProvider.getStoreHome();
+        int userIdx= jwtService.getUserIdxOption();
+        if (latitude==0 || longitude==0){
+            return new BaseResponse<>(EMPTY_POSITION_PARAM);
+        }
+
+        UserLocation userLocation = new UserLocation();
+
+        if (userIdx == 0){
+            userLocation.setUserLongitude(longitude);
+            userLocation.setUserLatitude(latitude);
+        } else{
+            userLocation = storeProvider.getNowUserLocation(userIdx);
+            if (userLocation.getUserLatitude()==0 || userLocation.getUserLatitude()==0){
+                userLocation.setUserLongitude(longitude);
+                userLocation.setUserLatitude(latitude);
+            }
+        }
+
+
+        GetStoreHomeRes getStoreHomeRes = storeProvider.getStoreHome(userLocation);
         return new BaseResponse<>(getStoreHomeRes);
     }
 

@@ -25,10 +25,11 @@ public class StoreInfo {
     private String buildingName;
     private String storeAddress;
     private String storeAddressDetail;
-    private double storeLongitude;
-    private double storeLatitude;
+//    private double storeLongitude;
+//    private double storeLatitude;
     private String status;
     private String createdAt;
     private double reviewScore;
     private int reviewCount;
+    private double distance;
 }

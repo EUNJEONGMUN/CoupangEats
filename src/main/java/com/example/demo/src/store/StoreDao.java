@@ -4,6 +4,7 @@ import com.example.demo.src.store.model.*;
 import com.example.demo.src.store.model.Res.GetStoreDetailRes;
 import com.example.demo.src.store.model.Res.GetStoreHomeRes;
 import com.example.demo.src.store.model.Res.GetStoreMenuOptionsRes;
+import com.example.demo.src.user.model.UserLocation;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -29,7 +30,7 @@ public class StoreDao {
      * [GET] /stores/home
      * @return BaseResponse<List<GetStoreHomeRes>>
      */
-    public GetStoreHomeRes getStoreHome() {
+    public GetStoreHomeRes getStoreHome(UserLocation userLocation) {
 
 //        // 주문 많은 순
 //        String Query1 = "SELECT S.storeIdx, S.storeImgUrl,S.storeName, S.isCheetah, S.timeDelivery, R.reviewScore, R.reviewCount, F.fee, S.isToGo, S.storeLongitude, S.storeLatitude, S.status\n" +
@@ -356,13 +357,14 @@ public class StoreDao {
 //                "WHERE RankRow.a <= 2 AND RankRow.storeIdx=?;";
 
         String StoreInfoQuery = "SELECT S.storeIdx, S.storeImgUrl,S.storeName, S.isCheetah, S.timeDelivery, R.reviewScore, R.reviewCount,\n" +
-                "       S.isToGo, S.isCoupon, S.storeLongitude, S.storeLatitude, S.status, S.minimumPrice, S.buildingName, S.storeAddress, S.storeAddressDetail, DATE_FORMAT(S.createdAt, '%Y-%m-%d %H:%I:%S') AS createdAt\n" +
-                "FROM Store S\n" +
-                "LEFT JOIN (\n" +
-                "    SELECT UO.storeIdx, ROUND(AVG(R.score),1) AS reviewScore, COUNT(R.reviewIdx) AS reviewCount\n" +
-                "    FROM Review R JOIN UserOrder UO on R.userOrderIdx=UO.userOrderIdx\n" +
-                "    GROUP BY UO.storeIdx) R ON R.storeIdx=S.storeIdx\n" +
-                "WHERE S.status != 'N';";
+                "                       S.isToGo, S.isCoupon, S.status, S.minimumPrice, S.buildingName, S.storeAddress, S.storeAddressDetail, DATE_FORMAT(S.createdAt, '%Y-%m-%d %H:%I:%S') AS createdAt,\n" +
+                "       ROUND(ST_DISTANCE_SPHERE(POINT(S.storeLongitude,S.storeLatitude), POINT(?,?))*0.001,1) AS distance\n" +
+                "                FROM Store S\n" +
+                "                LEFT JOIN (\n" +
+                "                    SELECT UO.storeIdx, ROUND(AVG(R.score),1) AS reviewScore, COUNT(R.reviewIdx) AS reviewCount\n" +
+                "                    FROM Review R JOIN UserOrder UO on R.userOrderIdx=UO.userOrderIdx\n" +
+                "                    GROUP BY UO.storeIdx) R ON R.storeIdx=S.storeIdx\n" +
+                "                WHERE S.status != 'N';";
 
         String DeliveryTimeQuery = "SELECT storeIdx, minPrice, maxPrice, deliveryFee FROM DeliveryFee;";
 
@@ -408,7 +410,7 @@ public class StoreDao {
                         rs2.getString("createdAt"),
                         rs2.getString("status")
                 ));
-
+        Object[] Params = new Object[]{userLocation.getUserLongitude(), userLocation.getUserLatitude()};
         List<StoreInfo> storeInfo = this.jdbcTemplate.query(StoreInfoQuery,
                 (rs1, rowNum1) -> new StoreInfo(
                         rs1.getInt("storeIdx"),
@@ -422,13 +424,12 @@ public class StoreDao {
                         rs1.getString("buildingName"),
                         rs1.getString("storeAddress"),
                         rs1.getString("storeAddressDetail"),
-                        rs1.getDouble("storeLongitude"),
-                        rs1.getDouble("storeLatitude"),
                         rs1.getString("status"),
                         rs1.getString("createdAt"),
                         rs1.getDouble("reviewScore"),
-                        rs1.getInt("reviewCount"))
-        );
+                        rs1.getInt("reviewCount"),
+                        rs1.getDouble("distance"))
+        , Params);
 
         List<OrderCount> orderCount = this.jdbcTemplate.query(orderCountQuery,
                 (rs1, rowNum1) -> new OrderCount(
@@ -534,6 +535,7 @@ public class StoreDao {
 
         return new GetStoreDetailRes(photoReview, menuCategory);
 
+
     }
 
     /**
@@ -617,5 +619,24 @@ public class StoreDao {
         return this.jdbcTemplate.queryForObject(Query,
                 int.class,
                 Param);
+    }
+
+    // 사용자의 현재 위치 찾기
+    public UserLocation getNowUserLocation(int userIdx) {
+        String nowCheckQuery = "SELECT EXISTS(SELECT * FROM UserAddress WHERE userIdx=? AND isNowLocation='Y' AND status='Y');";
+
+        String nowQuery = "SELECT addressLongitude, addressLatitude\n" +
+                "                FROM UserAddress\n" +
+                "                WHERE userIdx=? AND isNowLocation='Y' AND status='Y';";
+
+        if (this.jdbcTemplate.queryForObject(nowCheckQuery, int.class, userIdx) != 0){
+            return this.jdbcTemplate.queryForObject(nowQuery,
+                    (rs, rowNum)-> new UserLocation(
+                            rs.getDouble("addressLongitude"),
+                            rs.getDouble("addressLatitude")
+                    ), userIdx);
+        }
+        return new UserLocation(0.0,0.0);
+
     }
 }

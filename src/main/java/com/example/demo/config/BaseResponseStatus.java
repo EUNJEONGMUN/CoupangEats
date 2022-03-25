@@ -50,6 +50,7 @@ public enum BaseResponseStatus {
     EMPTY_STOREIDX_PARAM(false, 2200, "storeIdx를 입력하지 않았습니다."),
     EMPTY_MENUIDX_PARAM(false, 2201, "menuIdx를 입력하지 않았습니다."),
     EMPTY_OTHER_ADDRESS_IDX(false, 2202, "addressIdx를 입력하지 않았습니다."),
+    EMPTY_POSITION_PARAM(false, 2203, "위도, 혹은 경도를 입력하지 않았습니다."),
     /**
      * 3000 : Response 오류
      */
