@@ -5,7 +5,9 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import java.sql.Date;
 import java.sql.Time;
+import java.sql.Timestamp;
 
 @Getter
 @Setter
@@ -26,7 +28,7 @@ public class StoreInfo {
     private double storeLongitude;
     private double storeLatitude;
     private String status;
-    private Time createdAt;
+    private String createdAt;
     private double reviewScore;
     private int reviewCount;
 }

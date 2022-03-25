@@ -356,7 +356,7 @@ public class StoreDao {
 //                "WHERE RankRow.a <= 2 AND RankRow.storeIdx=?;";
 
         String StoreInfoQuery = "SELECT S.storeIdx, S.storeImgUrl,S.storeName, S.isCheetah, S.timeDelivery, R.reviewScore, R.reviewCount,\n" +
-                "       S.isToGo, S.isCoupon, S.storeLongitude, S.storeLatitude, S.status, S.minimumPrice, S.buildingName, S.storeAddress, S.storeAddressDetail, S.createdAt\n" +
+                "       S.isToGo, S.isCoupon, S.storeLongitude, S.storeLatitude, S.status, S.minimumPrice, S.buildingName, S.storeAddress, S.storeAddressDetail, DATE_FORMAT(S.createdAt, '%Y-%m-%d %H:%I:%S') AS createdAt\n" +
                 "FROM Store S\n" +
                 "LEFT JOIN (\n" +
                 "    SELECT UO.storeIdx, ROUND(AVG(R.score),1) AS reviewScore, COUNT(R.reviewIdx) AS reviewCount\n" +
@@ -369,7 +369,7 @@ public class StoreDao {
         String StoreCategoryQuery = "SELECT SCM.storeIdx, SC.storeCategoryIdx, categoryName\n" +
                 "FROM StoreCategoryMapping SCM JOIN StoreCategory SC on SCM.storeCategoryIdx = SC.storeCategoryIdx;";
 
-        String StoreCouponQuery = "SELECT couponIdx, storeIdx, couponTitle, discountPrice, limitPrice, endDate, couponType, createdAt, status FROM Coupon WHERE status='Y';";
+        String StoreCouponQuery = "SELECT couponIdx, storeIdx, couponTitle, discountPrice, limitPrice, endDate, couponType, DATE_FORMAT(createdAt, '%Y-%m-%d %H:%I:%S') AS createdAt, status FROM Coupon WHERE status='Y';";
 
         String orderCountQuery = "SELECT UO.storeIdx, COUNT(UO.userOrderIdx) AS orderCount\n" +
                 "FROM UserOrder UO\n" +
@@ -401,9 +401,9 @@ public class StoreDao {
                         rs2.getString("couponTitle"),
                         rs2.getInt("discountPrice"),
                         rs2.getInt("limitPrice"),
-                        rs2.getTime("endDate"),
+                        rs2.getString("endDate"),
                         rs2.getString("couponType"),
-                        rs2.getTime("createdAt"),
+                        rs2.getString("createdAt"),
                         rs2.getString("status")
                 ));
 
@@ -423,7 +423,7 @@ public class StoreDao {
                         rs1.getDouble("storeLongitude"),
                         rs1.getDouble("storeLatitude"),
                         rs1.getString("status"),
-                        rs1.getTime("createdAt"),
+                        rs1.getString("createdAt"),
                         rs1.getDouble("reviewScore"),
                         rs1.getInt("reviewCount"))
         );
@@ -461,7 +461,16 @@ public class StoreDao {
 //                "    FROM Review R JOIN UserOrder UO on R.userOrderIdx=UO.userOrderIdx\n" +
 //                "    GROUP BY UO.storeIdx) R ON R.storeIdx=S.storeIdx\n" +
 //                "WHERE S.status != 'N' AND S.storeIdx=?;";
-//
+
+        String StoreInfoQuery = "SELECT S.storeIdx, S.storeImgUrl,S.storeName, S.isCheetah, S.timeDelivery, R.reviewScore, R.reviewCount, CASE WHEN S.isToGo='Y' THEN S.timeToGo ELSE 'N' END AS timeToGo\n" +
+                "       S.isToGo, S.isCoupon, S.status, S.minimumPrice\n" +
+                "FROM Store S\n" +
+                "LEFT JOIN (\n" +
+                "    SELECT UO.storeIdx, ROUND(AVG(R.score),1) AS reviewScore, COUNT(R.reviewIdx) AS reviewCount\n" +
+                "    FROM Review R JOIN UserOrder UO on R.userOrderIdx=UO.userOrderIdx\n" +
+                "    GROUP BY UO.storeIdx) R ON R.storeIdx=S.storeIdx\n" +
+                "WHERE S.status != 'N';";
+
 //        String StoreCouponQuery = "SELECT S.storeIdx, IFNULL(C.discountPrice,0) AS maxDiscountPrice, IFNULL(C.couponType,'N') AS couponType\n" +
 //                "FROM Store S\n" +
 //                "LEFT JOIN (SELECT RankRow.storeIdx, RankRow.discountPrice, RankRow.couponType\n" +
@@ -471,7 +480,8 @@ public class StoreDao {
 //                "                 ) AS RankRow\n" +
 //                "            WHERE RankRow.a <= 1) C ON C.storeIdx = S.storeIdx\n" +
 //                "WHERE S.storeIdx = ?;";
-
+        String StoreCouponQuery = "SELECT couponIdx, storeIdx, couponTitle, discountPrice, limitPrice, endDate, couponType, DATE_FORMAT(createdAt, '%Y-%m-%d %H:%I:%S') AS createdAt, status FROM Coupon WHERE status='Y' AND storeIdx=?;";
+        String DeliveryTimeQuery = "SELECT storeIdx, minPrice, maxPrice, deliveryFee FROM DeliveryFee WHERE storeIdx=?;";
         String MenuCategoryQuery = "SELECT MC.menuCategoryIdx, storeIdx, categoryName\n" +
                 "FROM MenuCategory MC\n" +
                 "WHERE MC.storeIdx=?;";
@@ -480,7 +490,7 @@ public class StoreDao {
                 "FROM Menu\n" +
                 "WHERE status!='N' AND menuCategoryIdx=?;";
 
-        String PhotoReviewQuery = "SELECT PhotoReview.reviewIdx, PhotoReview.reviewImgUrl, PhotoReview.content, PhotoReview.score, PhotoReview.createdAt\n" +
+        String PhotoReviewQuery = "SELECT PhotoReview.reviewIdx, PhotoReview.reviewImgUrl, PhotoReview.content, PhotoReview.score, DATE_FORMAT(PhotoReview.createdAt, '%Y-%m-%d %H:%I:%S') AS createdAt\n" +
                 "FROM UserOrder UO\n" +
                 "JOIN (SELECT R.reviewIdx,FirstPhoto.reviewImgUrl,R.content,R.score,R.userOrderIdx, R.createdAt\n" +
                 "FROM Review R\n" +
@@ -503,7 +513,7 @@ public class StoreDao {
                         rs1.getString("reviewImgUrl"),
                         rs1.getString("content"),
                         rs1.getInt("score"),
-                        rs1.getTime("createdAt")
+                        rs1.getString("createdAt")
                 ), Param);
 
         List<MenuCategory> menuCategory = this.jdbcTemplate.query(MenuCategoryQuery,

@@ -19,6 +19,4 @@ public class AddressInfo {
     private double addressLongitude;
     private double addressLatitude;
     private String addressTitle="";
-    private String addressType="";
-    private String isNowLocation="";
 }

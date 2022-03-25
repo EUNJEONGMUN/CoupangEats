@@ -44,12 +44,35 @@ public class UserDao {
         String Query = "SELECT userAddressIdx, buildingName, address, addressDetail, addressGuide, addressTitle, addressLongitude, addressLatitude, addressType, isNowLocation \n" +
                 "FROM UserAddress \n" +
                 "WHERE userIdx=? AND addressType=? AND status='Y';";
+        String AllQuery = "SELECT userAddressIdx, buildingName, address, addressDetail, addressGuide, addressTitle, addressLongitude, addressLatitude, addressType, isNowLocation \n" +
+                "FROM UserAddress \n" +
+                "WHERE userIdx=? AND status='Y';";
+        String nowQuery = "SELECT userAddressIdx, buildingName, address, addressDetail, addressGuide, addressTitle, addressLongitude, addressLatitude, addressType, isNowLocation\n" +
+                "                FROM UserAddress\n" +
+                "                WHERE userIdx=? AND isNowLocation='Y' AND status='Y';";
+
 
         String checkQuery = "SELECT EXISTS(SELECT * FROM UserAddress WHERE userIdx=? AND addressType=? AND status='Y');";
+        String nowCheckQuery = "SELECT EXISTS(SELECT * FROM UserAddress WHERE userIdx=? AND isNowLocation='Y' AND status='Y');";
 
         Object[] Params1 = new Object[]{userIdx, "H"};
         Object[] Params2 = new Object[]{userIdx, "C"};
         Object[] Params3 = new Object[]{userIdx, "O"};
+
+        AddressInfo nowAddress = new AddressInfo();
+        if (this.jdbcTemplate.queryForObject(nowCheckQuery, int.class, userIdx) != 0){
+            nowAddress = this.jdbcTemplate.queryForObject(nowQuery,
+                    (rs, rowNum) -> new AddressInfo(
+                            rs.getInt("userAddressIdx"),
+                            rs.getString("buildingName"),
+                            rs.getString("address"),
+                            rs.getString("addressDetail"),
+                            rs.getString("addressGuide"),
+                            rs.getDouble("addressLongitude"),
+                            rs.getDouble("addressLatitude"),
+                            rs.getString("addressTitle")
+                    ), userIdx);
+        }
 
         AddressInfo homeAddress = new AddressInfo();
         if (this.jdbcTemplate.queryForObject(checkQuery, int.class, Params1) != 0){
@@ -62,9 +85,7 @@ public class UserDao {
                             rs.getString("addressGuide"),
                             rs.getDouble("addressLongitude"),
                             rs.getDouble("addressLatitude"),
-                            rs.getString("addressTitle"),
-                            rs.getString("addressType"),
-                            rs.getString("isNowLocation")
+                            rs.getString("addressTitle")
                     ), Params1);
         }
 
@@ -79,9 +100,7 @@ public class UserDao {
                             rs.getString("addressGuide"),
                             rs.getDouble("addressLongitude"),
                             rs.getDouble("addressLatitude"),
-                            rs.getString("addressTitle"),
-                            rs.getString("addressType"),
-                            rs.getString("isNowLocation")
+                            rs.getString("addressTitle")
                     ), Params2);
         }
 
@@ -94,12 +113,11 @@ public class UserDao {
                       rs.getString("addressGuide"),
                       rs.getDouble("addressLongitude"),
                       rs.getDouble("addressLatitude"),
-                      rs.getString("addressTitle"),
-                      rs.getString("addressType"),
-                      rs.getString("isNowLocation")
+                      rs.getString("addressTitle")
               ), Params3);
 
-        return new GetUserAddressRes(homeAddress, companyAddress, otherAddress);
+
+        return new GetUserAddressRes(nowAddress,homeAddress,companyAddress, otherAddress);
     }
 
 

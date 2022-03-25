@@ -11,6 +11,7 @@ import java.util.List;
 @Setter
 @AllArgsConstructor
 public class GetUserAddressRes {
+    private AddressInfo nowAddress;
     private AddressInfo homeAddress;
     private AddressInfo companyAddress;
     private List<AddressInfo> otherAddress;

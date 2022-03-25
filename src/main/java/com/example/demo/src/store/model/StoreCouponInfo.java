@@ -6,7 +6,10 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.springframework.scheduling.support.SimpleTriggerContext;
 
+import java.sql.Date;
 import java.sql.Time;
+import java.sql.Timestamp;
+import java.time.DateTimeException;
 
 @Getter
 @Setter
@@ -18,8 +21,8 @@ public class StoreCouponInfo {
     private String couponTitle;
     private int discountPrice;
     private int limitPrice;
-    private Time endDate;
+    private String endDate;
     private String couponType;
-    private Time createdAt;
+    private String createdAt;
     private String status;
 }

@@ -76,7 +76,6 @@ public class StoreController {
      * [GET] /stores/options?storeIdx=&menuIdx=
      * @return BaseResponse<GetStoreMenuOptionsRes>
      */
-//    @UnAuth
     @ResponseBody
     @GetMapping("/options")
     public BaseResponse<GetStoreMenuOptionsRes> getMenuOptions(@RequestParam(required = false, defaultValue = "0") int storeIdx,

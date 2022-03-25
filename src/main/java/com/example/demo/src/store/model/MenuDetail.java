@@ -1,5 +1,6 @@
 package com.example.demo.src.store.model;
 
+import com.example.demo.src.store.model.Res.GetStoreMenuOptionsRes;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;

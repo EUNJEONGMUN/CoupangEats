@@ -175,7 +175,6 @@ public class UserController {
      * @return BaseResponse<GetUserAddressRes>
      */
     @ResponseBody
-//    @RequestMapping(value="/users/address-list", method = RequestMethod.GET)
     @GetMapping("/address-list")
     public BaseResponse<GetUserAddressRes> getUserAddress() throws BaseException {
         int userIdx= jwtService.getUserIdx();
