@@ -2,6 +2,7 @@ package com.example.demo.src.orders;
 
 import com.example.demo.src.orders.model.CartMenu;
 import com.example.demo.src.orders.model.Req.PostCreateCartReq;
+import com.example.demo.src.orders.model.Req.PutModifyCartReq;
 import com.example.demo.src.orders.model.Res.GetCartListRes;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -159,5 +160,15 @@ public class OrderDao {
 
     }
 
-
+    /**
+     * 배달 카트 수정 삭제 API
+     * [PUT] /orders/cart/status
+     * /status?storeIdx=&cardIdx=
+     * @return BaseResponse<String>
+     */
+    public int modifyCart(int storeIdx, int cartIdx, PutModifyCartReq putModifyCartReq) {
+        String Query = "UPDATE Cart SET orderCount=?, status=? WHERE cartIdx=? AND storeIdx=?;";
+        Object[] Params = new Object[]{putModifyCartReq.getChangeCount(), putModifyCartReq.getStatus(), cartIdx, storeIdx};
+        return this.jdbcTemplate.update(Query, Params);
+    }
 }

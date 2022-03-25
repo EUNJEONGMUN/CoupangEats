@@ -119,3 +119,4 @@ Rising Test
 - 홈화면 API 수정
 - 가게 상세 화면 API 수정
 - 주소 관련 API 수정
+- 배달 카트 수정 API 구현

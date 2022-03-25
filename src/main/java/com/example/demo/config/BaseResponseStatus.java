@@ -46,7 +46,7 @@ public enum BaseResponseStatus {
     PUT_ADDRESS_CHOICE_PARAM_EMPTY(false, 2026, "addressType을 입력해주세요."),
     // orders
     POST_CART_PARAM_EMPTY(false, 2100, "가게 idx 혹은 메뉴 idx를 입력해주세요."),
-
+    PUT_CART_PARAM_EMPTY(false, 2101, "가게 idx 혹은 카트 idx를 입력해주세요."),
     EMPTY_STOREIDX_PARAM(false, 2200, "storeIdx를 입력하지 않았습니다."),
     EMPTY_MENUIDX_PARAM(false, 2201, "menuIdx를 입력하지 않았습니다."),
     EMPTY_OTHER_ADDRESS_IDX(false, 2202, "addressIdx를 입력하지 않았습니다."),
@@ -97,7 +97,8 @@ public enum BaseResponseStatus {
     FAIL_PUT_ADDRESS(false, 4401, "주소지 수정에 실패했습니다."),
     FAIL_POST_OTHER_ADDRESS(false, 4402, "주소지 추가에 실패했습니다."),
     FAIL_DELETE_EXISTS_ADDRESS(false, 4403, "기존 주소지 삭제에 실패했습니다."),
-    FAIL_MODIFY_ADDRESS(false, 4404, "주소지 수정에 실패했습니다.");
+    FAIL_MODIFY_ADDRESS(false, 4404, "주소지 수정에 실패했습니다."),
+    FAIL_MODIFY_CART(false, 4405, "카드 수정에 실패했습니다.");
 
     // 5000 : 필요시 만들어서 쓰세요
     // 6000 : 필요시 만들어서 쓰세요

@@ -3,6 +3,7 @@ package com.example.demo.src.orders;
 import com.example.demo.config.BaseException;
 import com.example.demo.config.BaseResponse;
 import com.example.demo.src.orders.model.Req.PostCreateCartReq;
+import com.example.demo.src.orders.model.Req.PutModifyCartReq;
 import com.example.demo.src.orders.model.Res.GetCartListRes;
 import com.example.demo.src.user.UserProvider;
 import com.example.demo.utils.JwtService;
@@ -98,7 +99,7 @@ public class OrderController {
      * @return BaseResponse<String>
      */
     @ResponseBody
-    @PutMapping("/cart/new")
+    @PostMapping("/cart/new")
     public BaseResponse<String> createCartNew(@RequestParam(required = false, defaultValue = "0") int storeIdx,
                                            @RequestParam(required = false, defaultValue = "0") int menuIdx,
                                            @Valid @RequestBody PostCreateCartReq postCreateCartReq) throws BaseException{
@@ -135,7 +136,7 @@ public class OrderController {
     /**
      * 배달 카트 조회 API
      * [GET] /orders/cart-list
-     * @return BaseResponse<List<GetCartListRes>>
+     * @return BaseResponse<GetCartListRes>
      */
     @ResponseBody
     @GetMapping("/cart-list")
@@ -152,6 +153,38 @@ public class OrderController {
 
     }
 
+    /**
+     * 배달 카트 수정 삭제 API
+     * [PUT] /orders/cart/status
+     * /status?storeIdx=&cardIdx=
+     * @return BaseResponse<String>
+     */
+    @ResponseBody
+    @PutMapping("/cart/status")
+    public BaseResponse<String> modifyCart(@RequestParam(required = false, defaultValue = "0") int storeIdx,
+                                           @RequestParam(required = false, defaultValue = "0") int cartIdx,
+                                           @Valid @RequestBody PutModifyCartReq putModifyCartReq) throws BaseException {
 
+        int userIdx= jwtService.getUserIdx();
+
+        // 사용자 존재 여부 확인
+        if (userProvider.checkUser(userIdx)==0){
+            return new BaseResponse<>(USER_NOT_EXISTS);
+        }
+
+        if (storeIdx==0 || cartIdx==0){
+            return new BaseResponse<>(PUT_CART_PARAM_EMPTY);
+        }
+
+        if (putModifyCartReq.getStatus()==null){
+            putModifyCartReq.setStatus("Y");
+        }
+
+        String result = "";
+        orderService.modifyCart(storeIdx, cartIdx, putModifyCartReq);
+        return new BaseResponse<>(result);
+
+
+    }
 
 }
