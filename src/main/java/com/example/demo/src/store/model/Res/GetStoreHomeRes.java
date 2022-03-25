@@ -14,11 +14,12 @@ import java.util.List;
 @AllArgsConstructor
 @NoArgsConstructor
 public class GetStoreHomeRes {
-    private List<StoreInfo> storeInfo;
+
+    private StoreInfo storeInfo;
     private List<DeliveryFeeInfo> deliveryFeeInfo;
     private List<StoreCategory> storeCategory;
     private List<StoreCouponInfo> storeCouponInfo;
-    private List<OrderCount> orderCount;
+//    private List<OrderCount> orderCount;
     private List<StoreMenuImg> storeMenuImg;
-
+    private int orderCount;
 }

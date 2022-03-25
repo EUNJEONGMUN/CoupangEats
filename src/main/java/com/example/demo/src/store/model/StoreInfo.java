@@ -8,6 +8,7 @@ import lombok.Setter;
 import java.sql.Date;
 import java.sql.Time;
 import java.sql.Timestamp;
+import java.util.List;
 
 @Getter
 @Setter
@@ -25,11 +26,12 @@ public class StoreInfo {
     private String buildingName;
     private String storeAddress;
     private String storeAddressDetail;
-//    private double storeLongitude;
+    //    private double storeLongitude;
 //    private double storeLatitude;
     private String status;
     private String createdAt;
     private double reviewScore;
     private int reviewCount;
     private double distance;
+
 }

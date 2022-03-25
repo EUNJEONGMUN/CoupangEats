@@ -42,7 +42,7 @@ public class StoreController {
      */
     @ResponseBody
     @GetMapping("/home")
-    public BaseResponse<GetStoreHomeRes> getStoreHome(@RequestParam(required = false, defaultValue = "0") double longitude,
+    public BaseResponse<List<GetStoreHomeRes>> getStoreHome(@RequestParam(required = false, defaultValue = "0") double longitude,
                                                       @RequestParam(required = false, defaultValue = "0") double latitude) throws BaseException{
 //        if (storeHome.getCategoryIdx()!=0 && storeProvider.checkStoreCategory(storeHome.getCategoryIdx())==0){
 //            return new BaseResponse<>(EMPTY_STORE_CATEGORY);
@@ -66,7 +66,7 @@ public class StoreController {
         }
 
 
-        GetStoreHomeRes getStoreHomeRes = storeProvider.getStoreHome(userLocation);
+        List<GetStoreHomeRes> getStoreHomeRes = storeProvider.getStoreHome(userLocation);
         return new BaseResponse<>(getStoreHomeRes);
     }
 

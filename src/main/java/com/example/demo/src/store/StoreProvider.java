@@ -11,6 +11,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import static com.example.demo.config.BaseResponseStatus.*;
@@ -29,9 +30,17 @@ public class StoreProvider {
      * [GET] /stores/home
      * @return BaseResponse<List<GetStoreHomeRes>>
      */
-    public GetStoreHomeRes getStoreHome(UserLocation userLocation) throws BaseException {
+    public List<GetStoreHomeRes> getStoreHome(UserLocation userLocation) throws BaseException {
         try {
-            GetStoreHomeRes getStoreHomeRes = storeDao.getStoreHome(userLocation);
+
+            List<Integer> StoreList = storeDao.findStoreIdxList();
+
+            List<GetStoreHomeRes> getStoreHomeRes = new ArrayList<>();
+
+            for(int idx:StoreList){
+                GetStoreHomeRes storeHome = storeDao.getStoreHome(idx, userLocation);
+                getStoreHomeRes.add(storeHome);
+            }
             return getStoreHomeRes;
         } catch (Exception exception) {
             System.out.println("storehome-> "+ exception);
