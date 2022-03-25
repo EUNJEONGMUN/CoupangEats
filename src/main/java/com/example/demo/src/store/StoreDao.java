@@ -465,14 +465,14 @@ public class StoreDao {
 //                "    GROUP BY UO.storeIdx) R ON R.storeIdx=S.storeIdx\n" +
 //                "WHERE S.status != 'N' AND S.storeIdx=?;";
 
-        String StoreInfoQuery = "SELECT S.storeIdx, S.storeImgUrl,S.storeName, S.isCheetah, S.timeDelivery, R.reviewScore, R.reviewCount, CASE WHEN S.isToGo='Y' THEN S.timeToGo ELSE 'N' END AS timeToGo\n" +
+        String StoreInfoQuery = "SELECT S.storeIdx, S.storeImgUrl,S.storeName, S.isCheetah, S.timeDelivery, R.reviewScore, R.reviewCount, CASE WHEN S.isToGo='Y' THEN S.timeToGo ELSE 'N' END AS timeToGo,\n" +
                 "       S.isToGo, S.isCoupon, S.status, S.minimumPrice\n" +
                 "FROM Store S\n" +
                 "LEFT JOIN (\n" +
                 "    SELECT UO.storeIdx, ROUND(AVG(R.score),1) AS reviewScore, COUNT(R.reviewIdx) AS reviewCount\n" +
                 "    FROM Review R JOIN UserOrder UO on R.userOrderIdx=UO.userOrderIdx\n" +
                 "    GROUP BY UO.storeIdx) R ON R.storeIdx=S.storeIdx\n" +
-                "WHERE S.status != 'N';";
+                "WHERE S.status != 'N' AND S.storeIdx=?;";
 
 //        String StoreCouponQuery = "SELECT S.storeIdx, IFNULL(C.discountPrice,0) AS maxDiscountPrice, IFNULL(C.couponType,'N') AS couponType\n" +
 //                "FROM Store S\n" +
@@ -509,7 +509,6 @@ public class StoreDao {
 
         int Param = storeIdx;
 
-
         List<PhotoReview> photoReview = this.jdbcTemplate.query(PhotoReviewQuery,
                 (rs1, rowNum1) -> new PhotoReview(
                         rs1.getInt("reviewIdx"),
@@ -533,7 +532,45 @@ public class StoreDao {
                                 ), rs3.getInt("menuCategoryIdx"))
                 ), Param);
 
-        return new GetStoreDetailRes(photoReview, menuCategory);
+        List<DeliveryFeeInfo> deliveryFeeInfo = this.jdbcTemplate.query(DeliveryTimeQuery,
+                (rs1, rowNum1) -> new DeliveryFeeInfo(
+                        rs1.getInt("storeIdx"),
+                        rs1.getInt("minPrice"),
+                        rs1.getInt("maxPrice"),
+                        rs1.getInt("deliveryFee")
+                ), Param);
+        List<StoreCouponInfo> storeCouponInfo = this.jdbcTemplate.query(StoreCouponQuery,
+                (rs2, rowNum2) -> new StoreCouponInfo(
+                        rs2.getInt("couponIdx"),
+                        rs2.getInt("storeIdx"),
+                        rs2.getString("couponTitle"),
+                        rs2.getInt("discountPrice"),
+                        rs2.getInt("limitPrice"),
+                        rs2.getString("endDate"),
+                        rs2.getString("couponType"),
+                        rs2.getString("createdAt"),
+                        rs2.getString("status")
+                ), Param);
+
+        return this.jdbcTemplate.queryForObject(StoreInfoQuery,
+                (rs, rowNum) -> new GetStoreDetailRes(
+                        rs.getInt("storeIdx"),
+                        rs.getString("storeImgUrl"),
+                        rs.getString("storeName"),
+                        rs.getString("isCheetah"),
+                        rs.getString("timeDelivery"),
+                        rs.getString("isToGo"),
+                        rs.getString("isCoupon"),
+                        rs.getInt("minimumPrice"),
+                        rs.getString("status"),
+                        rs.getDouble("reviewScore"),
+                        rs.getInt("reviewCount"),
+                        rs.getString("timeToGo"),
+                        storeCouponInfo,
+                        deliveryFeeInfo,
+                        photoReview,
+                        menuCategory),
+                Param);
 
 
     }
