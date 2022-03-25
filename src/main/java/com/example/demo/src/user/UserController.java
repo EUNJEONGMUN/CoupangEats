@@ -116,7 +116,7 @@ public class UserController {
 //    @UnAuth
     @ResponseBody
 //    @RequestMapping(value="/users/sign-in", method = RequestMethod.POST)
-    @PostMapping("/users/sign-in")
+    @PostMapping("/sign-in")
     public BaseResponse<PostSignInRes> signIn(@Valid @RequestBody PostSignInReq postSignInReq) throws BaseException {
 
         // 이메일(아이디) 정규식 확인
@@ -124,6 +124,7 @@ public class UserController {
             return new BaseResponse<>(POST_SIGN_IN_INVALID_EMAIL);
         }
 
+        System.out.println("여기");
         PostSignInRes postSignInRes = userService.signIn(postSignInReq);
         return new BaseResponse<>(postSignInRes);
 
