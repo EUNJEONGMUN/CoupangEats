@@ -1,11 +1,12 @@
 package com.example.demo.src.store.model.Res;
 
-import com.example.demo.src.store.model.StoreCouponInfo;
+import com.example.demo.src.store.model.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import java.sql.Time;
 import java.util.List;
 
 @Getter
@@ -13,17 +14,11 @@ import java.util.List;
 @AllArgsConstructor
 @NoArgsConstructor
 public class GetStoreHomeRes {
-    private String storeImgUrl;
-    private String storeName;
-    private String isCheetah;
-    private String timeDelivery;
-    private double reviewScore;
-    private int reviewCount;
-    private int fee;
-    private String isToGo;
-    private double storeLongitude;
-    private double storeLatitude;
-    private String status;
-    private StoreCouponInfo storeCouponInfo;
-    private List<String> menuImgUrl;
+    private List<StoreInfo> storeInfo;
+    private List<DeliveryFeeInfo> deliveryFeeInfo;
+    private List<StoreCategory> storeCategory;
+    private List<StoreCouponInfo> storeCouponInfo;
+    private List<OrderCount> orderCount;
+    private List<StoreMenuImg> storeMenuImg;
+
 }

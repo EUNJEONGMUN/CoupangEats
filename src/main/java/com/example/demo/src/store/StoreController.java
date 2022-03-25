@@ -42,11 +42,11 @@ public class StoreController {
 //    @UnAuth
     @ResponseBody
     @GetMapping("/home")
-    public BaseResponse<List<GetStoreHomeRes>> getStoreHome(StoreHome storeHome) throws BaseException{
-        if (storeHome.getCategoryIdx()!=0 && storeProvider.checkStoreCategory(storeHome.getCategoryIdx())==0){
-            return new BaseResponse<>(EMPTY_STORE_CATEGORY);
-        }
-        List<GetStoreHomeRes> getStoreHomeRes = storeProvider.getStoreHome(storeHome);
+    public BaseResponse<GetStoreHomeRes> getStoreHome() throws BaseException{
+//        if (storeHome.getCategoryIdx()!=0 && storeProvider.checkStoreCategory(storeHome.getCategoryIdx())==0){
+//            return new BaseResponse<>(EMPTY_STORE_CATEGORY);
+//        }
+        GetStoreHomeRes getStoreHomeRes = storeProvider.getStoreHome();
         return new BaseResponse<>(getStoreHomeRes);
     }
 
@@ -56,22 +56,22 @@ public class StoreController {
      * @return BaseResponse<GetStoreDetailRes>
      */
 //    @UnAuth
-    @ResponseBody
-    @GetMapping("/detail")
-    public BaseResponse<GetStoreDetailRes> getStoreDetail(@RequestParam(required = false, defaultValue = "0") int storeIdx) throws BaseException{
-
-        // storeIdx
-        if (storeIdx == 0){
-            return new BaseResponse<>(EMPTY_STOREIDX_PARAM);
-        }
-        if (storeProvider.checkStore(storeIdx)==0){
-            return new BaseResponse<>(EMPTY_STORE);
-        }
-
-
-        GetStoreDetailRes getStoreDetailRes = storeProvider.getStoreDetail(storeIdx);
-        return new BaseResponse<>(getStoreDetailRes);
-    }
+//    @ResponseBody
+//    @GetMapping("/detail")
+//    public BaseResponse<GetStoreDetailRes> getStoreDetail(@RequestParam(required = false, defaultValue = "0") int storeIdx) throws BaseException{
+//
+//        // storeIdx
+//        if (storeIdx == 0){
+//            return new BaseResponse<>(EMPTY_STOREIDX_PARAM);
+//        }
+//        if (storeProvider.checkStore(storeIdx)==0){
+//            return new BaseResponse<>(EMPTY_STORE);
+//        }
+//
+//
+//        GetStoreDetailRes getStoreDetailRes = storeProvider.getStoreDetail(storeIdx);
+//        return new BaseResponse<>(getStoreDetailRes);
+//    }
 
     /**
      * 메뉴 상세 화면 조회 조회 API

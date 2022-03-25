@@ -109,6 +109,11 @@ Rising Test
 - build 성공
   - GET메소드는 성공했지만, POST메소드에서 `Request method 'GET' not supported` 에러 발생
 
-### 2022-03-24 진행상황
+## 2022-03-24 진행상황
 - 배달 카드 담기 API 구현
 - 배탁 카트 새로 담기 API 구현
+- 주소 관련 API DB 수정
+  - 사용자 집, 회사 관련 정보를 기타 주소지 정보와 함게 UserAddress 테이블에 담기로 함.
+
+## 2022-03-25 진행상황
+- 홈화면 API 수정

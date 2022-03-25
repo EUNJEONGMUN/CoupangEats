@@ -28,9 +28,9 @@ public class StoreProvider {
      * [GET] /stores/home
      * @return BaseResponse<List<GetStoreHomeRes>>
      */
-    public List<GetStoreHomeRes> getStoreHome(StoreHome storeHome) throws BaseException {
+    public GetStoreHomeRes getStoreHome() throws BaseException {
         try {
-            List<GetStoreHomeRes> getStoreHomeRes = storeDao.getStoreHome(storeHome);
+            GetStoreHomeRes getStoreHomeRes = storeDao.getStoreHome();
             return getStoreHomeRes;
         } catch (Exception exception) {
             System.out.println("storehome-> "+ exception);
@@ -43,15 +43,15 @@ public class StoreProvider {
      * [GET] /stores/detail?storeIdx=
      * @return BaseResponse<List<GetStoreHomeRes>>
      */
-    public GetStoreDetailRes getStoreDetail(int storeIdx) throws BaseException {
-        try {
-            GetStoreDetailRes getStoreDetailRes = storeDao.getStoreDetail(storeIdx);
-            return getStoreDetailRes;
-        } catch (Exception exception) {
-            System.out.println("store_detail-> "+ exception);
-            throw new BaseException(DATABASE_ERROR);
-        }
-    }
+//    public GetStoreDetailRes getStoreDetail(int storeIdx) throws BaseException {
+//        try {
+//            GetStoreDetailRes getStoreDetailRes = storeDao.getStoreDetail(storeIdx);
+//            return getStoreDetailRes;
+//        } catch (Exception exception) {
+//            System.out.println("store_detail-> "+ exception);
+//            throw new BaseException(DATABASE_ERROR);
+//        }
+//    }
 
     /**
      * 메뉴 상세 화면 조회 조회 API
