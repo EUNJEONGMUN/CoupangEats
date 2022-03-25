@@ -39,7 +39,6 @@ public class StoreController {
      * /home?sort=&isCheetah&fee=&minimum=&isTogo=&isCoupon&categoryIdx=
      * @return BaseResponse<List<GetStoreHomeRes>>
      */
-//    @UnAuth
     @ResponseBody
     @GetMapping("/home")
     public BaseResponse<GetStoreHomeRes> getStoreHome() throws BaseException{
@@ -55,23 +54,22 @@ public class StoreController {
      * [GET] /stores/detail?storeIdx=
      * @return BaseResponse<GetStoreDetailRes>
      */
-//    @UnAuth
-//    @ResponseBody
-//    @GetMapping("/detail")
-//    public BaseResponse<GetStoreDetailRes> getStoreDetail(@RequestParam(required = false, defaultValue = "0") int storeIdx) throws BaseException{
-//
-//        // storeIdx
-//        if (storeIdx == 0){
-//            return new BaseResponse<>(EMPTY_STOREIDX_PARAM);
-//        }
-//        if (storeProvider.checkStore(storeIdx)==0){
-//            return new BaseResponse<>(EMPTY_STORE);
-//        }
-//
-//
-//        GetStoreDetailRes getStoreDetailRes = storeProvider.getStoreDetail(storeIdx);
-//        return new BaseResponse<>(getStoreDetailRes);
-//    }
+    @ResponseBody
+    @GetMapping("/detail")
+    public BaseResponse<GetStoreDetailRes> getStoreDetail(@RequestParam(required = false, defaultValue = "0") int storeIdx) throws BaseException{
+
+        // storeIdx
+        if (storeIdx == 0){
+            return new BaseResponse<>(EMPTY_STOREIDX_PARAM);
+        }
+        if (storeProvider.checkStore(storeIdx)==0){
+            return new BaseResponse<>(EMPTY_STORE);
+        }
+
+
+        GetStoreDetailRes getStoreDetailRes = storeProvider.getStoreDetail(storeIdx);
+        return new BaseResponse<>(getStoreDetailRes);
+    }
 
     /**
      * 메뉴 상세 화면 조회 조회 API

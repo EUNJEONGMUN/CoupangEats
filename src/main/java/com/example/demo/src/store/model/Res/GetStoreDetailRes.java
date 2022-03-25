@@ -13,18 +13,6 @@ import java.util.List;
 @Setter
 @AllArgsConstructor
 public class GetStoreDetailRes {
-    private String storeImgUrl;
-    private String storeName;
-    private String isCheetah;
-    private String timeDelivery;
-    private double reviewScore;
-    private int reviewCount;
-    private int fee;
-    private int minimumPrice;
-    private String timeToGo;
-    private double storeLongitude;
-    private double storeLatitude;
     private List<PhotoReview> photoReview;
-    private StoreCouponInfo storeCouponInfo;
     private List<MenuCategory> menuCategory;
 }

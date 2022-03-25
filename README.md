@@ -1,4 +1,4 @@
-# coupangEatsA-test-server-haena-rian
+# coupangEatsA-test-server-haena
 
 Rising Test
 
@@ -117,3 +117,4 @@ Rising Test
 
 ## 2022-03-25 진행상황
 - 홈화면 API 수정
+- 가게 상세 화면 API 수정
