@@ -11,7 +11,6 @@ import lombok.Setter;
 @NoArgsConstructor
 public class DeliveryFeeInfo {
     private int storeIdx;
-    private int minPrice;
-    private int maxPrice;
-    private int deliveryFee;
+    private String orderPrice;
+    private String deliveryFee;
 }

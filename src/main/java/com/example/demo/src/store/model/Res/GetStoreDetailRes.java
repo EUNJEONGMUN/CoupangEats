@@ -22,11 +22,10 @@ public class GetStoreDetailRes {
     private String isToGo;
     private String isCoupon;
     private int minimumPrice;
-//    private String buildingName;
-//    private String storeAddress;
-//    private String storeAddressDetail;
-//    private double storeLongitude;
-//    private double storeLatitude;
+    private String buildingName;
+    private String storeAddress;
+    private String storeAddressDetail;
+    private double distance;
     private String status;
 //    private String createdAt;
     private double reviewScore;
@@ -36,4 +35,5 @@ public class GetStoreDetailRes {
     private List<DeliveryFeeInfo> deliveryFeeInfo;
     private List<PhotoReview> photoReview;
     private List<MenuCategory> menuCategory;
+    private String isFavoriteStore;
 }

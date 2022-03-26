@@ -18,4 +18,6 @@ public class MenuDetail {
     private String menuImgUrl;
     private String isOption;
     private String status;
+    private String isManyOrder;
+    private String isManyReview;
 }

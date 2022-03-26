@@ -56,9 +56,9 @@ public class StoreProvider {
      * [GET] /stores/detail?storeIdx=
      * @return BaseResponse<List<GetStoreHomeRes>>
      */
-    public GetStoreDetailRes getStoreDetail(int storeIdx) throws BaseException {
+    public GetStoreDetailRes getStoreDetail(UserLocation userLocation, int storeIdx, int userIdx) throws BaseException {
         try {
-            GetStoreDetailRes getStoreDetailRes = storeDao.getStoreDetail(storeIdx);
+            GetStoreDetailRes getStoreDetailRes = storeDao.getStoreDetail(userLocation, storeIdx, userIdx);
             return getStoreDetailRes;
         } catch (Exception exception) {
             System.out.println("store_detail-> "+ exception);

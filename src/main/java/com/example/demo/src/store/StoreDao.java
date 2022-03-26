@@ -479,40 +479,31 @@ public class StoreDao {
      * [GET] /stores/detail?storeIdx=
      * @return BaseResponse<List<GetStoreHomeRes>>
      */
-    public GetStoreDetailRes getStoreDetail(int storeIdx) {
-//        String StoreInfoQuery = "SELECT S.storeIdx, S.storeImgUrl,S.storeName, S.isCheetah, S.timeDelivery, R.reviewScore, R.reviewCount, F.fee, S.minimumPrice,\n" +
-//                "       CASE WHEN S.isToGo='Y' THEN S.timeToGo ELSE 'N' END AS timeToGo, S.storeLongitude, S.storeLatitude\n" +
-//                "FROM Store S\n" +
-//                "LEFT JOIN (\n" +
-//                "    SELECT StoreIdx, IFNULL(MIN(deliveryFee),0) AS fee\n" +
-//                "    FROM DeliveryFee\n" +
-//                "    WHERE DeliveryFee.status='Y' GROUP BY storeIdx) F ON F.storeIdx = S.storeIdx\n" +
-//                "LEFT JOIN (\n" +
-//                "    SELECT UO.storeIdx, ROUND(AVG(R.score),1) AS reviewScore, COUNT(R.reviewIdx) AS reviewCount\n" +
-//                "    FROM Review R JOIN UserOrder UO on R.userOrderIdx=UO.userOrderIdx\n" +
-//                "    GROUP BY UO.storeIdx) R ON R.storeIdx=S.storeIdx\n" +
-//                "WHERE S.status != 'N' AND S.storeIdx=?;";
+    public GetStoreDetailRes getStoreDetail(UserLocation userLocation, int storeIdx, int userIdx) {
 
-        String StoreInfoQuery = "SELECT S.storeIdx, S.storeImgUrl,S.storeName, S.isCheetah, S.timeDelivery, R.reviewScore, R.reviewCount, CASE WHEN S.isToGo='Y' THEN S.timeToGo ELSE 'N' END AS timeToGo,\n" +
-                "       S.isToGo, S.isCoupon, S.status, S.minimumPrice\n" +
-                "FROM Store S\n" +
-                "LEFT JOIN (\n" +
-                "    SELECT UO.storeIdx, ROUND(AVG(R.score),1) AS reviewScore, COUNT(R.reviewIdx) AS reviewCount\n" +
-                "    FROM Review R JOIN UserOrder UO on R.userOrderIdx=UO.userOrderIdx\n" +
-                "    GROUP BY UO.storeIdx) R ON R.storeIdx=S.storeIdx\n" +
-                "WHERE S.status != 'N' AND S.storeIdx=?;";
+        String StoreInfoQuery = "SELECT S.storeIdx, S.storeImgUrl,S.storeName, S.isCheetah, S.timeDelivery, R.reviewScore, R.reviewCount,\n" +
+                "       CASE WHEN S.isToGo='Y' THEN S.timeToGo ELSE 'N' END AS timeToGo,\n" +
+                "       S.isToGo, S.isCoupon, S.status, S.minimumPrice, S.buildingName, S.storeAddress, S.storeAddressDetail,\n" +
+                "       ROUND(ST_DISTANCE_SPHERE(POINT(S.storeLongitude,S.storeLatitude), POINT(?,?))*0.001,1) AS distance\n" +
+                "                FROM Store S\n" +
+                "                LEFT JOIN (\n" +
+                "                    SELECT UO.storeIdx, ROUND(AVG(R.score),1) AS reviewScore, COUNT(R.reviewIdx) AS reviewCount\n" +
+                "                    FROM Review R JOIN UserOrder UO on R.userOrderIdx=UO.userOrderIdx\n" +
+                "                    GROUP BY UO.storeIdx) R ON R.storeIdx=S.storeIdx\n" +
+                "                WHERE S.status != 'N' AND S.storeIdx=?;";
 
-//        String StoreCouponQuery = "SELECT S.storeIdx, IFNULL(C.discountPrice,0) AS maxDiscountPrice, IFNULL(C.couponType,'N') AS couponType\n" +
-//                "FROM Store S\n" +
-//                "LEFT JOIN (SELECT RankRow.storeIdx, RankRow.discountPrice, RankRow.couponType\n" +
-//                "            FROM (SELECT*, RANK() OVER (PARTITION BY storeIdX ORDER BY discountPrice DESC, couponIdx ASC) AS a\n" +
-//                "                  FROM Coupon\n" +
-//                "                WHERE status='Y' AND  DATEDIFF(endDate, CURRENT_DATE())>=0\n" +
-//                "                 ) AS RankRow\n" +
-//                "            WHERE RankRow.a <= 1) C ON C.storeIdx = S.storeIdx\n" +
-//                "WHERE S.storeIdx = ?;";
-        String StoreCouponQuery = "SELECT couponIdx, storeIdx, couponTitle, discountPrice, limitPrice, endDate, couponType, DATE_FORMAT(createdAt, '%Y-%m-%d %H:%I:%S') AS createdAt, status FROM Coupon WHERE status='Y' AND storeIdx=?;";
-        String DeliveryTimeQuery = "SELECT storeIdx, minPrice, maxPrice, deliveryFee FROM DeliveryFee WHERE storeIdx=?;";
+        String StoreCouponQuery = "SELECT couponIdx, couponTitle, CONCAT(FORMAT(discountPrice,0),'원') AS discountPrice, \n" +
+                "       CONCAT(FORMAT(limitPrice,0),'원 이상 주문 시') AS limitPrice,\n" +
+                "       CONCAT(DATE_FORMAT(endDate, '%m/%d'),' 까지') AS endDate, couponType\n" +
+                "FROM Coupon WHERE status='Y' AND storeIdx=? AND DATEDIFF(endDate, CURRENT_DATE())>=0;";
+
+//        String DeliveryFeeInfo = "SELECT storeIdx, minPrice, maxPrice, deliveryFee FROM DeliveryFee WHERE storeIdx=?;";
+
+        String DeliveryFeeInfo = "SELECT storeIdx,\n" +
+                "       CASE WHEN deliveryFee=0 THEN '무료' ELSE CONCAT(FORMAT(deliveryFee,0),'원') END AS deliveryFee,\n" +
+                "       CASE WHEN maxPrice IS NULL THEN CONCAT(FORMAT(minPrice,0),'원 ~ ') ELSE CONCAT(FORMAT(minPrice,0), '원 ~ ', FORMAT(maxPrice,0),'원') END AS orderPrice\n" +
+                "FROM DeliveryFee WHERE storeIdx=?;";
+
         String MenuCategoryQuery = "SELECT MC.menuCategoryIdx, storeIdx, categoryName\n" +
                 "FROM MenuCategory MC\n" +
                 "WHERE MC.storeIdx=?;";
@@ -535,7 +526,41 @@ public class StoreDao {
                 "WHERE UO.status='Y' AND UO.storeIdx=?;";
 
 
+        // 가게 총 주문량
+
+        String StoreTotalOrderQuery = "SELECT ROUND(COUNT(*)*0.5) AS storeTotalOrderCount\n" +
+                "FROM UserOrder\n" +
+                "WHERE storeIdx=? AND (status!='E' AND status!='F');";
+        int storeTotalOrder = this.jdbcTemplate.queryForObject(StoreTotalOrderQuery, int.class, storeIdx);
+        // 가게의 총 메뉴 좋아요 수
+        String StoreTotalMenuGood = "SELECT ROUND(COUNT(*)*0.5)\n" +
+                "FROM CartToOrder CTO JOIN Cart C on CTO.cartIdx = C.cartIdx\n" +
+                "WHERE C.storeIdx=? AND CTO.isGood='G' AND CTO.status!='N';";
+        int storeTotalMenuGood = this.jdbcTemplate.queryForObject(StoreTotalMenuGood, int.class, storeIdx);
+
+        String IsManyOrderQuery = "SELECT CASE WHEN COUNT(*)>=? THEN 'Y' ELSE 'N' END AS isManyOrder\n" +
+                "FROM CartToOrder CTO JOIN Cart C on CTO.cartIdx = C.cartIdx\n" +
+                "WHERE C.menuIdx=? AND CTO.status!='N';";
+        String IsManyReviewQuery = "SELECT CASE WHEN COUNT(*)>=? THEN 'Y' ELSE 'N' END AS isManyReview\n" +
+                "FROM CartToOrder CTO JOIN Cart C on CTO.cartIdx = C.cartIdx\n" +
+                "WHERE C.menuIdx=? AND CTO.isGood='G' AND CTO.status!='N';";
+
+
+        String isFavoriteStoreQuery = "SELECT EXISTS(SELECT * FROM Favorite WHERE storeIdx=? AND userIdx=? AND status='Y');";
+        String isFavorite = "N";
+        if (userIdx!=0){
+            // 로그인 한 상태라면
+            Object[] FavoriteParam = new Object[]{storeIdx, userIdx};
+            if (this.jdbcTemplate.queryForObject(isFavoriteStoreQuery, int.class, FavoriteParam)==1){
+                // 좋아요 한 가게라면
+                isFavorite = "Y";
+            }
+        }
+        String isFavoriteStore = isFavorite;
+
+
         int Param = storeIdx;
+        Object[] StoreInfoParams = new Object[]{userLocation.getUserLongitude(),userLocation.getUserLatitude(), storeIdx};
 
         List<PhotoReview> photoReview = this.jdbcTemplate.query(PhotoReviewQuery,
                 (rs1, rowNum1) -> new PhotoReview(
@@ -557,29 +582,59 @@ public class StoreDao {
                                         rs4.getString("menuDetail"),
                                         rs4.getString("menuImgUrl"),
                                         rs4.getString("isOption"),
-                                        rs4.getString("status")
+                                        rs4.getString("status"),
+                                        this.jdbcTemplate.queryForObject(IsManyOrderQuery,
+                                                String.class,
+                                                storeTotalOrder, rs4.getInt("menuIdx")),
+                                        this.jdbcTemplate.queryForObject(IsManyReviewQuery,
+                                                String.class,
+                                                storeTotalMenuGood,rs4.getInt("menuIdx"))
+
                                 ), rs3.getInt("menuCategoryIdx"))
                 ), Param);
 
-        List<DeliveryFeeInfo> deliveryFeeInfo = this.jdbcTemplate.query(DeliveryTimeQuery,
+        List<DeliveryFeeInfo> deliveryFeeInfo = this.jdbcTemplate.query(DeliveryFeeInfo,
                 (rs1, rowNum1) -> new DeliveryFeeInfo(
                         rs1.getInt("storeIdx"),
-                        rs1.getInt("minPrice"),
-                        rs1.getInt("maxPrice"),
-                        rs1.getInt("deliveryFee")
+                        rs1.getString("orderPrice"),
+                        rs1.getString("deliveryFee")
                 ), Param);
+
+
         List<StoreCouponInfo> storeCouponInfo = this.jdbcTemplate.query(StoreCouponQuery,
                 (rs2, rowNum2) -> new StoreCouponInfo(
                         rs2.getInt("couponIdx"),
-                        rs2.getInt("storeIdx"),
                         rs2.getString("couponTitle"),
-                        rs2.getInt("discountPrice"),
-                        rs2.getInt("limitPrice"),
+                        rs2.getString("discountPrice"),
+                        rs2.getString("limitPrice"),
                         rs2.getString("endDate"),
-                        rs2.getString("couponType"),
-                        rs2.getString("createdAt"),
-                        rs2.getString("status")
+                        rs2.getString("couponType")
                 ), Param);
+
+
+        /*
+        StoreInfo storeInfo = this.jdbcTemplate.queryForObject(StoreInfoQuery,
+                (rs1, rowNum1) -> new StoreInfo(
+                        rs1.getInt("storeIdx"),
+                        rs1.getString("storeImgUrl"),
+                        rs1.getString("storeName"),
+                        rs1.getString("isCheetah"),
+                        rs1.getString("timeDelivery"),
+                        rs1.getString("isToGo"),
+                        rs1.getString("isCoupon"),
+                        rs1.getInt("minimumPrice"),
+                        rs1.getString("buildingName"),
+                        rs1.getString("storeAddress"),
+                        rs1.getString("storeAddressDetail"),
+                        rs1.getString("status"),
+                        rs1.getString("createdAt"),
+                        rs1.getDouble("reviewScore"),
+                        rs1.getInt("reviewCount"),
+                        rs1.getDouble("distance"),
+                        orderCount,
+                        deliveryFee
+                ), Params);
+         */
 
         return this.jdbcTemplate.queryForObject(StoreInfoQuery,
                 (rs, rowNum) -> new GetStoreDetailRes(
@@ -591,6 +646,10 @@ public class StoreDao {
                         rs.getString("isToGo"),
                         rs.getString("isCoupon"),
                         rs.getInt("minimumPrice"),
+                        rs.getString("buildingName"),
+                        rs.getString("storeAddress"),
+                        rs.getString("storeAddressDetail"),
+                        rs.getDouble("distance"),
                         rs.getString("status"),
                         rs.getDouble("reviewScore"),
                         rs.getInt("reviewCount"),
@@ -598,8 +657,9 @@ public class StoreDao {
                         storeCouponInfo,
                         deliveryFeeInfo,
                         photoReview,
-                        menuCategory),
-                Param);
+                        menuCategory,
+                        isFavoriteStore),
+                StoreInfoParams);
 
 
     }
@@ -627,6 +687,7 @@ public class StoreDao {
 
         return this.jdbcTemplate.queryForObject(MenuInfoQuery,
                 (rs1, rowNum1) -> new GetStoreMenuOptionsRes(
+                        rs1.getInt("menuIdx"),
                         rs1.getString("menuImgUrl"),
                         rs1.getString("menuName"),
                         rs1.getString("menuDetail"),

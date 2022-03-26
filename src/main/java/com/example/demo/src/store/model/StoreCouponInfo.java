@@ -17,12 +17,9 @@ import java.time.DateTimeException;
 @NoArgsConstructor
 public class StoreCouponInfo {
     private int couponIdx;
-    private int storeIdx;
     private String couponTitle;
-    private int discountPrice;
-    private int limitPrice;
+    private String discountPrice;
+    private String limitPrice;
     private String endDate;
     private String couponType;
-    private String createdAt;
-    private String status;
 }

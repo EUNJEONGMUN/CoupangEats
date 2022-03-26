@@ -45,9 +45,7 @@ public class StoreController {
     public BaseResponse<List<GetStoreHomeRes>> getStoreHome(@RequestParam(required = false, defaultValue = "0") double longitude,
                                                             @RequestParam(required = false, defaultValue = "0") double latitude,
                                                             @RequestParam(required = false, defaultValue = "0") int categoryIdx) throws BaseException{
-//        if (storeHome.getCategoryIdx()!=0 && storeProvider.checkStoreCategory(storeHome.getCategoryIdx())==0){
-//            return new BaseResponse<>(EMPTY_STORE_CATEGORY);
-//        }
+
         int userIdx= jwtService.getUserIdxOption();
         if (latitude==0 || longitude==0){
             return new BaseResponse<>(EMPTY_POSITION_PARAM);
@@ -78,7 +76,26 @@ public class StoreController {
      */
     @ResponseBody
     @GetMapping("/detail")
-    public BaseResponse<GetStoreDetailRes> getStoreDetail(@RequestParam(required = false, defaultValue = "0") int storeIdx) throws BaseException{
+    public BaseResponse<GetStoreDetailRes> getStoreDetail(@RequestParam(required = false, defaultValue = "0") double longitude,
+                                                          @RequestParam(required = false, defaultValue = "0") double latitude,
+                                                          @RequestParam(required = false, defaultValue = "0") int storeIdx) throws BaseException{
+        int userIdx= jwtService.getUserIdxOption();
+        if (latitude==0 || longitude==0){
+            return new BaseResponse<>(EMPTY_POSITION_PARAM);
+        }
+
+        UserLocation userLocation = new UserLocation();
+
+        if (userIdx == 0){
+            userLocation.setUserLongitude(longitude);
+            userLocation.setUserLatitude(latitude);
+        } else{
+            userLocation = storeProvider.getNowUserLocation(userIdx);
+            if (userLocation.getUserLatitude()==0 || userLocation.getUserLatitude()==0){
+                userLocation.setUserLongitude(longitude);
+                userLocation.setUserLatitude(latitude);
+            }
+        }
 
         // storeIdx
         if (storeIdx == 0){
@@ -89,7 +106,7 @@ public class StoreController {
         }
 
 
-        GetStoreDetailRes getStoreDetailRes = storeProvider.getStoreDetail(storeIdx);
+        GetStoreDetailRes getStoreDetailRes = storeProvider.getStoreDetail(userLocation, storeIdx, userIdx);
         return new BaseResponse<>(getStoreDetailRes);
     }
 
@@ -125,9 +142,15 @@ public class StoreController {
 
     }
 
-    /**
-     * 리뷰 조회 API
-     * [GET] /stores/options?storeIdx=&menuIdx=
-     * @return BaseResponse<GetStoreMenuOptionsRes>
-     */
+//    /**
+//     * 가게별 리뷰 조회 API
+//     * [GET] /stores/review-list
+//     * /review-list?storeIdx=
+//     * @return BaseResponse<List<GetStoreReviewListRes>>
+//     */
+//    public BaseResponse<List<GetStoreReviewListRes>> getMenuOptions(@RequestParam(required = false, defaultValue = "0") int storeIdx){
+//
+//
+//    }
+
 }
