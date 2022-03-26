@@ -2,6 +2,7 @@ package com.example.demo.src.orders;
 
 import com.example.demo.src.orders.model.CartMenu;
 import com.example.demo.src.orders.model.Req.PostCreateCartReq;
+import com.example.demo.src.orders.model.Req.PostCreateOrderReq;
 import com.example.demo.src.orders.model.Req.PutModifyCartReq;
 import com.example.demo.src.orders.model.Res.GetCartListRes;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -9,6 +10,11 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Repository;
 
 import javax.sql.DataSource;
+import java.sql.Date;
+import java.text.SimpleDateFormat;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -170,5 +176,39 @@ public class OrderDao {
         String Query = "UPDATE Cart SET orderCount=?, status=? WHERE cartIdx=? AND storeIdx=?;";
         Object[] Params = new Object[]{putModifyCartReq.getChangeCount(), putModifyCartReq.getStatus(), cartIdx, storeIdx};
         return this.jdbcTemplate.update(Query, Params);
+    }
+
+    // 쿠폰 사용 처리
+    public void userCoupon(int userIdx, int couponIdx) {
+        String Query = "UPDATE UserCoupon SET status='U' WHERE couponIdx=? AND userIdx=?;";
+        Object[] Params = new Object[]{couponIdx, userIdx};
+        this.jdbcTemplate.update(Query, Params);
+    }
+
+    public int createOrder(int userIdx, String[] cartList, PostCreateOrderReq postCreateOrderReq) {
+        String InsertCartToOrderQuery = "INSERT INTO CartToOrder (userIdx, cartIdx, orderTime) VALUES (?,?,?);";
+        String UpdateUserCart = "UPDATE Cart SET status='O' WHERE cartIdx=?;";
+        String InsertUserOrderQuery = "INSERT INTO UserOrder (userIdx, storeIdx, message, deliveryManOptionIdx, deliveryManContent, orderTime) VALUES (?,?,?,?,?,?);";
+
+        // 현재 날짜 구하기
+        LocalDateTime now = LocalDateTime.now();
+
+        // 포맷 정의
+        String orderTime = now.format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));
+        // 포맷 적용
+
+        for (int i=0; i< cartList.length; i++){
+            Object[] Params = new Object[]{userIdx, cartList[i], orderTime};
+            this.jdbcTemplate.update(InsertCartToOrderQuery, Params); // 주문 매핑 테이블
+            this.jdbcTemplate.update(UpdateUserCart, cartList[i]); // 카트에서 삭제
+        }
+
+        Object[] Params2 = new Object[]{userIdx, postCreateOrderReq.getStoreIdx(), postCreateOrderReq.getMessage(),
+                postCreateOrderReq.getDeliveryManOptionIdx(), postCreateOrderReq.getDeliveryManContent(), orderTime};
+        return this.jdbcTemplate.update(InsertUserOrderQuery,Params2); // 주문테이블
+
+
+
+
     }
 }

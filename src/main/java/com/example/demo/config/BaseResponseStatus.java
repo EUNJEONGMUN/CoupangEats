@@ -98,7 +98,8 @@ public enum BaseResponseStatus {
     FAIL_POST_OTHER_ADDRESS(false, 4402, "주소지 추가에 실패했습니다."),
     FAIL_DELETE_EXISTS_ADDRESS(false, 4403, "기존 주소지 삭제에 실패했습니다."),
     FAIL_MODIFY_ADDRESS(false, 4404, "주소지 수정에 실패했습니다."),
-    FAIL_MODIFY_CART(false, 4405, "카드 수정에 실패했습니다.");
+    FAIL_MODIFY_CART(false, 4405, "카드 수정에 실패했습니다."),
+    FAIL_CREATE_ORDER(false, 4406, "주문하기에 실패했습니다.");
 
     // 5000 : 필요시 만들어서 쓰세요
     // 6000 : 필요시 만들어서 쓰세요

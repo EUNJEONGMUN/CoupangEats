@@ -3,6 +3,7 @@ package com.example.demo.src.orders;
 import com.example.demo.config.BaseException;
 import com.example.demo.config.BaseResponse;
 import com.example.demo.src.orders.model.Req.PostCreateCartReq;
+import com.example.demo.src.orders.model.Req.PostCreateOrderReq;
 import com.example.demo.src.orders.model.Req.PutModifyCartReq;
 import com.example.demo.src.orders.model.Res.GetCartListRes;
 import com.example.demo.src.user.UserProvider;
@@ -186,5 +187,28 @@ public class OrderController {
 
 
     }
+
+    /**
+     * 주문하기 API
+     * [POST] /orders/delivery
+     * /delivery?cartList=
+     * @return BaseResponse<String>
+     */
+    @ResponseBody
+    @PostMapping("/delivery")
+    public BaseResponse<String> createOrder(@RequestParam String[] cartList, @RequestBody PostCreateOrderReq postCreateOrderReq) throws BaseException {
+        int userIdx= jwtService.getUserIdx();
+
+        // 사용자 존재 여부 확인
+        if (userProvider.checkUser(userIdx)==0){
+            return new BaseResponse<>(USER_NOT_EXISTS);
+        }
+
+        orderService.createOrder(userIdx, cartList, postCreateOrderReq);
+        String result = "";
+        return new BaseResponse<>(result);
+
+    }
+
 
 }

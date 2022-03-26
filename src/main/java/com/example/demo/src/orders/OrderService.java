@@ -2,6 +2,7 @@ package com.example.demo.src.orders;
 
 import com.example.demo.config.BaseException;
 import com.example.demo.src.orders.model.Req.PostCreateCartReq;
+import com.example.demo.src.orders.model.Req.PostCreateOrderReq;
 import com.example.demo.src.orders.model.Req.PutModifyCartReq;
 import com.example.demo.utils.JwtService;
 import org.slf4j.Logger;
@@ -103,6 +104,30 @@ public class OrderService {
             }
         }catch (Exception exception) {
             System.out.println("modifyCart"+exception);
+            throw new BaseException(DATABASE_ERROR);
+        }
+    }
+
+    /**
+     * 주문하기 API
+     * [POST] /orders/delivery
+     * /delivery?cartList=
+     * @return BaseResponse<String>
+     */
+    public void createOrder(int userIdx, String[] cartList, PostCreateOrderReq postCreateOrderReq) throws BaseException {
+        try {
+
+            if (postCreateOrderReq.getCouponIdx()!=0){
+                // 쿠폰을 사용한다면 -> 사용 처리
+                orderDao.userCoupon(userIdx, postCreateOrderReq.getCouponIdx());
+            }
+
+            int result = orderDao.createOrder(userIdx, cartList, postCreateOrderReq);
+            if (result == FAIL){
+                throw new BaseException(FAIL_CREATE_ORDER);
+            }
+        }catch (Exception exception) {
+            System.out.println("createOrder"+exception);
             throw new BaseException(DATABASE_ERROR);
         }
     }

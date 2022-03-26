@@ -94,7 +94,7 @@ public class StoreController {
     }
 
     /**
-     * 메뉴 상세 화면 조회 조회 API
+     * 메뉴 상세 화면 조회 API
      * [GET] /stores/options?storeIdx=&menuIdx=
      * @return BaseResponse<GetStoreMenuOptionsRes>
      */
@@ -123,7 +123,11 @@ public class StoreController {
         GetStoreMenuOptionsRes getStoreMenuOptionsRes = storeProvider.getMenuOptions(menuIdx);
         return new BaseResponse<>(getStoreMenuOptionsRes);
 
-
-
     }
+
+    /**
+     * 리뷰 조회 API
+     * [GET] /stores/options?storeIdx=&menuIdx=
+     * @return BaseResponse<GetStoreMenuOptionsRes>
+     */
 }
