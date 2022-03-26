@@ -517,7 +517,7 @@ public class StoreDao {
                 "FROM MenuCategory MC\n" +
                 "WHERE MC.storeIdx=?;";
 
-        String MenuDetailQuery = "SELECT menuName, menuPrice, menuDetail, menuImgUrl, isOption, status\n" +
+        String MenuDetailQuery = "SELECT menuIdx, menuName, menuPrice, menuDetail, menuImgUrl, isOption, status\n" +
                 "FROM Menu\n" +
                 "WHERE status!='N' AND menuCategoryIdx=?;";
 
@@ -551,6 +551,7 @@ public class StoreDao {
                         rs3.getString("categoryName"),
                         this.jdbcTemplate.query(MenuDetailQuery,
                                 (rs4, rowNum4) -> new MenuDetail(
+                                        rs4.getInt("menuIdx"),
                                         rs4.getString("menuName"),
                                         rs4.getInt("menuPrice"),
                                         rs4.getString("menuDetail"),

@@ -11,6 +11,7 @@ import java.util.List;
 @Setter
 @AllArgsConstructor
 public class GetDeliveryListRes {
+    private int userOrderIdx;
     private int storeIdx;
     private String storeImgUrl;
     private String storeName;

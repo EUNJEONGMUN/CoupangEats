@@ -11,6 +11,7 @@ import lombok.Setter;
 @AllArgsConstructor
 @NoArgsConstructor
 public class MenuDetail {
+    private int menuIdx;
     private String menuName;
     private int menuPrice;
     private String menuDetail;

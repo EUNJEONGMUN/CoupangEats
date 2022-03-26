@@ -314,6 +314,7 @@ public class OrderDao {
 
         return this.jdbcTemplate.queryForObject(StoreInfo,
                 (rs, rowNum) -> new GetDeliveryListRes(
+                        orderList.getUserOrderIdx(),
                         rs.getInt("storeIdx"),
                         rs.getString("storeImgUrl"),
                         rs.getString("storeName"),

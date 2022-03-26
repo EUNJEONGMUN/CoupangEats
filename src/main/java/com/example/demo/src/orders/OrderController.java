@@ -6,6 +6,7 @@ import com.example.demo.src.orders.model.Req.*;
 import com.example.demo.src.orders.model.Res.*;
 import com.example.demo.src.user.UserProvider;
 import com.example.demo.utils.JwtService;
+import com.fasterxml.jackson.databind.ser.Serializers;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -264,9 +265,17 @@ public class OrderController {
 
         List<GetDeliveryListRes> getDeliveryListRes = orderProvider.getUserDelivery(userIdx);
         return new BaseResponse<>(getDeliveryListRes);
-
-
-
     }
+
+//
+//    /**
+//     * 재주문하기 API
+//     * [POST] /orders/delivery/reorder?userOrderIdx=
+//     * /reorder?userOrderIdx=
+//     * @return BaseResponse<String>
+//     */
+//    @ResponseBody
+//    @PostMapping("/delivery/reorder")
+//    public BaseResponse<String> reCreateOrder(@RequestParam(required = false, defaultValue = "0") int userOrderIdx)
 
 }
