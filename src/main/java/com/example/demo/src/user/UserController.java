@@ -6,7 +6,6 @@ import com.example.demo.src.user.model.Req.PostAddressReq;
 import com.example.demo.src.user.model.Req.*;
 import com.example.demo.src.user.model.Res.*;
 import com.example.demo.src.user.model.UserNowAddressIdx;
-import com.example.demo.src.user.model.UserNowAddressInfo;
 import com.example.demo.utils.JwtService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -73,23 +72,23 @@ public class UserController {
 
 
         // 비밀번호 정규식 확인
-        if (!isRegexPwd(postUserReq.getPassward())) {
+        if (!isRegexPwd(postUserReq.getPassword())) {
             return new BaseResponse<>(POST_USERS_INVALID_PWD);
         }
 
-        if (!isRegexPwdLen(postUserReq.getPassward())){
+        if (!isRegexPwdLen(postUserReq.getPassword())){
             return new BaseResponse<>(POST_USERS_INVALID_PWD_LEN);
         }
 
         // 3개 이상연속 되거나 동일한 문자/숫자 체크
-        if (!isRegexPwdContinuous(postUserReq.getPassward()) || isRegexPwdThreeSame(postUserReq.getPassward())){
+        if (!isRegexPwdContinuous(postUserReq.getPassword()) || isRegexPwdThreeSame(postUserReq.getPassword())){
             return new BaseResponse<>(POST_USERS_INVALID_PWD_CONTINUOUS);
         }
 
         String userEmail = postUserReq.getEmail().substring(0, postUserReq.getEmail().lastIndexOf("@"));
 
         // 아이디(이메일)와 비밀번호 동일 여부 체크
-        if (postUserReq.getPassward().contains(userEmail)) {
+        if (postUserReq.getPassword().contains(userEmail)) {
             return new BaseResponse<>(PWD_CONTAINS_EMAIL);
         }
 

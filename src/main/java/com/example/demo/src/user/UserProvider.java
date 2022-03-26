@@ -1,7 +1,6 @@
 package com.example.demo.src.user;
 
 import com.example.demo.config.BaseException;
-import com.example.demo.config.BaseResponse;
 import com.example.demo.src.user.model.Res.GetUserAddressRes;
 import com.example.demo.src.user.model.UserNowAddressInfo;
 import org.slf4j.Logger;
@@ -60,9 +59,9 @@ public class UserProvider {
     }
 
     // 회원가입 시 사용자 존재 여부 확인
-    public int checkPassward(String email, String encryptPwd) throws BaseException  {
+    public int checkPassword(String email, String encryptPwd) throws BaseException  {
         try {
-            return userDao.checkPassward(email, encryptPwd);
+            return userDao.checkPassword(email, encryptPwd);
         } catch (Exception exception){
             throw new BaseException(DATABASE_ERROR);
         }

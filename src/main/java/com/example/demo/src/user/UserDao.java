@@ -3,7 +3,6 @@ package com.example.demo.src.user;
 import com.example.demo.src.user.model.*;
 import com.example.demo.src.user.model.Req.*;
 import com.example.demo.src.user.model.Res.GetUserAddressRes;
-import com.example.demo.src.user.model.Res.PutAddressChoiceRes;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Repository;
@@ -28,8 +27,8 @@ public class UserDao {
      */
     public int createUser(PostUserReq postUserReq) {
         // 사용자 정보 insert
-        String UserInfoQuery = "INSERT INTO User (userName, email, passward, phoneNumber) VALUES (?,?,?,?);";
-        Object[] UserInfoParams = new Object[]{postUserReq.getUserName(), postUserReq.getEmail(), postUserReq.getPassward(), postUserReq.getPhoneNumber()};
+        String UserInfoQuery = "INSERT INTO User (userName, email, password, phoneNumber) VALUES (?,?,?,?);";
+        Object[] UserInfoParams = new Object[]{postUserReq.getUserName(), postUserReq.getEmail(), postUserReq.getPassword(), postUserReq.getPhoneNumber()};
         return this.jdbcTemplate.update(UserInfoQuery, UserInfoParams);
 
     }
@@ -143,8 +142,8 @@ public class UserDao {
     }
 
     // 회원가입 시 사용자 존재 여부 확인
-    public int checkPassward(String email, String encryptPwd) {
-        String Query = "SELECT EXISTS(SELECT * FROM User WHERE User.email=? AND User.passward=? AND User.status='Y');";
+    public int checkPassword(String email, String encryptPwd) {
+        String Query = "SELECT EXISTS(SELECT * FROM User WHERE User.email=? AND User.password=? AND User.status='Y');";
         Object[] Params = new Object[]{email, encryptPwd};
 
         return this.jdbcTemplate.queryForObject(Query,
@@ -156,8 +155,8 @@ public class UserDao {
     public User getUserInfo(PostSignInReq postSignInReq) {
         String Query = "SELECT U.userIdx, U.userName, U.phoneNumber, UL.userLongitude, UL.userLatitude\n" +
                 "FROM User U JOIN UserLocation UL on U.userIdx = UL.userIdx\n" +
-                "WHERE U.email=? AND U.passward=?;";
-        Object[] Params = new Object[]{postSignInReq.getEmail(), postSignInReq.getPassward()};
+                "WHERE U.email=? AND U.password=?;";
+        Object[] Params = new Object[]{postSignInReq.getEmail(), postSignInReq.getPassword()};
 
 
         return this.jdbcTemplate.queryForObject(Query,

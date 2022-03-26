@@ -4,7 +4,6 @@ import com.example.demo.config.BaseException;
 import com.example.demo.src.user.model.Req.PostAddressReq;
 import com.example.demo.src.user.model.Req.*;
 import com.example.demo.src.user.model.Res.PostSignInRes;
-import com.example.demo.src.user.model.Res.PutAddressChoiceRes;
 import com.example.demo.src.user.model.User;
 import com.example.demo.src.user.model.UserNowAddressIdx;
 import com.example.demo.src.user.model.UserNowAddressInfo;
@@ -53,8 +52,8 @@ public class UserService {
         String pwd;
 
         try {
-            pwd = new SHA256().encrypt(postUserReq.getPassward());
-            postUserReq.setPassward(pwd);
+            pwd = new SHA256().encrypt(postUserReq.getPassword());
+            postUserReq.setPassword(pwd);
         } catch (Exception ignored) {
             throw new BaseException(PASSWORD_ENCRYPTION_ERROR);
         }
@@ -78,15 +77,15 @@ public class UserService {
         String encryptPwd;
         try {
             // 사용자에게 바디값으로 받은 비밀번호 암호화
-            encryptPwd = new SHA256().encrypt(postSignInReq.getPassward());
-            postSignInReq.setPassward(encryptPwd);
+            encryptPwd = new SHA256().encrypt(postSignInReq.getPassword());
+            postSignInReq.setPassword(encryptPwd);
         } catch (Exception ignored) {
             throw new BaseException(PASSWORD_DECRYPTION_ERROR);
         }
 
         // 사용자가 존재하는지 확인
         // 존재하지 않을 때
-        if(userProvider.checkPassward(postSignInReq.getEmail(),encryptPwd) != 1){
+        if(userProvider.checkPassword(postSignInReq.getEmail(),encryptPwd) != 1){
             throw new BaseException(FAILED_TO_LOGIN);
         }
 
