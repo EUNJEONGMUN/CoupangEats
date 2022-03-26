@@ -5,6 +5,7 @@ import com.example.demo.config.BaseResponse;
 import com.example.demo.src.user.model.Req.PostAddressReq;
 import com.example.demo.src.user.model.Req.*;
 import com.example.demo.src.user.model.Res.*;
+import com.example.demo.src.user.model.UserNowAddressIdx;
 import com.example.demo.src.user.model.UserNowAddressInfo;
 import com.example.demo.utils.JwtService;
 import org.slf4j.Logger;
@@ -138,7 +139,7 @@ public class UserController {
     @ResponseBody
 //    @RequestMapping(value="/users/address", method = RequestMethod.POST)
     @PostMapping("/address")
-    public BaseResponse<String> createAddress(@Valid @RequestBody PostAddressReq postAddressReq) throws BaseException {
+    public BaseResponse<UserNowAddressIdx> createAddress(@Valid @RequestBody PostAddressReq postAddressReq) throws BaseException {
 
         int userIdx= jwtService.getUserIdx();
 
@@ -163,8 +164,8 @@ public class UserController {
                 userService.deleteExistsAddress(duplicatedAddressIdx);
             }
         }
-        userService.createAddress(userIdx, postAddressReq);
-        return new BaseResponse<>(result);
+        UserNowAddressIdx userNowAddressIdx = userService.createAddress(userIdx, postAddressReq);
+        return new BaseResponse<>(userNowAddressIdx);
 
     }
 
@@ -243,7 +244,7 @@ public class UserController {
     @ResponseBody
 //    @RequestMapping(value="/users/address/choice", method = RequestMethod.PUT)
     @PutMapping("/address/choice")
-    public BaseResponse<UserNowAddressInfo> putAddressChoice(@RequestParam(required = false, defaultValue = "0") int addressIdx) throws BaseException {
+    public BaseResponse<UserNowAddressIdx> putAddressChoice(@RequestParam(required = false, defaultValue = "0") int addressIdx) throws BaseException {
 
         int userIdx= jwtService.getUserIdx();
         if (userProvider.checkUser(userIdx)==0){
@@ -255,8 +256,8 @@ public class UserController {
         }
 
 
-        UserNowAddressInfo putAddressChoiceRes = userService.putAddressChoice(userIdx, addressIdx);
-        return new BaseResponse<>(putAddressChoiceRes);
+        UserNowAddressIdx userNowAddressIdx = userService.putAddressChoice(userIdx, addressIdx);
+        return new BaseResponse<>(userNowAddressIdx);
 
     }
 

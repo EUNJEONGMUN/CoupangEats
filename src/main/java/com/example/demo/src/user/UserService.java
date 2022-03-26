@@ -6,6 +6,7 @@ import com.example.demo.src.user.model.Req.*;
 import com.example.demo.src.user.model.Res.PostSignInRes;
 import com.example.demo.src.user.model.Res.PutAddressChoiceRes;
 import com.example.demo.src.user.model.User;
+import com.example.demo.src.user.model.UserNowAddressIdx;
 import com.example.demo.src.user.model.UserNowAddressInfo;
 import com.example.demo.utils.JwtService;
 import org.slf4j.Logger;
@@ -110,12 +111,14 @@ public class UserService {
      * [POST] /users/address
      * @return BaseResponse<String>
      */
-    public void createAddress(int userIdx, PostAddressReq postAddressReq) throws BaseException {
+    public UserNowAddressIdx createAddress(int userIdx, PostAddressReq postAddressReq) throws BaseException {
         try {
-            int result = userDao.createAddress(userIdx, postAddressReq);
-            if (result == FAIL){
+            int lastIdx = userDao.createAddress(userIdx, postAddressReq);
+            if (lastIdx == FAIL){
                 throw new BaseException(FAIL_DELETE_EXISTS_ADDRESS);
             }
+            UserNowAddressIdx userNowAddressIdx = userDao.putAddressChoice(userIdx, lastIdx);
+            return userNowAddressIdx; // 리턴값 바꾸기
         } catch (Exception exception) {
             System.out.println("createAddress"+exception);
             throw new BaseException(DATABASE_ERROR);
@@ -159,10 +162,10 @@ public class UserService {
      * /choice?addressIdx=
      * @return BaseResponse<String>
      */
-    public UserNowAddressInfo putAddressChoice(int userIdx, int addressIdx) throws BaseException {
+    public UserNowAddressIdx putAddressChoice(int userIdx, int addressIdx) throws BaseException {
         try {
-            UserNowAddressInfo putAddressChoiceRes = userDao.putAddressChoice(userIdx, addressIdx);
-            return putAddressChoiceRes;
+            UserNowAddressIdx userNowAddressIdx = userDao.putAddressChoice(userIdx, addressIdx);
+            return userNowAddressIdx;
         } catch (Exception exception) {
             System.out.println("putAddressChoice"+exception);
             throw new BaseException(DATABASE_ERROR);

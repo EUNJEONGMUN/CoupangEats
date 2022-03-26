@@ -307,7 +307,13 @@ public class UserDao {
         String Query = "INSERT INTO UserAddress (userIdx, buildingName, address, addressDetail, addressGuide, addressTitle, addressLongitude, addressLatitude, addressType) VALUES (?,?,?,?,?,?,?,?,?);";
         Object[] Params = new Object[]{userIdx, postAddressReq.getBuildingName(), postAddressReq.getAddress(), postAddressReq.getAddressDetail(), postAddressReq.getAddressGuide(),
         postAddressReq.getAddressTitle(), postAddressReq.getAddressLongitude(), postAddressReq.getAddressLatitude(), postAddressReq.getAddressType()};
-        return this.jdbcTemplate.update(Query, Params);
+        this.jdbcTemplate.update(Query, Params);
+
+        String lastInsertIdQuery = "select last_insert_id()";
+        return this.jdbcTemplate.queryForObject(lastInsertIdQuery,int.class);
+
+
+
     }
 
     /**
@@ -332,12 +338,12 @@ public class UserDao {
      * /choice?addressIdx=
      * @return BaseResponse<String>
      */
-    public UserNowAddressInfo putAddressChoice(int userIdx, int addressIdx) {
-        System.out.println(">>진입<<");
+    public UserNowAddressIdx putAddressChoice(int userIdx, int addressIdx) {
+        System.out.println(">>주소지 변경 진입<<");
         String Query = "SELECT EXISTS(SELECT * FROM UserAddress WHERE userIdx=? AND isNowLocation='Y' AND status='Y');";
         int isNowLocationExists = this.jdbcTemplate.queryForObject(Query, int.class, userIdx);
 
-        System.out.println(">><<"+isNowLocationExists);
+        System.out.println(">>isNowLocationExists<<"+isNowLocationExists);
 
         if (isNowLocationExists != 0){
             String findPastLocationQuery = "SELECT userAddressIdx FROM UserAddress WHERE userIdx=? AND isNowLocation='Y' AND status='Y';";
@@ -345,29 +351,37 @@ public class UserDao {
 
             String DeletePastLocation = "UPDATE UserAddress SET isNowLocation='N' WHERE userAddressIdx=?;";
             this.jdbcTemplate.update(DeletePastLocation, findPastLocation);
-            System.out.println("여기");
         }
-        System.out.println("여기여기");
+
         String updateNowLocation = "UPDATE UserAddress SET isNowLocation='Y' WHERE userIdx=? AND userAddressIdx=?;";
         Object[] Params = new Object[]{userIdx, addressIdx};
         this.jdbcTemplate.update(updateNowLocation, Params);
-        System.out.println("여기여기ㅇ기");
+
+//        String getNowAddressQuery = "SELECT userAddressIdx, buildingName, address, addressDetail, addressGuide, addressTitle, addressLongitude, addressLatitude, addressType\n" +
+//                "FROM UserAddress\n" +
+//                "WHERE userAddressIdx=?;";
+
         String getNowAddressQuery = "SELECT userAddressIdx, buildingName, address, addressDetail, addressGuide, addressTitle, addressLongitude, addressLatitude, addressType\n" +
                 "FROM UserAddress\n" +
                 "WHERE userAddressIdx=?;";
 
+//        return this.jdbcTemplate.queryForObject(getNowAddressQuery,
+//                (rs, rowNum) -> new UserNowAddressInfo(
+//                        rs.getInt("userAddressIdx"),
+//                        rs.getString("buildingName"),
+//                        rs.getString("address"),
+//                        rs.getString("addressDetail"),
+//                        rs.getString("addressGuide"),
+//                        rs.getString("addressTitle"),
+//                        rs.getDouble("addressLongitude"),
+//                        rs.getDouble("addressLatitude"),
+//                        rs.getString("addressType")
+//                ), addressIdx);
+
         return this.jdbcTemplate.queryForObject(getNowAddressQuery,
-                (rs, rowNum) -> new UserNowAddressInfo(
-                        rs.getInt("userAddressIdx"),
-                        rs.getString("buildingName"),
-                        rs.getString("address"),
-                        rs.getString("addressDetail"),
-                        rs.getString("addressGuide"),
-                        rs.getString("addressTitle"),
-                        rs.getDouble("addressLongitude"),
-                        rs.getDouble("addressLatitude"),
-                        rs.getString("addressType")
-                ), addressIdx);
+                (rs, rowNum) -> new UserNowAddressIdx(
+                        rs.getInt("userAddressIdx"))
+                , addressIdx);
 
     }
 }
