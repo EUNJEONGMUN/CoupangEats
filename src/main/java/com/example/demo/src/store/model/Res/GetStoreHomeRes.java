@@ -18,6 +18,6 @@ public class GetStoreHomeRes {
     private List<StoreCategory> storeCategory;
     private StoreBestCoupon storeBestCoupon;
 //    private List<OrderCount> orderCount;
-    private List<StoreMenuImg> storeMenuImg;
+    private List<String> storeMenuImg;
 
 }

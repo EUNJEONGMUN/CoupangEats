@@ -381,7 +381,7 @@ public class StoreDao {
                 "WHERE storeIdx=?\n" +
                 "GROUP BY UO.storeIdx;";
 
-        String StoreMenuImgQuery = "SELECT RankRow.storeIdx, RankRow.menuImgUrl\n" +
+        String StoreMenuImgQuery = "SELECT RankRow.menuImgUrl\n" +
                 "FROM (SELECT*, RANK() OVER (PARTITION BY M.storeIdX ORDER BY M.menuIdx) AS a\n" +
                 "      FROM Menu M\n" +
                 "     ) AS RankRow\n" +
@@ -443,9 +443,8 @@ public class StoreDao {
                         rs2.getString("couponType")
                 ), idx);
 
-        List<StoreMenuImg> storeMenuImg = this.jdbcTemplate.query(StoreMenuImgQuery,
-                (rs1, rowNum1) -> new StoreMenuImg(
-                        rs1.getInt("storeIdx"),
+        List<String> storeMenuImg = this.jdbcTemplate.query(StoreMenuImgQuery,
+                (rs1, rowNum1) -> new String(
                         rs1.getString("menuImgUrl")
                 ),idx);
 
