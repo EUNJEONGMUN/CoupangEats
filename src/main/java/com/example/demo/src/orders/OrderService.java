@@ -131,4 +131,44 @@ public class OrderService {
             throw new BaseException(DATABASE_ERROR);
         }
     }
+
+
+    /**
+     * 주문취소 API
+     * [PUT] /orders/delivery/status?userOrderIdx=
+     * /status?userOrderIdx=
+     * @return BaseResponse<PutOrderRes>
+     */
+    public void deleteOrder(int userIdx, int userOrderIdx) throws BaseException {
+        try {
+            int result = orderDao.deleteOrder(userIdx, userOrderIdx);
+            if (result == FAIL){
+                throw new BaseException(FAIL_DELETE_ORDER);
+            }
+        } catch (Exception exception) {
+                System.out.println("checkOrder"+exception);
+                throw new BaseException(DATABASE_ERROR);
+            }
+    }
+
+    // 주문 존재 여부 확인
+    public int checkOrder(int userOrderIdx) throws BaseException {
+        try {
+            return orderDao.checkOrder(userOrderIdx);
+        }catch (Exception exception) {
+            System.out.println("checkOrder"+exception);
+            throw new BaseException(DATABASE_ERROR);
+        }
+    }
+
+    // 주문 소유자 확인
+    public int checkOrderOwner(int userIdx, int userOrderIdx) throws BaseException {
+        try {
+            return orderDao.checkOrderOwner(userIdx, userOrderIdx);
+        }catch (Exception exception) {
+            System.out.println("checkOrderOwner"+exception);
+            throw new BaseException(DATABASE_ERROR);
+        }
+    }
+
 }

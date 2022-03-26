@@ -15,8 +15,6 @@ import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
 
-import java.util.List;
-
 import static com.example.demo.config.BaseResponseStatus.*;
 
 @RestController
@@ -204,11 +202,45 @@ public class OrderController {
             return new BaseResponse<>(USER_NOT_EXISTS);
         }
 
+        if (postCreateOrderReq.getIsSpoon()==null){
+            postCreateOrderReq.setIsSpoon("N");
+        }
+
         orderService.createOrder(userIdx, cartList, postCreateOrderReq);
         String result = "";
         return new BaseResponse<>(result);
 
     }
 
+    /**
+     * 주문취소 API
+     * [PUT] /orders/delivery/status?userOrderIdx=
+     * /status?userOrderIdx=
+     * @return BaseResponse<PutOrderRes>
+     */
+    @ResponseBody
+    @PutMapping("/delivery/status")
+    public BaseResponse<String> deleteOrder(@RequestParam int userOrderIdx) throws BaseException {
+        int userIdx= jwtService.getUserIdx();
 
+        // 사용자 존재 여부 확인
+        if (userProvider.checkUser(userIdx)==0){
+            return new BaseResponse<>(USER_NOT_EXISTS);
+        }
+
+        // 주문 존재 여부 확인
+        if (orderService.checkOrder(userOrderIdx)==0){
+            return new BaseResponse<>(USER_ORDER_NOT_EXISTS);
+        }
+
+        // 주문 소유자 확인
+        if (orderService.checkOrderOwner(userIdx, userOrderIdx)==0){
+            return new BaseResponse<>(USER_ORDER_NOT_EXISTS);
+        }
+
+        String result = "";
+        orderService.deleteOrder(userIdx, userOrderIdx);
+        return new BaseResponse<>(result);
+
+    }
 }

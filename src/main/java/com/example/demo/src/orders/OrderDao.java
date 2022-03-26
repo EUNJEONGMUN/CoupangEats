@@ -1,6 +1,7 @@
 package com.example.demo.src.orders;
 
 import com.example.demo.src.orders.model.CartMenu;
+import com.example.demo.src.orders.model.OrderInfo;
 import com.example.demo.src.orders.model.Req.PostCreateCartReq;
 import com.example.demo.src.orders.model.Req.PostCreateOrderReq;
 import com.example.demo.src.orders.model.Req.PutModifyCartReq;
@@ -178,17 +179,17 @@ public class OrderDao {
         return this.jdbcTemplate.update(Query, Params);
     }
 
-    // 쿠폰 사용 처리
-    public void userCoupon(int userIdx, int couponIdx) {
-        String Query = "UPDATE UserCoupon SET status='U' WHERE couponIdx=? AND userIdx=?;";
-        Object[] Params = new Object[]{couponIdx, userIdx};
-        this.jdbcTemplate.update(Query, Params);
-    }
 
+    /**
+     * 주문하기 API
+     * [POST] /orders/delivery
+     * /delivery?cartList=
+     * @return BaseResponse<String>
+     */
     public int createOrder(int userIdx, String[] cartList, PostCreateOrderReq postCreateOrderReq) {
         String InsertCartToOrderQuery = "INSERT INTO CartToOrder (userIdx, cartIdx, orderTime) VALUES (?,?,?);";
         String UpdateUserCart = "UPDATE Cart SET status='O' WHERE cartIdx=?;";
-        String InsertUserOrderQuery = "INSERT INTO UserOrder (userIdx, storeIdx, message, deliveryManOptionIdx, deliveryManContent, orderTime) VALUES (?,?,?,?,?,?);";
+        String InsertUserOrderQuery = "INSERT INTO UserOrder (userIdx, storeIdx, message, deliveryManOptionIdx, deliveryManContent, useCouponIdx, orderTime) VALUES (?,?,?,?,?,?,?);";
 
         // 현재 날짜 구하기
         LocalDateTime now = LocalDateTime.now();
@@ -204,11 +205,58 @@ public class OrderDao {
         }
 
         Object[] Params2 = new Object[]{userIdx, postCreateOrderReq.getStoreIdx(), postCreateOrderReq.getMessage(),
-                postCreateOrderReq.getDeliveryManOptionIdx(), postCreateOrderReq.getDeliveryManContent(), orderTime};
+                postCreateOrderReq.getDeliveryManOptionIdx(), postCreateOrderReq.getDeliveryManContent(), postCreateOrderReq.getCouponIdx(), orderTime};
         return this.jdbcTemplate.update(InsertUserOrderQuery,Params2); // 주문테이블
 
-
-
-
     }
+
+    // 쿠폰 사용 처리
+    public void userCoupon(int userIdx, int couponIdx) {
+        String Query = "UPDATE UserCoupon SET status='U' WHERE couponIdx=? AND userIdx=?;";
+        Object[] Params = new Object[]{couponIdx, userIdx};
+        this.jdbcTemplate.update(Query, Params);
+    }
+
+    /**
+     * 주문취소 API
+     * [PUT] /orders/delivery/status?userOrderIdx=
+     * /status?userOrderIdx=
+     * @return BaseResponse<PutOrderRes>
+     */
+    public int deleteOrder(int userIdx, int userOrderIdx) {
+        String UpdateUserOrder = "UPDATE UserOrder SET status='N' WHERE userOrderIdx=?;";
+        String GetOrderInfo = "SELECT orderTime, useCouponIdx FROM UserOrder WHERE userOrderIdx=?;";
+        String UpdateCartToOrder = "UPDATE CartToOrder SET status='N' WHERE userIdx=? AND orderTime=?;";
+        String UpdateCoupon = "UPDATE UserCoupon SET status='Y' WHERE userIdx=? AND userCouponIdx=?;";
+
+
+        // 사용한 쿠폰 정보와 주문 시간 select
+        OrderInfo orderInfo = this.jdbcTemplate.queryForObject(GetOrderInfo,
+                (rs, rowNum) -> new OrderInfo(
+                        rs.getString("orderTime"),
+                        rs.getInt("useCouponIdx"))
+                , userOrderIdx);
+
+        Object[] Params = new Object[]{userIdx, orderInfo.getOrderTime()};
+        Object[] ParamsCoupon = new Object[]{userIdx, orderInfo.getUseCouponIdx()};
+
+        this.jdbcTemplate.update(UpdateUserOrder, userOrderIdx);
+        this.jdbcTemplate.update(UpdateCartToOrder, Params);
+        return this.jdbcTemplate.update(UpdateCoupon, ParamsCoupon);
+    }
+
+
+    // 주문 존재 여부 확인
+    public int checkOrder(int userOrderIdx) {
+        String Query = "SELECT EXISTS(SELECT * FROM UserOrder WHERE userOrderIdx=? AND status='Y');";
+        return this.jdbcTemplate.queryForObject(Query, int.class, userOrderIdx);
+    }
+
+    // 주문 소유자 확인
+    public int checkOrderOwner(int userIdx, int userOrderIdx) {
+        String Query = "SELECT EXISTS(SELECT * FROM UserOrder WHERE userOrderIdx=? AND userIdx=?);";
+        Object[] Params = new Object[]{userOrderIdx, userIdx};
+        return this.jdbcTemplate.queryForObject(Query, int.class, Params);
+    }
+
 }
