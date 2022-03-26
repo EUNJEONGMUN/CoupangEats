@@ -15,7 +15,7 @@ import java.util.List;
 @NoArgsConstructor
 public class GetStoreHomeRes {
     private StoreInfo storeInfo;
-    private List<StoreCategory> storeCategory;
+//    private List<StoreCategory> storeCategory;
     private StoreBestCoupon storeBestCoupon;
 //    private List<OrderCount> orderCount;
     private List<String> storeMenuImg;

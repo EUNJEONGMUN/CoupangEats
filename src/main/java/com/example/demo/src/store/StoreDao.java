@@ -370,9 +370,9 @@ public class StoreDao {
                 "FROM DeliveryFee D\n" +
                 "WHERE D.storeIdx=? AND D.status='Y';";
 
-        String StoreCategoryQuery = "SELECT SCM.storeIdx, SC.storeCategoryIdx, categoryName\n" +
-                "FROM StoreCategoryMapping SCM JOIN StoreCategory SC on SCM.storeCategoryIdx = SC.storeCategoryIdx\n" +
-                "WHERE SCM.storeIdx=?;";
+//        String StoreCategoryQuery = "SELECT SCM.storeIdx, SC.storeCategoryIdx, categoryName\n" +
+//                "FROM StoreCategoryMapping SCM JOIN StoreCategory SC on SCM.storeCategoryIdx = SC.storeCategoryIdx\n" +
+//                "WHERE SCM.storeIdx=?;";
 
 //        String StoreCouponQuery = "SELECT couponIdx, storeIdx, couponTitle, discountPrice, limitPrice, endDate, couponType, DATE_FORMAT(createdAt, '%Y-%m-%d %H:%I:%S') AS createdAt, status FROM Coupon WHERE storeIdx=? AND status='Y';";
 
@@ -429,12 +429,12 @@ public class StoreDao {
                         deliveryFee
                 ), Params);
 
-        List<StoreCategory> storeCategory = this.jdbcTemplate.query(StoreCategoryQuery,
-                (rs2, rowNum2) -> new StoreCategory(
-                        rs2.getInt("storeIdx"),
-                        rs2.getInt("storeCategoryIdx"),
-                        rs2.getString("categoryName")
-                ), idx);
+//        List<StoreCategory> storeCategory = this.jdbcTemplate.query(StoreCategoryQuery,
+//                (rs2, rowNum2) -> new StoreCategory(
+//                        rs2.getInt("storeIdx"),
+//                        rs2.getInt("storeCategoryIdx"),
+//                        rs2.getString("categoryName")
+//                ), idx);
 
         StoreBestCoupon storeBestCoupon = this.jdbcTemplate.queryForObject(StoreCouponQuery,
                 (rs2, rowNum2) -> new StoreBestCoupon(
@@ -450,7 +450,7 @@ public class StoreDao {
 
 
 
-        return new GetStoreHomeRes(storeInfo, storeCategory, storeBestCoupon ,storeMenuImg);
+        return new GetStoreHomeRes(storeInfo, storeBestCoupon ,storeMenuImg);
     }
 
     /**

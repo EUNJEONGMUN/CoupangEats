@@ -2,6 +2,7 @@ package com.example.demo.src.orders;
 
 import com.example.demo.config.BaseException;
 import com.example.demo.src.orders.model.Res.GetCartListRes;
+import com.example.demo.src.orders.model.Res.GetDeliveryListRes;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -37,6 +38,20 @@ public class OrderProvider {
         }
     }
 
+//    /**
+//     * 주문조회 API
+//     * [GET] /orders/delivery-list
+//     * @return BaseResponse<List<GetDeliveryRes>>
+//     */
+//    public List<GetDeliveryListRes> getUserDelivery(int userIdx) throws BaseException {
+//        try {
+//            List<GetDeliveryListRes> getDeliveryListRes = orderDao.getUserDelivery(userIdx);
+//            return getDeliveryListRes;
+//        } catch (Exception exception) {
+//            System.out.println("getUserDelivery-> "+ exception);
+//            throw new BaseException(DATABASE_ERROR);
+//        }
+//    }
 
     // 카드에 담겨진 가게 확인
     public int checkCartStore(int userIdx) throws BaseException {

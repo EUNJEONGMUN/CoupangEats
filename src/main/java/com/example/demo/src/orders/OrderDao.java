@@ -6,6 +6,7 @@ import com.example.demo.src.orders.model.Req.PostCreateCartReq;
 import com.example.demo.src.orders.model.Req.PostCreateOrderReq;
 import com.example.demo.src.orders.model.Req.PutModifyCartReq;
 import com.example.demo.src.orders.model.Res.GetCartListRes;
+import com.example.demo.src.orders.model.Res.GetDeliveryListRes;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Repository;
@@ -245,7 +246,14 @@ public class OrderDao {
         return this.jdbcTemplate.update(UpdateCoupon, ParamsCoupon);
     }
 
-
+//    /**
+//     * 주문조회 API
+//     * [GET] /orders/delivery-list
+//     * @return BaseResponse<List<GetDeliveryRes>>
+//     */
+//    public List<GetDeliveryListRes> getUserDelivery(int userIdx) {
+//
+//    }
     // 주문 존재 여부 확인
     public int checkOrder(int userOrderIdx) {
         String Query = "SELECT EXISTS(SELECT * FROM UserOrder WHERE userOrderIdx=? AND status='Y');";

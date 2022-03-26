@@ -2,10 +2,8 @@ package com.example.demo.src.orders;
 
 import com.example.demo.config.BaseException;
 import com.example.demo.config.BaseResponse;
-import com.example.demo.src.orders.model.Req.PostCreateCartReq;
-import com.example.demo.src.orders.model.Req.PostCreateOrderReq;
-import com.example.demo.src.orders.model.Req.PutModifyCartReq;
-import com.example.demo.src.orders.model.Res.GetCartListRes;
+import com.example.demo.src.orders.model.Req.*;
+import com.example.demo.src.orders.model.Res.*;
 import com.example.demo.src.user.UserProvider;
 import com.example.demo.utils.JwtService;
 import org.slf4j.Logger;
@@ -14,6 +12,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
+
+import java.util.List;
 
 import static com.example.demo.config.BaseResponseStatus.*;
 
@@ -243,4 +243,30 @@ public class OrderController {
         return new BaseResponse<>(result);
 
     }
+
+//    /**
+//     * 주문조회 API
+//     * [GET] /orders/delivery-list
+//     * @return BaseResponse<List<GetDeliveryRes>>
+//     */
+//    @ResponseBody
+//    @GetMapping("/delivery-list")
+//    public BaseResponse<List<GetDeliveryListRes>> getUserDelivery() throws BaseException {
+//        int userIdx= jwtService.getUserIdx();
+//
+//        // 사용자 존재 여부 확인
+//        if (userProvider.checkUser(userIdx)==0){
+//            return new BaseResponse<>(USER_NOT_EXISTS);
+//        }
+//
+//        // 카트 내역 존재 여부 확인
+//        // 구현하기???
+//
+//        List<GetDeliveryListRes> getDeliveryListRes = orderProvider.getUserDelivery(userIdx);
+//        return new BaseResponse<>(getDeliveryListRes);
+//
+//
+//
+//    }
+
 }
