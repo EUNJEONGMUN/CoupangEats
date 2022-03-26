@@ -365,38 +365,17 @@ public class StoreDao {
                 "                    FROM Review R JOIN UserOrder UO on R.userOrderIdx=UO.userOrderIdx\n" +
                 "                    GROUP BY UO.storeIdx) R ON R.storeIdx=S.storeIdx\n" +
                 "                WHERE S.status != 'N' AND S.storeIdx=?;";
-        // 정보 벌로 묶을 때
-//        String DeliveryTimeQuery = "SELECT storeIdx, minPrice, maxPrice, deliveryFee FROM DeliveryFee;";
-//
-//        String StoreCategoryQuery = "SELECT SCM.storeIdx, SC.storeCategoryIdx, categoryName\n" +
-//                "FROM StoreCategoryMapping SCM JOIN StoreCategory SC on SCM.storeCategoryIdx = SC.storeCategoryIdx;";
-//
-//        String StoreCouponQuery = "SELECT couponIdx, storeIdx, couponTitle, discountPrice, limitPrice, endDate, couponType, DATE_FORMAT(createdAt, '%Y-%m-%d %H:%I:%S') AS createdAt, status FROM Coupon WHERE status='Y';";
-//
-//        String orderCountQuery = "SELECT UO.storeIdx, COUNT(UO.userOrderIdx) AS orderCount\n" +
-//                "FROM UserOrder UO\n" +
-//                "GROUP BY UO.storeIdx";
-//
-//        String StoreMenuImgQuery = "SELECT RankRow.storeIdx, RankRow.menuImgUrl\n" +
-//                "FROM (SELECT*, RANK() OVER (PARTITION BY M.storeIdX ORDER BY M.menuIdx) AS a\n" +
-//                "      FROM Menu M\n" +
-//                "     ) AS RankRow\n" +
-//                "WHERE RankRow.a <= 2;";
 
-        String DeliveryTimeQuery = "SELECT S.storeIdx, minPrice, maxPrice, deliveryFee\n" +
-                "FROM DeliveryFee DF JOIN Store S on DF.storeIdx = S.storeIdx\n" +
-                "WHERE S.storeIdx=?;";
+        String DeliveryFeeQuery = "SELECT IFNULL(MIN(deliveryFee),0) AS fee\n" +
+                "FROM DeliveryFee D\n" +
+                "WHERE D.storeIdx=? AND D.status='Y';";
 
         String StoreCategoryQuery = "SELECT SCM.storeIdx, SC.storeCategoryIdx, categoryName\n" +
                 "FROM StoreCategoryMapping SCM JOIN StoreCategory SC on SCM.storeCategoryIdx = SC.storeCategoryIdx\n" +
                 "WHERE SCM.storeIdx=?;";
 
-        String StoreCouponQuery = "SELECT couponIdx, storeIdx, couponTitle, discountPrice, limitPrice, endDate, couponType, DATE_FORMAT(createdAt, '%Y-%m-%d %H:%I:%S') AS createdAt, status FROM Coupon WHERE storeIdx=? AND status='Y';";
+//        String StoreCouponQuery = "SELECT couponIdx, storeIdx, couponTitle, discountPrice, limitPrice, endDate, couponType, DATE_FORMAT(createdAt, '%Y-%m-%d %H:%I:%S') AS createdAt, status FROM Coupon WHERE storeIdx=? AND status='Y';";
 
-//        String orderCountQuery = "SELECT UO.storeIdx, COUNT(UO.userOrderIdx) AS orderCount\n" +
-//                "FROM UserOrder UO\n" +
-//                "WHERE storeIdx=?\n" +
-//                "GROUP BY UO.storeIdx;";
         String orderCountQuery = "SELECT COUNT(UO.userOrderIdx) AS orderCount\n" +
                 "FROM UserOrder UO\n" +
                 "WHERE storeIdx=?\n" +
@@ -408,7 +387,25 @@ public class StoreDao {
                 "     ) AS RankRow\n" +
                 "WHERE RankRow.a <= 2 AND RankRow.storeIdx=?;";
 
+        String StoreCouponQuery = "SELECT C.couponIdx, IFNULL(C.discountPrice,0) AS maxDiscountPrice, IFNULL(C.couponType,'N') AS couponType\n" +
+                "FROM Store S\n" +
+                "LEFT JOIN (SELECT RankRow.storeIdx, RankRow.couponIdx, RankRow.discountPrice, RankRow.couponType\n" +
+                "            FROM (SELECT*, RANK() OVER (PARTITION BY storeIdX ORDER BY discountPrice DESC, couponIdx ASC) AS a\n" +
+                "                    FROM Coupon\n" +
+                "                    WHERE status='Y' AND  DATEDIFF(endDate, CURRENT_DATE())>=0) AS RankRow\n" +
+                "                    WHERE RankRow.a <= 1) C ON C.storeIdx = S.storeIdx\n" +
+                "WHERE S.storeIdx = ?;";
+
         Object[] Params = new Object[]{userLocation.getUserLongitude(), userLocation.getUserLatitude(), idx};
+
+
+        int orderCount = this.jdbcTemplate.queryForObject(orderCountQuery,
+                int.class,
+                idx);
+        int deliveryFee = this.jdbcTemplate.queryForObject(DeliveryFeeQuery,
+                int.class,
+                idx);
+
 
         StoreInfo storeInfo = this.jdbcTemplate.queryForObject(StoreInfoQuery,
                 (rs1, rowNum1) -> new StoreInfo(
@@ -427,17 +424,10 @@ public class StoreDao {
                         rs1.getString("createdAt"),
                         rs1.getDouble("reviewScore"),
                         rs1.getInt("reviewCount"),
-                        rs1.getDouble("distance")
+                        rs1.getDouble("distance"),
+                        orderCount,
+                        deliveryFee
                 ), Params);
-
-
-        List<DeliveryFeeInfo> deliveryFeeInfo = this.jdbcTemplate.query(DeliveryTimeQuery,
-                (rs1, rowNum1) -> new DeliveryFeeInfo(
-                        rs1.getInt("storeIdx"),
-                        rs1.getInt("minPrice"),
-                        rs1.getInt("maxPrice"),
-                        rs1.getInt("deliveryFee")
-                ), idx);
 
         List<StoreCategory> storeCategory = this.jdbcTemplate.query(StoreCategoryQuery,
                 (rs2, rowNum2) -> new StoreCategory(
@@ -446,17 +436,11 @@ public class StoreDao {
                         rs2.getString("categoryName")
                 ), idx);
 
-        List<StoreCouponInfo> storeCouponInfo = this.jdbcTemplate.query(StoreCouponQuery,
-                (rs2, rowNum2) -> new StoreCouponInfo(
+        StoreBestCoupon storeBestCoupon = this.jdbcTemplate.queryForObject(StoreCouponQuery,
+                (rs2, rowNum2) -> new StoreBestCoupon(
                         rs2.getInt("couponIdx"),
-                        rs2.getInt("storeIdx"),
-                        rs2.getString("couponTitle"),
-                        rs2.getInt("discountPrice"),
-                        rs2.getInt("limitPrice"),
-                        rs2.getString("endDate"),
-                        rs2.getString("couponType"),
-                        rs2.getString("createdAt"),
-                        rs2.getString("status")
+                        rs2.getInt("maxDiscountPrice"),
+                        rs2.getString("couponType")
                 ), idx);
 
         List<StoreMenuImg> storeMenuImg = this.jdbcTemplate.query(StoreMenuImgQuery,
@@ -465,16 +449,9 @@ public class StoreDao {
                         rs1.getString("menuImgUrl")
                 ),idx);
 
-        int orderCount = this.jdbcTemplate.queryForObject(orderCountQuery,
-                int.class,
-                idx);
 
 
-
-
-
-
-        return new GetStoreHomeRes(storeInfo,deliveryFeeInfo, storeCategory, storeCouponInfo ,storeMenuImg, orderCount);
+        return new GetStoreHomeRes(storeInfo, storeCategory, storeBestCoupon ,storeMenuImg);
     }
 
     /**
@@ -709,11 +686,25 @@ public class StoreDao {
     }
 
     // 가게 idx 찾기
-    public List<Integer> findStoreIdxList() {
+    public List<Integer> findStoreIdxList(int categoryIdx) {
         String Query = "SELECT storeIdx FROM Store WHERE status!='N';";
-        return this.jdbcTemplate.query(Query,
+
+        String CategoryQuery = "SELECT S.storeIdx, SC.categoryName\n" +
+                "FROM Store S\n" +
+                "    JOIN StoreCategoryMapping SCM on S.storeIdx = SCM.storeIdx\n" +
+                "    JOIN StoreCategory SC on SCM.storeCategoryIdx = SC.storeCategoryIdx\n" +
+                "WHERE SCM.storeCategoryIdx=?;";
+
+        if (categoryIdx==0){
+            return this.jdbcTemplate.query(Query,
+                    (rs, rowNum) -> {
+                        return rs.getInt("storeIdx");
+                    });
+        }
+        return this.jdbcTemplate.query(CategoryQuery,
                 (rs, rowNum) -> {
                     return rs.getInt("storeIdx");
-                });
+                }, categoryIdx);
+
     }
 }

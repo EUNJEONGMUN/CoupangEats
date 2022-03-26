@@ -33,5 +33,8 @@ public class StoreInfo {
     private double reviewScore;
     private int reviewCount;
     private double distance;
+    private int orderCount;
+    private int deliveryFee;
+
 
 }

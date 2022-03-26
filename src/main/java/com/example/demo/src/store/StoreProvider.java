@@ -30,10 +30,10 @@ public class StoreProvider {
      * [GET] /stores/home
      * @return BaseResponse<List<GetStoreHomeRes>>
      */
-    public List<GetStoreHomeRes> getStoreHome(UserLocation userLocation) throws BaseException {
+    public List<GetStoreHomeRes> getStoreHome(UserLocation userLocation, int categoryIdx) throws BaseException {
         try {
 
-            List<Integer> StoreList = storeDao.findStoreIdxList();
+            List<Integer> StoreList = storeDao.findStoreIdxList(categoryIdx);
 
             List<GetStoreHomeRes> getStoreHomeRes = new ArrayList<>();
 

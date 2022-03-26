@@ -37,13 +37,14 @@ public class StoreController {
     /**
      * 홈 화면 조회 API
      * [GET] /stores/home
-     * /home?longitude=&latitude=
+     * /home?&longitude=&latitude=&categoryIdx=
      * @return BaseResponse<List<GetStoreHomeRes>>
      */
     @ResponseBody
     @GetMapping("/home")
     public BaseResponse<List<GetStoreHomeRes>> getStoreHome(@RequestParam(required = false, defaultValue = "0") double longitude,
-                                                      @RequestParam(required = false, defaultValue = "0") double latitude) throws BaseException{
+                                                            @RequestParam(required = false, defaultValue = "0") double latitude,
+                                                            @RequestParam(required = false, defaultValue = "0") int categoryIdx) throws BaseException{
 //        if (storeHome.getCategoryIdx()!=0 && storeProvider.checkStoreCategory(storeHome.getCategoryIdx())==0){
 //            return new BaseResponse<>(EMPTY_STORE_CATEGORY);
 //        }
@@ -66,7 +67,7 @@ public class StoreController {
         }
 
 
-        List<GetStoreHomeRes> getStoreHomeRes = storeProvider.getStoreHome(userLocation);
+        List<GetStoreHomeRes> getStoreHomeRes = storeProvider.getStoreHome(userLocation, categoryIdx);
         return new BaseResponse<>(getStoreHomeRes);
     }
 
