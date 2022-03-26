@@ -410,14 +410,20 @@ public class StoreDao {
                 "WHERE S.storeIdx = ?;";
 
         Object[] Params = new Object[]{userLocation.getUserLongitude(), userLocation.getUserLatitude(), idx};
+        System.out.println("here");
 
+        int oc = 0;
+        if (this.jdbcTemplate.queryForObject("SELECT EXISTS(SELECT * FROM UserOrder UO WHERE storeIdx=?);", int.class, idx)!=0){
+            oc = this.jdbcTemplate.queryForObject(orderCountQuery,
+                    int.class,
+                    idx);
+        }
+        int orderCount = oc;
 
-        int orderCount = this.jdbcTemplate.queryForObject(orderCountQuery,
-                int.class,
-                idx);
         int deliveryFeeCount =  this.jdbcTemplate.queryForObject(DeliveryFeeCount,
                 int.class,
                 idx);
+        System.out.println("deliveryFeeCount" + deliveryFeeCount);
         String fee = this.jdbcTemplate.queryForObject(DeliveryFeeQuery,
                 String.class,
                 idx);
@@ -425,7 +431,7 @@ public class StoreDao {
         if (deliveryFeeCount>1){
             fee = fee+"~";
         }
-
+        System.out.println("fee" + fee);
 
         String deliveryFee = fee;
         StoreInfo storeInfo = this.jdbcTemplate.queryForObject(StoreInfoQuery,
@@ -449,13 +455,7 @@ public class StoreDao {
                         orderCount,
                         deliveryFee
                 ), Params);
-
-//        List<StoreCategory> storeCategory = this.jdbcTemplate.query(StoreCategoryQuery,
-//                (rs2, rowNum2) -> new StoreCategory(
-//                        rs2.getInt("storeIdx"),
-//                        rs2.getInt("storeCategoryIdx"),
-//                        rs2.getString("categoryName")
-//                ), idx);
+        System.out.println("storeInfo");
 
         StoreBestCoupon storeBestCoupon = this.jdbcTemplate.queryForObject(StoreCouponQuery,
                 (rs2, rowNum2) -> new StoreBestCoupon(
@@ -463,12 +463,12 @@ public class StoreDao {
                         rs2.getString("maxDiscountPrice"),
                         rs2.getString("couponType")
                 ), idx);
-
+        System.out.println("bestCoupon");
         List<String> storeMenuImg = this.jdbcTemplate.query(StoreMenuImgQuery,
                 (rs1, rowNum1) -> new String(
                         rs1.getString("menuImgUrl")
                 ),idx);
-
+        System.out.println("storeMenuImg");
 
 
         return new GetStoreHomeRes(storeInfo, storeBestCoupon ,storeMenuImg);

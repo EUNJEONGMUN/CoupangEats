@@ -34,12 +34,15 @@ public class StoreProvider {
         try {
 
             List<Integer> StoreList = storeDao.findStoreIdxList(categoryIdx);
-
+            System.out.println("here");
             List<GetStoreHomeRes> getStoreHomeRes = new ArrayList<>();
-
+            System.out.println("here");
             for(int idx:StoreList){
+                System.out.println(">>idx>>"+idx);
                 GetStoreHomeRes storeHome = storeDao.getStoreHome(idx, userLocation);
+                System.out.println("here");
                 getStoreHomeRes.add(storeHome);
+                System.out.println("here");
             }
             return getStoreHomeRes;
         } catch (Exception exception) {
