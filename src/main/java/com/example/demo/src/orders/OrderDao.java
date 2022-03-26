@@ -2,6 +2,7 @@ package com.example.demo.src.orders;
 
 import com.example.demo.src.orders.model.CartMenu;
 import com.example.demo.src.orders.model.OrderInfo;
+import com.example.demo.src.orders.model.OrderList;
 import com.example.demo.src.orders.model.Req.PostCreateCartReq;
 import com.example.demo.src.orders.model.Req.PostCreateOrderReq;
 import com.example.demo.src.orders.model.Req.PutModifyCartReq;
@@ -246,12 +247,53 @@ public class OrderDao {
         return this.jdbcTemplate.update(UpdateCoupon, ParamsCoupon);
     }
 
-//    /**
-//     * 주문조회 API
-//     * [GET] /orders/delivery-list
-//     * @return BaseResponse<List<GetDeliveryRes>>
-//     */
-//    public List<GetDeliveryListRes> getUserDelivery(int userIdx) {
+    /**
+     * 주문조회 API
+     * [GET] /orders/delivery-list
+     * @return BaseResponse<List<GetDeliveryRes>>
+     */
+//    public GetDeliveryListRes getUserDelivery(int userIdx, OrderList orderList) {
+//
+//        String StoreInfo = "SELECT storeIdx, storeName, storeImgUrl\n" +
+//                "FROM Store\n" +
+//                "WHERE storeIdx=?";
+//
+//        String OrderMenuInfo = "SELECT C.menuOptions, C.orderCount, OrderMenu.cartIdx, OrderMenu.isGood\n" +
+//                "FROM Cart C JOIN (\n" +
+//                "    SELECT CTO.userIdx, CTO.cartIdx, UO.orderTime, CTO.isGood, UO.status\n" +
+//                "    FROM UserOrder UO JOIN CartToOrder CTO on UO.orderTime = CTO.orderTime\n" +
+//                "    WHERE UO.userIdx=? AND UO.orderTime=? AND UO.status!='N'\n" +
+//                "    ORDER BY UO.orderTime DESC) OrderMenu ON OrderMenu.cartIdx = C.cartIdx;";
+//
+//
+//        String TotalPrice = "SELECT SUM(C.orderPrice) AS totalPrice\n" +
+//                "FROM Cart C JOIN (\n" +
+//                "    SELECT CTO.userIdx, CTO.cartIdx, UO.orderTime, CTO.isGood, UO.status\n" +
+//                "    FROM UserOrder UO JOIN CartToOrder CTO on UO.orderTime = CTO.orderTime\n" +
+//                "    WHERE UO.userIdx=? AND UO.orderTime=? AND UO.status!='N'\n" +
+//                "    ORDER BY UO.orderTime DESC) OrderMenu ON OrderMenu.cartIdx = C.cartIdx;";
+//
+//        String OrderStatus = "SELECT CASE WHEN UO.status='A' THEN '주문 수락됨'\n" +
+//                "           WHEN UO.status='B' THEN '메뉴 준비중'\n" +
+//                "           WHEN UO.status='C' THEN '배달중'\n" +
+//                "           WHEN UO.status='D' THEN '배달 완료'\n" +
+//                "           ELSE UO.status\n" +
+//                "               END AS status,\n" +
+//                "       CASE\n" +
+//                "        WHEN INSTR(DATE_FORMAT(UO.orderTime, '%Y-%m-%d %p %h:%i'), 'PM') > 0\n" +
+//                "        THEN REPLACE(DATE_FORMAT(UO.orderTime, '%Y-%m-%d %p %h:%i'), 'PM', '오후')\n" +
+//                "        ELSE REPLACE(DATE_FORMAT(UO.orderTime, '%Y-%m-%d %p %h:%i'), 'AM', '오전')\n" +
+//                "        END AS orderTime\n" +
+//                "FROM UserOrder UO\n" +
+//                "WHERE UO.userOrderIdx=?";
+//
+//
+//        String ReviewScore = "SELECT score\n" +
+//                "FROM Review\n" +
+//                "WHERE userOrderIdx=?;";
+//
+//
+//
 //
 //    }
     // 주문 존재 여부 확인
@@ -267,4 +309,18 @@ public class OrderDao {
         return this.jdbcTemplate.queryForObject(Query, int.class, Params);
     }
 
+    // orderTime 찾기
+    public List<OrderList> findOrderList(int userIdx) {
+        String Query = "SELECT orderTime, storeIdx, userOrderIdx\n" +
+                "FROM UserOrder\n" +
+                "WHERE userIdx=? AND status!='N'\n" +
+                "ORDER BY orderTime DESC;";
+
+        return this.jdbcTemplate.query(Query,
+                (rs, rowNum) -> new OrderList(
+                        rs.getInt("storeIdx"),
+                        rs.getString("orderTime"),
+                        rs.getInt("userOrderIdx")
+                ), userIdx);
+    }
 }

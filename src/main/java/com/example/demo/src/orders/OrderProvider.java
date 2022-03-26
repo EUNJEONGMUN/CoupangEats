@@ -1,6 +1,7 @@
 package com.example.demo.src.orders;
 
 import com.example.demo.config.BaseException;
+import com.example.demo.src.orders.model.OrderList;
 import com.example.demo.src.orders.model.Res.GetCartListRes;
 import com.example.demo.src.orders.model.Res.GetDeliveryListRes;
 import org.slf4j.Logger;
@@ -8,6 +9,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import static com.example.demo.config.BaseResponseStatus.DATABASE_ERROR;
@@ -45,7 +47,13 @@ public class OrderProvider {
 //     */
 //    public List<GetDeliveryListRes> getUserDelivery(int userIdx) throws BaseException {
 //        try {
-//            List<GetDeliveryListRes> getDeliveryListRes = orderDao.getUserDelivery(userIdx);
+//            List<OrderList> orderList = orderDao.findOrderList(userIdx);
+//            List<GetDeliveryListRes> getDeliveryListRes = new ArrayList<>();
+//
+//            for (OrderList userOrder:orderList){
+//                GetDeliveryListRes userOrderList = orderDao.getUserDelivery(userIdx, userOrder);
+//                getDeliveryListRes.add(userOrderList);
+//            }
 //            return getDeliveryListRes;
 //        } catch (Exception exception) {
 //            System.out.println("getUserDelivery-> "+ exception);

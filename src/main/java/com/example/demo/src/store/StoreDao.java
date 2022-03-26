@@ -366,9 +366,22 @@ public class StoreDao {
                 "                    GROUP BY UO.storeIdx) R ON R.storeIdx=S.storeIdx\n" +
                 "                WHERE S.status != 'N' AND S.storeIdx=?;";
 
-        String DeliveryFeeQuery = "SELECT IFNULL(MIN(deliveryFee),0) AS fee\n" +
+//        String DeliveryFeeQuery = "SELECT IFNULL(MIN(deliveryFee),0) AS fee\n" +
+//                "FROM DeliveryFee D\n" +
+//                "WHERE D.storeIdx=? AND D.status='Y';";
+
+        String DeliveryFeeCount = "SELECT COUNT(*) as feeCount\n" +
                 "FROM DeliveryFee D\n" +
                 "WHERE D.storeIdx=? AND D.status='Y';";
+
+        String DeliveryFeeQuery = "SELECT CASE\n" +
+                "    WHEN IFNULL(MIN(deliveryFee),0) =0\n" +
+                "        THEN '무료배달'\n" +
+                "    ELSE CONCAT(FORMAT(IFNULL(MIN(deliveryFee),0),0),'원')\n" +
+                "    END AS fee\n" +
+                "        FROM DeliveryFee D\n" +
+                "        WHERE D.storeIdx=? AND D.status='Y';";
+
 
 //        String StoreCategoryQuery = "SELECT SCM.storeIdx, SC.storeCategoryIdx, categoryName\n" +
 //                "FROM StoreCategoryMapping SCM JOIN StoreCategory SC on SCM.storeCategoryIdx = SC.storeCategoryIdx\n" +
@@ -387,7 +400,7 @@ public class StoreDao {
                 "     ) AS RankRow\n" +
                 "WHERE RankRow.a <= 2 AND RankRow.storeIdx=?;";
 
-        String StoreCouponQuery = "SELECT C.couponIdx, IFNULL(C.discountPrice,0) AS maxDiscountPrice, IFNULL(C.couponType,'N') AS couponType\n" +
+        String StoreCouponQuery = "SELECT C.couponIdx, CONCAT(FORMAT(IFNULL(C.discountPrice,0),0),'원') AS maxDiscountPrice, IFNULL(C.couponType,'N') AS couponType\n" +
                 "FROM Store S\n" +
                 "LEFT JOIN (SELECT RankRow.storeIdx, RankRow.couponIdx, RankRow.discountPrice, RankRow.couponType\n" +
                 "            FROM (SELECT*, RANK() OVER (PARTITION BY storeIdX ORDER BY discountPrice DESC, couponIdx ASC) AS a\n" +
@@ -402,11 +415,19 @@ public class StoreDao {
         int orderCount = this.jdbcTemplate.queryForObject(orderCountQuery,
                 int.class,
                 idx);
-        int deliveryFee = this.jdbcTemplate.queryForObject(DeliveryFeeQuery,
+        int deliveryFeeCount =  this.jdbcTemplate.queryForObject(DeliveryFeeCount,
                 int.class,
                 idx);
+        String fee = this.jdbcTemplate.queryForObject(DeliveryFeeQuery,
+                String.class,
+                idx);
+
+        if (deliveryFeeCount>1){
+            fee = fee+"~";
+        }
 
 
+        String deliveryFee = fee;
         StoreInfo storeInfo = this.jdbcTemplate.queryForObject(StoreInfoQuery,
                 (rs1, rowNum1) -> new StoreInfo(
                         rs1.getInt("storeIdx"),
@@ -439,7 +460,7 @@ public class StoreDao {
         StoreBestCoupon storeBestCoupon = this.jdbcTemplate.queryForObject(StoreCouponQuery,
                 (rs2, rowNum2) -> new StoreBestCoupon(
                         rs2.getInt("couponIdx"),
-                        rs2.getInt("maxDiscountPrice"),
+                        rs2.getString("maxDiscountPrice"),
                         rs2.getString("couponType")
                 ), idx);
 

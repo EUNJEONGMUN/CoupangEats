@@ -34,7 +34,7 @@ public class StoreInfo {
     private int reviewCount;
     private double distance;
     private int orderCount;
-    private int deliveryFee;
+    private String deliveryFee;
 
 
 }

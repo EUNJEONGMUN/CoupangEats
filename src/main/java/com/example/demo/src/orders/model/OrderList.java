@@ -1,4 +1,4 @@
-package com.example.demo.src.store.model;
+package com.example.demo.src.orders.model;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -9,8 +9,8 @@ import lombok.Setter;
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
-public class StoreBestCoupon {
-    private int couponIdx;
-    private String maxDiscountPrice;
-    private String couponType;
+public class OrderList {
+    private int storeIdx;
+    private String orderTime;
+    private int userOrderIdx;
 }
