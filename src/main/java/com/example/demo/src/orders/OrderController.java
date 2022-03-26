@@ -244,29 +244,29 @@ public class OrderController {
 
     }
 
-//    /**
-//     * 주문조회 API
-//     * [GET] /orders/delivery-list
-//     * @return BaseResponse<List<GetDeliveryRes>>
-//     */
-//    @ResponseBody
-//    @GetMapping("/delivery-list")
-//    public BaseResponse<List<GetDeliveryListRes>> getUserDelivery() throws BaseException {
-//        int userIdx= jwtService.getUserIdx();
-//
-//        // 사용자 존재 여부 확인
-//        if (userProvider.checkUser(userIdx)==0){
-//            return new BaseResponse<>(USER_NOT_EXISTS);
-//        }
-//
-//        // 카트 내역 존재 여부 확인
-//        // 구현하기???
-//
-//        List<GetDeliveryListRes> getDeliveryListRes = orderProvider.getUserDelivery(userIdx);
-//        return new BaseResponse<>(getDeliveryListRes);
-//
-//
-//
-//    }
+    /**
+     * 주문조회 API
+     * [GET] /orders/delivery-list
+     * @return BaseResponse<List<GetDeliveryRes>>
+     */
+    @ResponseBody
+    @GetMapping("/delivery-list")
+    public BaseResponse<List<GetDeliveryListRes>> getUserDelivery() throws BaseException {
+        int userIdx= jwtService.getUserIdx();
+
+        // 사용자 존재 여부 확인
+        if (userProvider.checkUser(userIdx)==0){
+            return new BaseResponse<>(USER_NOT_EXISTS);
+        }
+
+        // 카트 내역 존재 여부 확인
+        // 구현하기???
+
+        List<GetDeliveryListRes> getDeliveryListRes = orderProvider.getUserDelivery(userIdx);
+        return new BaseResponse<>(getDeliveryListRes);
+
+
+
+    }
 
 }

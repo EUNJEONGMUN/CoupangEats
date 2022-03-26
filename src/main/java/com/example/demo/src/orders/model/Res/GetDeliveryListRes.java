@@ -15,8 +15,8 @@ public class GetDeliveryListRes {
     private String storeImgUrl;
     private String storeName;
     private String orderTime;
-    private int totalPrice;
     private String status;
+    private String totalPrice;
     private int ReviewScore;
     private List<OrderMenuInfo> orderMenuInfo;
 }

@@ -9,10 +9,8 @@ import lombok.Setter;
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
-public class OrderMenuInfo {
-    private int cartIdx;
-    private int orderCount;
-    private String menuOptions;
-    private String isGood;
-
+public class OrderStatus {
+    private String status;
+    private String orderTime;
 }
+

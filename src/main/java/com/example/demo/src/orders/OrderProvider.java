@@ -40,26 +40,26 @@ public class OrderProvider {
         }
     }
 
-//    /**
-//     * 주문조회 API
-//     * [GET] /orders/delivery-list
-//     * @return BaseResponse<List<GetDeliveryRes>>
-//     */
-//    public List<GetDeliveryListRes> getUserDelivery(int userIdx) throws BaseException {
-//        try {
-//            List<OrderList> orderList = orderDao.findOrderList(userIdx);
-//            List<GetDeliveryListRes> getDeliveryListRes = new ArrayList<>();
-//
-//            for (OrderList userOrder:orderList){
-//                GetDeliveryListRes userOrderList = orderDao.getUserDelivery(userIdx, userOrder);
-//                getDeliveryListRes.add(userOrderList);
-//            }
-//            return getDeliveryListRes;
-//        } catch (Exception exception) {
-//            System.out.println("getUserDelivery-> "+ exception);
-//            throw new BaseException(DATABASE_ERROR);
-//        }
-//    }
+    /**
+     * 주문조회 API
+     * [GET] /orders/delivery-list
+     * @return BaseResponse<List<GetDeliveryRes>>
+     */
+    public List<GetDeliveryListRes> getUserDelivery(int userIdx) throws BaseException {
+        try {
+            List<OrderList> orderList = orderDao.findOrderList(userIdx);
+            List<GetDeliveryListRes> getDeliveryListRes = new ArrayList<>();
+
+            for (OrderList userOrder:orderList){
+                GetDeliveryListRes userOrderList = orderDao.getUserDelivery(userIdx, userOrder);
+                getDeliveryListRes.add(userOrderList);
+            }
+            return getDeliveryListRes;
+        } catch (Exception exception) {
+            System.out.println("getUserDelivery-> "+ exception);
+            throw new BaseException(DATABASE_ERROR);
+        }
+    }
 
     // 카드에 담겨진 가게 확인
     public int checkCartStore(int userIdx) throws BaseException {

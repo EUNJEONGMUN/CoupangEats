@@ -1,8 +1,6 @@
 package com.example.demo.src.orders;
 
-import com.example.demo.src.orders.model.CartMenu;
-import com.example.demo.src.orders.model.OrderInfo;
-import com.example.demo.src.orders.model.OrderList;
+import com.example.demo.src.orders.model.*;
 import com.example.demo.src.orders.model.Req.PostCreateCartReq;
 import com.example.demo.src.orders.model.Req.PostCreateOrderReq;
 import com.example.demo.src.orders.model.Req.PutModifyCartReq;
@@ -252,50 +250,87 @@ public class OrderDao {
      * [GET] /orders/delivery-list
      * @return BaseResponse<List<GetDeliveryRes>>
      */
-//    public GetDeliveryListRes getUserDelivery(int userIdx, OrderList orderList) {
-//
-//        String StoreInfo = "SELECT storeIdx, storeName, storeImgUrl\n" +
-//                "FROM Store\n" +
-//                "WHERE storeIdx=?";
-//
-//        String OrderMenuInfo = "SELECT C.menuOptions, C.orderCount, OrderMenu.cartIdx, OrderMenu.isGood\n" +
-//                "FROM Cart C JOIN (\n" +
-//                "    SELECT CTO.userIdx, CTO.cartIdx, UO.orderTime, CTO.isGood, UO.status\n" +
-//                "    FROM UserOrder UO JOIN CartToOrder CTO on UO.orderTime = CTO.orderTime\n" +
-//                "    WHERE UO.userIdx=? AND UO.orderTime=? AND UO.status!='N'\n" +
-//                "    ORDER BY UO.orderTime DESC) OrderMenu ON OrderMenu.cartIdx = C.cartIdx;";
-//
-//
-//        String TotalPrice = "SELECT SUM(C.orderPrice) AS totalPrice\n" +
-//                "FROM Cart C JOIN (\n" +
-//                "    SELECT CTO.userIdx, CTO.cartIdx, UO.orderTime, CTO.isGood, UO.status\n" +
-//                "    FROM UserOrder UO JOIN CartToOrder CTO on UO.orderTime = CTO.orderTime\n" +
-//                "    WHERE UO.userIdx=? AND UO.orderTime=? AND UO.status!='N'\n" +
-//                "    ORDER BY UO.orderTime DESC) OrderMenu ON OrderMenu.cartIdx = C.cartIdx;";
-//
-//        String OrderStatus = "SELECT CASE WHEN UO.status='A' THEN '주문 수락됨'\n" +
-//                "           WHEN UO.status='B' THEN '메뉴 준비중'\n" +
-//                "           WHEN UO.status='C' THEN '배달중'\n" +
-//                "           WHEN UO.status='D' THEN '배달 완료'\n" +
-//                "           ELSE UO.status\n" +
-//                "               END AS status,\n" +
-//                "       CASE\n" +
-//                "        WHEN INSTR(DATE_FORMAT(UO.orderTime, '%Y-%m-%d %p %h:%i'), 'PM') > 0\n" +
-//                "        THEN REPLACE(DATE_FORMAT(UO.orderTime, '%Y-%m-%d %p %h:%i'), 'PM', '오후')\n" +
-//                "        ELSE REPLACE(DATE_FORMAT(UO.orderTime, '%Y-%m-%d %p %h:%i'), 'AM', '오전')\n" +
-//                "        END AS orderTime\n" +
-//                "FROM UserOrder UO\n" +
-//                "WHERE UO.userOrderIdx=?";
-//
-//
-//        String ReviewScore = "SELECT score\n" +
-//                "FROM Review\n" +
-//                "WHERE userOrderIdx=?;";
-//
-//
-//
-//
-//    }
+    public GetDeliveryListRes getUserDelivery(int userIdx, OrderList orderList) {
+
+        String StoreInfo = "SELECT storeIdx, storeName, storeImgUrl\n" +
+                "FROM Store\n" +
+                "WHERE storeIdx=?";
+
+        String TotalPriceQuery = "SELECT CONCAT(FORMAT(SUM(C.orderPrice),0),'원') AS totalPrice\n" +
+                "FROM Cart C JOIN (\n" +
+                "    SELECT CTO.userIdx, CTO.cartIdx, UO.orderTime, CTO.isGood, UO.status\n" +
+                "    FROM UserOrder UO JOIN CartToOrder CTO on UO.orderTime = CTO.orderTime\n" +
+                "    WHERE UO.userIdx=? AND UO.orderTime=? AND UO.status!='N'\n" +
+                "    ORDER BY UO.orderTime DESC) OrderMenu ON OrderMenu.cartIdx = C.cartIdx;";
+
+        String OrderStatus = "SELECT CASE WHEN UO.status='A' THEN '주문 수락됨'\n" +
+                "           WHEN UO.status='B' THEN '메뉴 준비중'\n" +
+                "           WHEN UO.status='C' THEN '배달중'\n" +
+                "           WHEN UO.status='D' THEN '배달 완료'\n" +
+                "           ELSE UO.status\n" +
+                "               END AS status,\n" +
+                "       CASE\n" +
+                "        WHEN INSTR(DATE_FORMAT(UO.orderTime, '%Y-%m-%d %p %h:%i'), 'PM') > 0\n" +
+                "        THEN REPLACE(DATE_FORMAT(UO.orderTime, '%Y-%m-%d %p %h:%i'), 'PM', '오후')\n" +
+                "        ELSE REPLACE(DATE_FORMAT(UO.orderTime, '%Y-%m-%d %p %h:%i'), 'AM', '오전')\n" +
+                "        END AS orderTime\n" +
+                "FROM UserOrder UO\n" +
+                "WHERE UO.userOrderIdx=?";
+
+        String isReview = "SELECT EXISTS(SELECT score FROM Review WHERE userOrderIdx=?);";
+        String ReviewScore = "SELECT score\n" +
+                "FROM Review\n" +
+                "WHERE userOrderIdx=?;";
+
+
+        String OrderMenuInfoQuery = "SELECT C.menuOptions, C.orderCount, OrderMenu.cartIdx, OrderMenu.isGood\n" +
+                "FROM Cart C JOIN (\n" +
+                "    SELECT CTO.userIdx, CTO.cartIdx, UO.orderTime, CTO.isGood, UO.status\n" +
+                "    FROM UserOrder UO JOIN CartToOrder CTO on UO.orderTime = CTO.orderTime\n" +
+                "    WHERE UO.userIdx=? AND UO.orderTime=? AND UO.status!='N'\n" +
+                "    ORDER BY UO.orderTime DESC) OrderMenu ON OrderMenu.cartIdx = C.cartIdx;";
+
+        Object[] Params = new Object[]{userIdx, orderList.getOrderTime()};
+
+        int review = 0;
+        if (this.jdbcTemplate.queryForObject(isReview, int.class, orderList.getUserOrderIdx()) != 0){
+            review = this.jdbcTemplate.queryForObject(ReviewScore,
+                    int.class,
+                    orderList.getUserOrderIdx());
+        }
+        int reviewScore = review;
+
+
+
+        OrderStatus orderStatus = this.jdbcTemplate.queryForObject(OrderStatus,
+                (rs, rowNum) -> new OrderStatus(
+                        rs.getString("status"),
+                        rs.getString("orderTime")
+                ), orderList.getUserOrderIdx());
+
+        String totalPrice = this.jdbcTemplate.queryForObject(TotalPriceQuery,
+                String.class,
+                Params);
+
+        return this.jdbcTemplate.queryForObject(StoreInfo,
+                (rs, rowNum) -> new GetDeliveryListRes(
+                        rs.getInt("storeIdx"),
+                        rs.getString("storeImgUrl"),
+                        rs.getString("storeName"),
+                        orderStatus.getOrderTime(),
+                        orderStatus.getStatus(),
+                        totalPrice,
+                        reviewScore,
+                        this.jdbcTemplate.query(OrderMenuInfoQuery,
+                                (rs2, rowNum2) -> new OrderMenuInfo(
+                                        rs2.getInt("cartIdx"),
+                                        rs2.getInt("orderCount"),
+                                        rs2.getString("menuOptions"),
+                                        rs2.getString("isGood")
+                                ),Params)
+                ), orderList.getStoreIdx());
+
+    }
     // 주문 존재 여부 확인
     public int checkOrder(int userOrderIdx) {
         String Query = "SELECT EXISTS(SELECT * FROM UserOrder WHERE userOrderIdx=? AND status='Y');";
