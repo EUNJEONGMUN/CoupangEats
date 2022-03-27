@@ -361,7 +361,7 @@ public class StoreDao {
                 "                FROM Store S\n" +
                 "                LEFT JOIN (\n" +
                 "                    SELECT UO.storeIdx, ROUND(AVG(R.score),1) AS reviewScore, COUNT(R.reviewIdx) AS reviewCount\n" +
-                "                    FROM Review R JOIN UserOrder UO on R.userOrderIdx=UO.userOrderIdx\n" +
+                "                    FROM Review R JOIN UserOrder UO on R.userOrderIdx=UO.userOrderIdx WHERE R.status='Y'\n" +
                 "                    GROUP BY UO.storeIdx) R ON R.storeIdx=S.storeIdx\n" +
                 "                WHERE S.status != 'N' AND S.storeIdx=?;";
 
@@ -487,7 +487,7 @@ public class StoreDao {
                 "                FROM Store S\n" +
                 "                LEFT JOIN (\n" +
                 "                    SELECT UO.storeIdx, ROUND(AVG(R.score),1) AS reviewScore, COUNT(R.reviewIdx) AS reviewCount\n" +
-                "                    FROM Review R JOIN UserOrder UO on R.userOrderIdx=UO.userOrderIdx\n" +
+                "                    FROM Review R JOIN UserOrder UO on R.userOrderIdx=UO.userOrderIdx WHERE R.status='Y'\n" +
                 "                    GROUP BY UO.storeIdx) R ON R.storeIdx=S.storeIdx\n" +
                 "                WHERE S.status != 'N' AND S.storeIdx=?;";
 
@@ -738,7 +738,7 @@ public class StoreDao {
                 "                FROM Store S\n" +
                 "                LEFT JOIN (\n" +
                 "                    SELECT UO.storeIdx, ROUND(AVG(R.score),1) AS reviewScore, COUNT(R.reviewIdx) AS reviewCount\n" +
-                "                    FROM Review R JOIN UserOrder UO on R.userOrderIdx=UO.userOrderIdx\n" +
+                "                    FROM Review R JOIN UserOrder UO on R.userOrderIdx=UO.userOrderIdx WHERE R.status='Y'\n" +
                 "                    GROUP BY UO.storeIdx) R ON R.storeIdx=S.storeIdx\n" +
                 "                WHERE S.status != 'N' AND S.storeIdx=?;";
 
@@ -825,7 +825,17 @@ public class StoreDao {
      * @return BaseResponse<List<GetStoreReviewListRes>>
      */
     public GetStoreReviewListRes getStoreReviews(int userIdx, int storeIdx, StoreReviewIdx idx) {
-
+    
+        
+        // 추가 여부 클라이언트와 상의
+//        String ReviewStoreInfo = "SELECT S.storeIdx, S.storeName,R.reviewScore, R.reviewCount\n" +
+//                "    FROM Store S\n" +
+//                "    LEFT JOIN (\n" +
+//                "        SELECT UO.storeIdx, ROUND(AVG(R.score),1) AS reviewScore, COUNT(R.reviewIdx) AS reviewCount\n" +
+//                "        FROM Review R JOIN UserOrder UO on R.userOrderIdx=UO.userOrderIdx WHERE R.status='Y'\n" +
+//                "        GROUP BY UO.storeIdx) R ON R.storeIdx=S.storeIdx\n" +
+//                "    WHERE S.status != 'N';";
+//        
         String ReviewInfoQuery = "SELECT R.reviewIdx, R.userIdx, R.userOrderIdx, R.score, R.content, R.isPhoto AS isPhotoReview,\n" +
                 "       CASE\n" +
                 "WHEN TIMESTAMPDIFF(DAY, R.createdAt, CURRENT_TIMESTAMP())<1\n" +

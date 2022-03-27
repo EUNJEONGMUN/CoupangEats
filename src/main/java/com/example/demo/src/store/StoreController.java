@@ -168,11 +168,13 @@ public class StoreController {
 
 //    /**
 //     * 작성한 리뷰 조회 API
-//     * [GET] /stores/review
-//     * /review?storeIdx=&reviewIdx
-//     * @return BaseResponse<GetFavoriteListRes>
+//     * [GET] /stores/review?userOrderIdx=
+//     * /review?userOrderIdx=
+//     * @return BaseResponse<GetStoreReviewListRes>
 //     */
 //    public BaseResponse<GetStoreReviewListRes> getStoreMyReviews(@RequestParam(required = false, defaultValue = "0") int storeIdx) throws BaseException {
+//
+//
 //
 //    }
 
