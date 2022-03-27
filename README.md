@@ -183,4 +183,4 @@ Rising Test
 - 배달 카트 조회 API 구현
 - 가게별 리뷰 조회 API 수정
   - 정렬을 위한 createdAt 추가
-  - 필터를 위한 isPhotoReveiw 추가
+  - 필터를 위한 isPhotoReview 추가
