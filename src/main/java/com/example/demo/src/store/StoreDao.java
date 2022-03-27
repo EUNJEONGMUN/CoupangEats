@@ -826,7 +826,7 @@ public class StoreDao {
      */
     public GetStoreReviewListRes getStoreReviews(int userIdx, int storeIdx, StoreReviewIdx idx) {
 
-        String ReviewInfoQuery = "SELECT R.reviewIdx, R.userIdx, R.userOrderIdx, R.score, R.content, R.isPhoto,\n" +
+        String ReviewInfoQuery = "SELECT R.reviewIdx, R.userIdx, R.userOrderIdx, R.score, R.content, R.isPhoto AS isPhotoReview,\n" +
                 "       CASE\n" +
                 "WHEN TIMESTAMPDIFF(DAY, R.createdAt, CURRENT_TIMESTAMP())<1\n" +
                 "THEN '오늘'\n" +
@@ -839,7 +839,7 @@ public class StoreDao {
                 "WHEN TIMESTAMPDIFF(MONTH, R.createdAt, CURRENT_TIMESTAMP())<2\n" +
                 "THEN '지난 달'\n" +
                 "ELSE DATE_FORMAT(R.createdAt, '%Y-%m-%d')\n" +
-                "END AS uploadDate\n" +
+                "END AS uploadDate, DATE_FORMAT(R.createdAt, '%Y-%m-%d %H:%I:%S') AS createdAt, R.isPhoto\n" +
                 "FROM Review R JOIN UserOrder UO on R.userOrderIdx = UO.userOrderIdx\n" +
                 "WHERE R.reviewIdx=? AND R.status='Y';";
 
@@ -860,7 +860,7 @@ public class StoreDao {
                 "WHEN TIMESTAMPDIFF(MONTH, createdAt, CURRENT_TIMESTAMP())<2\n" +
                 "THEN '지난 달'\n" +
                 "ELSE DATE_FORMAT(createdAt, '%Y-%m-%d')\n" +
-                "END AS uploadDate\n" +
+                "END AS bossUploadDate\n" +
                 "FROM BossReview\n" +
                 "WHERE reviewIdx=? AND status='Y';\n";
 
@@ -875,6 +875,7 @@ public class StoreDao {
         String MyLikedQuery = "SELECT status\n" +
                 "FROM ReviewLiked\n" +
                 "WHERE userIdx=? AND reviewIdx=?;";
+
         String MenuImgQuery = "SELECT reviewImgUrl\n" +
                 "FROM ReviewImg\n" +
                 "WHERE reviewIdx=? AND status='Y';";
@@ -884,7 +885,7 @@ public class StoreDao {
             bossReview = this.jdbcTemplate.queryForObject(BossReviewQuery,
                     (rs, rowNum) -> new BossReview(
                             rs.getString("content"),
-                            rs.getString("uploadDate")
+                            rs.getString("bossUploadDate")
                     ), idx.getReviewIdx());
         }
 
@@ -916,14 +917,23 @@ public class StoreDao {
         }
         String isMyReview = myReview;
 
-        String reviewUserName = this.jdbcTemplate.queryForObject("SELECT userName FROM User WHERE userIdx=?;", String.class, idx.getUserIdx());
+        String userName = this.jdbcTemplate.queryForObject("SELECT userName FROM User WHERE userIdx=?;", String.class, idx.getUserIdx());
+
+        String reviewUserName = userName.substring(0,1);
+
+        for (int i=1; i<userName.length(); i++) {
+            reviewUserName += "*";
+        }
 
         BossReview finalBossReview = bossReview;
+        String finalReviewUserName = reviewUserName;
         return this.jdbcTemplate.queryForObject(ReviewInfoQuery,
                 (rs1, rowNum1) -> new GetStoreReviewListRes(
-                        reviewUserName,
+                        finalReviewUserName,
+                        rs1.getInt("reviewIdx"),
                         rs1.getInt("score"),
                         rs1.getString("uploadDate"),
+                        rs1.getString("createdAt"),
                         rs1.getString("content"),
                         this.jdbcTemplate.queryForObject(MenuQuery,
                                 String.class, idx.getUserOrderIdx()),
@@ -931,7 +941,8 @@ public class StoreDao {
                         finalBossReview,
                         helpedCount,
                         isMyHelped,
-                        isMyReview
+                        isMyReview,
+                        rs1.getString("isPhotoReview")
                 ), idx.getReviewIdx());
 
     }

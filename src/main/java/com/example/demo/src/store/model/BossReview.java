@@ -11,6 +11,6 @@ import lombok.Setter;
 @NoArgsConstructor
 public class BossReview {
     private String content="";
-    private String uploadDate="";
+    private String bossUploadDate="";
 
 }

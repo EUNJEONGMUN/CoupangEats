@@ -335,6 +335,7 @@ public class OrderDao {
         Object[] Params = new Object[]{userIdx, orderList.getOrderTime()};
 
         int review = 0;
+        // 리뷰를 했다면
         if (this.jdbcTemplate.queryForObject(isReview, int.class, orderList.getUserOrderIdx()) != 0){
             review = this.jdbcTemplate.queryForObject(ReviewScore,
                     int.class,
