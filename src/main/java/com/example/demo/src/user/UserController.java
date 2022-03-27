@@ -274,5 +274,32 @@ public class UserController {
         return new BaseResponse<>(getUserCouponListRes);
     }
 
+    /**
+     * 할인 쿠폰 받기 API
+     * [POST] /users/coupons
+     * /coupons?couponIdx=?
+     * @return BaseResponse<String>
+     */
+    @ResponseBody
+    @PostMapping("/coupons")
+    public BaseResponse<String> createUserCoupon(@RequestParam(required = false, defaultValue = "0") int couponIdx) throws BaseException {
+
+        int userIdx= jwtService.getUserIdx();
+        if (userProvider.checkUser(userIdx)==0){
+            return new BaseResponse<>(USER_NOT_EXISTS);
+        }
+
+        if (couponIdx==0){
+            return new BaseResponse<>(EMPTY_COUPON_IDX_PARAMS);
+        }
+
+        if (userProvider.checkUserCoupon(userIdx, couponIdx) == 1){
+            return new BaseResponse<>(DUPLICATED_COUPON);
+        }
+        userService.createUserCoupon(userIdx, couponIdx);
+        String result = "";
+        return new BaseResponse<>(result);
+    }
+
 
 }

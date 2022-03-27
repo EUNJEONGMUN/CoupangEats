@@ -174,4 +174,13 @@ public class UserProvider {
         }
     }
 
+    // 사용자 쿠폰 확인
+    public int checkUserCoupon(int userIdx, int couponIdx) throws BaseException {
+        try {
+            return userDao.checkUserCoupon(userIdx, couponIdx);
+        } catch (Exception exception){
+            System.out.println("checkUserCoupon"+exception);
+            throw new BaseException(DATABASE_ERROR);
+        }
+    }
 }

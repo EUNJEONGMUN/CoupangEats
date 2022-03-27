@@ -392,4 +392,21 @@ public class UserDao {
                         rs.getString("couponType")
                 ), userIdx);
     }
+    /**
+     * 할인 쿠폰 받기 API
+     * [POST] /users/coupons
+     * /coupons?couponIdx=?
+     * @return BaseResponse<String>
+     */
+    public int createUserCoupon(int userIdx, int couponIdx) {
+        String Query = "INSERT INTO UserCoupon (userIdx, couponIdx) VALUES (?,?);";
+        return this.jdbcTemplate.update(Query, userIdx, couponIdx);
+
+    }
+
+    // 사용자 쿠폰 확인
+    public int checkUserCoupon(int userIdx, int couponIdx) {
+        String Query ="SELECT EXISTS(SELECT * FROM UserCoupon WHERE (status='Y' OR status='U') AND userIdx=? AND couponIdx=?);";
+        return this.jdbcTemplate.queryForObject(Query, int.class, userIdx, couponIdx);
+    }
 }

@@ -171,4 +171,21 @@ public class UserService {
         }
     }
 
+    /**
+     * 할인 쿠폰 받기 API
+     * [POST] /users/coupons
+     * /coupons?couponIdx=?
+     * @return BaseResponse<String>
+     */
+    public void createUserCoupon(int userIdx, int couponIdx) throws BaseException {
+        try {
+              int result = userDao.createUserCoupon(userIdx, couponIdx);
+              if (result==FAIL){
+                  throw new BaseException(FAIL_CREATE_USER_COUPON);
+              }
+        } catch (Exception exception) {
+            System.out.println("createUserCoupon"+exception);
+            throw new BaseException(DATABASE_ERROR);
+        }
+    }
 }

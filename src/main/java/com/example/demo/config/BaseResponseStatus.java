@@ -44,6 +44,7 @@ public enum BaseResponseStatus {
     POST_USERS_INVALID_PWD_LEN(false, 2024, "8자~20자"),
     POST_USERS_EMPTY_NAME(false, 2025, "이름을 정확히 입력하세요."),
     PUT_ADDRESS_CHOICE_PARAM_EMPTY(false, 2026, "addressType을 입력해주세요."),
+    EMPTY_COUPON_IDX_PARAMS(false, 2027, "couponIdx를 입력해주세요."),
     // orders
     POST_CART_PARAM_EMPTY(false, 2100, "가게 idx 혹은 메뉴 idx를 입력해주세요."),
     PUT_CART_PARAM_EMPTY(false, 2101, "가게 idx 혹은 카트 idx를 입력해주세요."),
@@ -64,6 +65,7 @@ public enum BaseResponseStatus {
     USER_NOT_EXISTS(false, 3016, "존재하지 않는 사용자입니다."),
     ADDRESS_NOT_EXISTS(false, 3017, "주소가 존재하지 않습니다."),
     INCONSISTENCY_ADDRESS_USER(false, 3018, "해당 사용자의 주소가 아닙니다."),
+    DUPLICATED_COUPON(false, 3019, "이미 받은 쿠폰입니다."),
 
 
     EMPTY_STORE(false, 3100, "존재하지 않는 가게입니다."),
@@ -109,7 +111,8 @@ public enum BaseResponseStatus {
     FAIL_DELETE_ORDER(false, 4407, "주문 취소에 실패했습니다."),
 
     FAIL_POST_FAVORITE_STORE(false, 4500, "즐겨찾기 설정에 실패했습니다."),
-    FAIL_PUT_FAVORITE_STORE(false, 4501, "즐거찾기 해제에 실패했습니다.");
+    FAIL_PUT_FAVORITE_STORE(false, 4501, "즐거찾기 해제에 실패했습니다."),
+    FAIL_CREATE_USER_COUPON(false, 4502, "쿠폰 받기에 실패했습니다.");
 
     // 5000 : 필요시 만들어서 쓰세요
     // 6000 : 필요시 만들어서 쓰세요
