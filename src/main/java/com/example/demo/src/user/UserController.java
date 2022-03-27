@@ -14,6 +14,8 @@ import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
 
+import java.util.List;
+
 import static com.example.demo.config.BaseResponseStatus.*;
 import static com.example.demo.utils.ValidationRegex.*;
 
@@ -42,8 +44,6 @@ public class UserController {
      *
      * @return BaseResponse<String>
      */
-//    @UnAuth
-//    @RequestMapping(value="/users/sign-up", method = RequestMethod.POST)
     @ResponseBody
     @PostMapping("/sign-up")
     public BaseResponse<String> createUser(@Valid @RequestBody PostUserReq postUserReq) throws BaseException {
@@ -113,9 +113,7 @@ public class UserController {
      *
      * @return BaseResponse<PostSignInRes>
      */
-//    @UnAuth
     @ResponseBody
-//    @RequestMapping(value="/users/sign-in", method = RequestMethod.POST)
     @PostMapping("/sign-in")
     public BaseResponse<PostSignInRes> signIn(@Valid @RequestBody PostSignInReq postSignInReq) throws BaseException {
 
@@ -136,7 +134,6 @@ public class UserController {
      * @return BaseResponse<String>
      */
     @ResponseBody
-//    @RequestMapping(value="/users/address", method = RequestMethod.POST)
     @PostMapping("/address")
     public BaseResponse<UserNowAddressIdx> createAddress(@Valid @RequestBody PostAddressReq postAddressReq) throws BaseException {
 
@@ -241,7 +238,6 @@ public class UserController {
      * @return BaseResponse<String>
      */
     @ResponseBody
-//    @RequestMapping(value="/users/address/choice", method = RequestMethod.PUT)
     @PutMapping("/address/choice")
     public BaseResponse<UserNowAddressIdx> putAddressChoice(@RequestParam(required = false, defaultValue = "0") int addressIdx) throws BaseException {
 
@@ -258,9 +254,25 @@ public class UserController {
         UserNowAddressIdx userNowAddressIdx = userService.putAddressChoice(userIdx, addressIdx);
         return new BaseResponse<>(userNowAddressIdx);
 
+
     }
 
+    /**
+     * 할인 쿠폰 조회 API
+     * [GET] /users/coupons
+     * @return BaseResponse<List<GetUserCouponListRes>>
+     */
+    @ResponseBody
+    @GetMapping("/coupons-list")
+    public BaseResponse<List<GetUserCouponListRes>> getUserCoupons() throws BaseException {
+        int userIdx= jwtService.getUserIdx();
+        if (userProvider.checkUser(userIdx)==0){
+            return new BaseResponse<>(USER_NOT_EXISTS);
+        }
 
+        List<GetUserCouponListRes> getUserCouponListRes = userProvider.getUserCoupons(userIdx);
+        return new BaseResponse<>(getUserCouponListRes);
+    }
 
 
 }

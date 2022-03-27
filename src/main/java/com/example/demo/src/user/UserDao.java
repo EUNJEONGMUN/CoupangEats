@@ -3,6 +3,7 @@ package com.example.demo.src.user;
 import com.example.demo.src.user.model.*;
 import com.example.demo.src.user.model.Req.*;
 import com.example.demo.src.user.model.Res.GetUserAddressRes;
+import com.example.demo.src.user.model.Res.GetUserCouponListRes;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Repository;
@@ -356,31 +357,39 @@ public class UserDao {
         Object[] Params = new Object[]{userIdx, addressIdx};
         this.jdbcTemplate.update(updateNowLocation, Params);
 
-//        String getNowAddressQuery = "SELECT userAddressIdx, buildingName, address, addressDetail, addressGuide, addressTitle, addressLongitude, addressLatitude, addressType\n" +
-//                "FROM UserAddress\n" +
-//                "WHERE userAddressIdx=?;";
-
         String getNowAddressQuery = "SELECT userAddressIdx, buildingName, address, addressDetail, addressGuide, addressTitle, addressLongitude, addressLatitude, addressType\n" +
                 "FROM UserAddress\n" +
                 "WHERE userAddressIdx=?;";
-
-//        return this.jdbcTemplate.queryForObject(getNowAddressQuery,
-//                (rs, rowNum) -> new UserNowAddressInfo(
-//                        rs.getInt("userAddressIdx"),
-//                        rs.getString("buildingName"),
-//                        rs.getString("address"),
-//                        rs.getString("addressDetail"),
-//                        rs.getString("addressGuide"),
-//                        rs.getString("addressTitle"),
-//                        rs.getDouble("addressLongitude"),
-//                        rs.getDouble("addressLatitude"),
-//                        rs.getString("addressType")
-//                ), addressIdx);
 
         return this.jdbcTemplate.queryForObject(getNowAddressQuery,
                 (rs, rowNum) -> new UserNowAddressIdx(
                         rs.getInt("userAddressIdx"))
                 , addressIdx);
 
+    }
+
+    /**
+     * 할인 쿠폰 조회 API
+     * [GET] /users/coupons
+     * @return BaseResponse<List<GetUserCouponListRes>>
+     */
+    public List<GetUserCouponListRes> getUserCoupons(int userIdx) {
+        String Query = "SELECT UC.userCouponIdx, C.storeIdx, C.couponTitle,\n" +
+                "       CONCAT(FORMAT(discountPrice,0),'원') AS discountPrice,\n" +
+                "       CONCAT(FORMAT(limitPrice,0),'원 이상 주문 시') AS limitPrice,\n" +
+                "       CONCAT(DATE_FORMAT(endDate, '%m/%d'),' 까지') AS endDate, C.couponType\n" +
+                "FROM UserCoupon UC JOIN Coupon C on UC.couponIdx = C.couponIdx\n" +
+                "WHERE userIdx=? AND C.status='Y' AND UC.status='Y' AND DATEDIFF(C.endDate, CURRENT_DATE())>=0;";
+
+        return this.jdbcTemplate.query(Query,
+                (rs, rowNum) -> new GetUserCouponListRes(
+                        rs.getInt("userCouponIdx"),
+                        rs.getInt("storeIdx"),
+                        rs.getString("couponTitle"),
+                        rs.getString("discountPrice"),
+                        rs.getString("limitPrice"),
+                        rs.getString("endDate"),
+                        rs.getString("couponType")
+                ), userIdx);
     }
 }

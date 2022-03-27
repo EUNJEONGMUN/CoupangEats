@@ -2,11 +2,14 @@ package com.example.demo.src.user;
 
 import com.example.demo.config.BaseException;
 import com.example.demo.src.user.model.Res.GetUserAddressRes;
+import com.example.demo.src.user.model.Res.GetUserCouponListRes;
 import com.example.demo.src.user.model.UserNowAddressInfo;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+
+import java.util.List;
 
 import static com.example.demo.config.BaseResponseStatus.DATABASE_ERROR;
 
@@ -38,6 +41,20 @@ public class UserProvider {
 
     }
 
+    /**
+     * 할인 쿠폰 조회 API
+     * [GET] /users/coupons
+     * @return BaseResponse<List<GetUserCouponListRes>>
+     */
+    public List<GetUserCouponListRes> getUserCoupons(int userIdx) throws BaseException {
+        try {
+            List<GetUserCouponListRes> GetUserCouponListRes = userDao.getUserCoupons(userIdx);
+            return GetUserCouponListRes;
+        } catch (Exception exception) {
+            System.out.println("getUserCoupons-> "+ exception);
+            throw new BaseException(DATABASE_ERROR);
+        }
+    }
 
     // 이메일 중복 확인
     public int checkEmail(String email) throws BaseException {
@@ -156,4 +173,5 @@ public class UserProvider {
             throw new BaseException(DATABASE_ERROR);
         }
     }
+
 }
