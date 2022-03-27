@@ -6,6 +6,9 @@ import com.example.demo.src.orders.model.Req.PostCreateOrderReq;
 import com.example.demo.src.orders.model.Req.PutModifyCartReq;
 import com.example.demo.src.orders.model.Res.GetCartListRes;
 import com.example.demo.src.orders.model.Res.GetDeliveryListRes;
+import com.example.demo.src.store.model.DeliveryFeeInfo;
+import com.example.demo.src.user.model.AddressInfo;
+import com.example.demo.src.user.model.UserLocation;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Repository;
@@ -79,7 +82,7 @@ public class OrderDao {
      * [GET] /orders/cart-list
      * @return BaseResponse<GetCartListRes>
      */
-    public GetCartListRes getCartList(int userIdx) {
+    public GetCartListRes getCartList(int userIdx, UserLocation userLocation) {
 
         // 카트에 담긴 것이 있는지 확인
         String isCartQuery = "SELECT EXISTS(SELECT storeIdx FROM Cart WHERE status='Y' AND userIdx=?);";
@@ -88,15 +91,22 @@ public class OrderDao {
             return new GetCartListRes();
         }
 
+        // 사용자의 현재 위치
+        String nowQuery = "SELECT userAddressIdx, buildingName, address, addressDetail, addressGuide, addressTitle, addressLongitude, addressLatitude, addressType, isNowLocation\n" +
+                "                FROM UserAddress\n" +
+                "                WHERE userIdx=? AND isNowLocation='Y' AND status='Y';";
+
+
         // 가게 정보
         String findStoreIdx = "SELECT storeIdx FROM Cart WHERE status='Y' AND userIdx=? LIMIT 1;";
         int storeIdx = this.jdbcTemplate.queryForObject(findStoreIdx, int.class, userIdx);
         System.out.println("storeIdx>>"+storeIdx);
 
-        String userInfoQuery = "";
 
-        String storeInfoQuery = "SELECT S.storeIdx, S.storeName, S.isCheetah, S.timeDelivery,S.minimumPrice,\n" +
-                "       CASE WHEN S.isToGo='Y' THEN S.timeToGo ELSE 'N' END AS timeToGo\n" +
+        String storeInfoQuery = "SELECT S.storeIdx, S.storeImgUrl,S.storeName, S.isCheetah, S.timeDelivery,\n" +
+                "    S.isToGo, S.isCoupon, S.status, S.minimumPrice, S.buildingName, S.storeAddress, S.storeAddressDetail,\n" +
+                "       CASE WHEN S.isToGo='Y' THEN S.timeToGo ELSE 'N' END AS timeToGo,\n" +
+                "    ROUND(ST_DISTANCE_SPHERE(POINT(S.storeLongitude,S.storeLatitude), POINT(?,?))*0.001,1) AS distance\n" +
                 "FROM Store S\n" +
                 "WHERE S.status != 'N' AND S.storeIdx=?;";
 
@@ -113,21 +123,47 @@ public class OrderDao {
         int totalPrice = this.jdbcTemplate.queryForObject(totalPriceQuery, int.class, userIdx);
         System.out.println("totalPrice>>"+totalPrice);
 
-        String feeQuery = "SELECT MIN(deliveryFee) AS deliveryFee FROM DeliveryFee WHERE storeIdx=? AND (minPrice<=?<maxPrice OR minPrice<=?);";
-        Object[] feeParams = new Object[]{storeIdx, totalPrice, totalPrice};
-        int deliveryFee = this.jdbcTemplate.queryForObject(feeQuery, int.class, feeParams);
-        System.out.println("deliveryFee>>"+deliveryFee);
+//        String feeQuery = "SELECT MIN(deliveryFee) AS deliveryFee FROM DeliveryFee WHERE storeIdx=? AND (minPrice<=?<maxPrice OR minPrice<=?);";
+//        Object[] feeParams = new Object[]{storeIdx, totalPrice, totalPrice};
+//        int deliveryFee = this.jdbcTemplate.queryForObject(feeQuery, int.class, feeParams);
+
+        String DeliveryFeeQuery = "SELECT storeIdx, minPrice, maxPrice, deliveryFee FROM DeliveryFee WHERE storeIdx=?;";
+
+        // 사용자의 현재 위치 정보
+        AddressInfo  nowAddress = this.jdbcTemplate.queryForObject(nowQuery,
+                    (rs, rowNum) -> new AddressInfo(
+                            rs.getInt("userAddressIdx"),
+                            rs.getString("buildingName"),
+                            rs.getString("address"),
+                            rs.getString("addressDetail"),
+                            rs.getString("addressGuide"),
+                            rs.getDouble("addressLongitude"),
+                            rs.getDouble("addressLatitude"),
+                            rs.getString("addressTitle")
+                    ), userIdx);
 
 
         return this.jdbcTemplate.queryForObject(storeInfoQuery,
                 (rs1, rowNum1) -> new GetCartListRes(
+                        nowAddress,
+                        storeIdx,
                         rs1.getString("storeName"),
                         rs1.getString("isCheetah"),
                         rs1.getInt("minimumPrice"),
                         rs1.getString("timeDelivery"),
                         rs1.getString("timeToGo"),
+                        rs1.getString("status"),
+                        rs1.getString("buildingName"),
+                        rs1.getString("storeAddress"),
+                        rs1.getString("storeAddressDetail"),
+                        rs1.getDouble("distance"),
                         totalPrice,
-                        deliveryFee,
+                        this.jdbcTemplate.query(DeliveryFeeQuery,
+                                (rs2, rowNum2) -> new DeliveryFeeList(
+                                        rs2.getInt("minPrice"),
+                                        rs2.getInt("maxPrice"),
+                                        rs2.getInt("deliveryFee")
+                                ), storeIdx),
                         this.jdbcTemplate.query(menuInfoQuery,
                                 (rs3, rowNum3) -> new CartMenu(
                                         rs3.getString("menuName"),
@@ -136,10 +172,15 @@ public class OrderDao {
                                         rs3.getInt("orderCount")
                                 ), userIdx)
                         )
-                , storeIdx);
+                , userLocation.getUserLongitude(), userLocation.getUserLatitude(), storeIdx);
 
     }
 
+    // 사용자가 설정한 주소가 있는지 확인
+    public int checkUserNowAddress(int userIdx){
+        String Query = "SELECT EXISTS(SELECT * FROM UserAddress WHERE userIdx=? AND isNowLocation='Y' AND status='Y');";
+        return this.jdbcTemplate.queryForObject(Query, int.class, userIdx);
+    }
 
     // 카트에 담겨진 가게 확인
     public int checkCartStore(int userIdx) {

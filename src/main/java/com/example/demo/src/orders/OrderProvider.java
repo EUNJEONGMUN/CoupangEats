@@ -4,6 +4,7 @@ import com.example.demo.config.BaseException;
 import com.example.demo.src.orders.model.OrderList;
 import com.example.demo.src.orders.model.Res.GetCartListRes;
 import com.example.demo.src.orders.model.Res.GetDeliveryListRes;
+import com.example.demo.src.user.model.UserLocation;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -30,9 +31,9 @@ public class OrderProvider {
      * [GET] /orders/cart-list
      * @return BaseResponse<List<GetCartListRes>>
      */
-    public GetCartListRes getCartList(int userIdx) throws BaseException {
+    public GetCartListRes getCartList(int userIdx, UserLocation userLocation) throws BaseException {
         try {
-            GetCartListRes getCartListRes = orderDao.getCartList(userIdx);
+            GetCartListRes getCartListRes = orderDao.getCartList(userIdx, userLocation);
             return getCartListRes;
         } catch (Exception exception) {
             System.out.println("getCartList-> "+ exception);
@@ -81,5 +82,13 @@ public class OrderProvider {
         }
     }
 
-
+    // 사용자가 현재 설정한 주소 확인
+    public int checkUserNowAddress(int userIdx) throws BaseException {
+        try{
+            return orderDao.checkUserNowAddress(userIdx);
+        } catch (Exception exception) {
+            System.out.println("checkUserNowAddress-> "+ exception);
+            throw new BaseException(DATABASE_ERROR);
+        }
+    }
 }

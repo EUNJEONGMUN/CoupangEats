@@ -67,6 +67,7 @@ public enum BaseResponseStatus {
     ADDRESS_NOT_EXISTS(false, 3017, "주소가 존재하지 않습니다."),
     INCONSISTENCY_ADDRESS_USER(false, 3018, "해당 사용자의 주소가 아닙니다."),
     DUPLICATED_COUPON(false, 3019, "이미 받은 쿠폰입니다."),
+    USER_NOW_ADDRESS_NOT_EXISTS(false, 3020, "주소를 설정해주세요."),
 
 
     EMPTY_STORE(false, 3100, "존재하지 않는 가게입니다."),

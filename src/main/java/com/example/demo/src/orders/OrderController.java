@@ -4,7 +4,9 @@ import com.example.demo.config.BaseException;
 import com.example.demo.config.BaseResponse;
 import com.example.demo.src.orders.model.Req.*;
 import com.example.demo.src.orders.model.Res.*;
+import com.example.demo.src.store.StoreProvider;
 import com.example.demo.src.user.UserProvider;
+import com.example.demo.src.user.model.UserLocation;
 import com.example.demo.utils.JwtService;
 import com.fasterxml.jackson.databind.ser.Serializers;
 import org.slf4j.Logger;
@@ -34,12 +36,15 @@ public class OrderController {
     private final JwtService jwtService;
     @Autowired
     private final UserProvider userProvider;
+    @Autowired
+    private final StoreProvider storeProvider;
 
-    public OrderController(OrderProvider orderProvider, OrderService orderService, JwtService jwtService, UserProvider userProvider){
+    public OrderController(OrderProvider orderProvider, OrderService orderService, JwtService jwtService, UserProvider userProvider, StoreProvider storeProvider){
         this.orderProvider = orderProvider;
         this.orderService = orderService;
         this.jwtService = jwtService;
         this.userProvider = userProvider;
+        this.storeProvider = storeProvider;
     }
 
     /**
@@ -148,7 +153,13 @@ public class OrderController {
             return new BaseResponse<>(USER_NOT_EXISTS);
         }
 
-        GetCartListRes getCartListRes = orderProvider.getCartList(userIdx);
+        // 사용자가 현재 설정한 주소 확인
+        if (orderProvider.checkUserNowAddress(userIdx) == 0){
+            // 없다면 주소 설정해달라는 오류 반환
+            return new BaseResponse<>(USER_NOW_ADDRESS_NOT_EXISTS);
+        }
+        UserLocation userLocation = storeProvider.getNowUserLocation(userIdx);
+        GetCartListRes getCartListRes = orderProvider.getCartList(userIdx, userLocation);
         return new BaseResponse<>(getCartListRes);
 
     }
