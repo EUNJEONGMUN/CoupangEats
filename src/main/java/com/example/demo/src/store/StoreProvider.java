@@ -1,6 +1,7 @@
 package com.example.demo.src.store;
 
 import com.example.demo.config.BaseException;
+import com.example.demo.src.store.model.Res.GetFavoriteListRes;
 import com.example.demo.src.store.model.Res.GetStoreDetailRes;
 import com.example.demo.src.store.model.Res.GetStoreHomeRes;
 import com.example.demo.src.store.model.Res.GetStoreMenuOptionsRes;
@@ -81,6 +82,29 @@ public class StoreProvider {
         }
     }
 
+    /**
+     * 즐겨찾기 조회 API
+     * [GET] /stores/favorite-list
+     * @return BaseResponse<List<GetFavoriteListRes>>
+     */
+    public List<GetFavoriteListRes> getFavoriteList(int userIdx, UserLocation userLocation) throws BaseException{
+        try {
+
+            List<Integer> storeLIst = storeDao.getFavoriteStoreIdx(userIdx);
+
+            List<GetFavoriteListRes> getFavoriteListRes = new ArrayList<>();
+            for (int idx: storeLIst){
+                GetFavoriteListRes favoriteStore = storeDao.getFavoriteList(userIdx, idx, userLocation);
+                getFavoriteListRes.add(favoriteStore);
+            }
+
+            return getFavoriteListRes;
+        } catch (Exception exception) {
+            System.out.println("getFavoriteList"+exception);
+            throw new BaseException(DATABASE_ERROR);
+        }
+
+    }
 
     // 가게 존재 여부 확인
     public int checkStore(int storeIdx) throws BaseException{
@@ -122,6 +146,15 @@ public class StoreProvider {
     public UserLocation getNowUserLocation(int userIdx) throws BaseException {
         try {
             return storeDao.getNowUserLocation(userIdx);
+        } catch (Exception exception) {
+            throw new BaseException(DATABASE_ERROR);
+        }
+    }
+
+    // 즐겨찾기 한 가게 찾기
+    public int checkFavoriteStore(int userIdx, int storeIdx) throws BaseException {
+        try {
+            return storeDao.checkFavoriteStore(userIdx,storeIdx);
         } catch (Exception exception) {
             throw new BaseException(DATABASE_ERROR);
         }

@@ -4,6 +4,8 @@ import com.example.demo.config.BaseException;
 import com.example.demo.config.BaseResponse;
 import com.example.demo.src.store.model.Res.*;
 import com.example.demo.src.store.model.StoreHome;
+import com.example.demo.src.user.UserProvider;
+import com.example.demo.src.user.UserService;
 import com.example.demo.src.user.model.UserLocation;
 import com.example.demo.utils.JwtService;
 import org.slf4j.Logger;
@@ -27,11 +29,14 @@ public class StoreController {
     private final StoreService storeService;
     @Autowired
     private final JwtService jwtService;
+    @Autowired
+    private final UserProvider userProvider;
 
-    public StoreController(StoreProvider storeProvider, StoreService storeService, JwtService jwtService){
+    public StoreController(StoreProvider storeProvider, StoreService storeService, JwtService jwtService,UserProvider userProvider){
         this.storeProvider = storeProvider;
         this.storeService = storeService;
         this.jwtService = jwtService;
+        this.userProvider = userProvider;
     }
 
     /**
@@ -152,5 +157,91 @@ public class StoreController {
 //
 //
 //    }
+
+
+    /**
+     * 즐겨찾기 등록 API
+     * [POST] /stores/favorite?storeIdx=
+     * /favorite?storeIdx=
+     * @return BaseResponse<String>
+     */
+    @ResponseBody
+    @PostMapping("/favorite")
+    public BaseResponse<String> createFavoriteStore(@RequestParam(required = false) int storeIdx) throws BaseException {
+
+        int userIdx= jwtService.getUserIdx();
+        if (userProvider.checkUser(userIdx)==0){
+            return new BaseResponse<>(USER_NOT_EXISTS);
+        }
+
+        if (storeIdx == 0){ // storeIdx가 없을 경우
+            return new BaseResponse<>(EMPTY_STOREIDX_PARAM);
+        }
+        // 이미 좋아요 한 가게가 있는지 확인
+        if (storeProvider.checkFavoriteStore(userIdx, storeIdx) !=0){
+            return new BaseResponse<>(FAVORITE_STORE_ALREADY);
+        }
+
+        storeService.createFavoriteStore(userIdx, storeIdx);
+        String result = "";
+        return new BaseResponse<>(result);
+    }
+
+    /**
+     * 즐겨찾기 해제 API
+     * [PUT] /stores/favorite?storeIdx=
+     * /favorite?storeIdx=
+     * @return BaseResponse<String>
+     */
+    @ResponseBody
+    @PutMapping("/favorite")
+    public BaseResponse<String> deleteFavoriteStore(@RequestParam(required = false) String[] storeIdx) throws BaseException {
+        int userIdx= jwtService.getUserIdx();
+        if (userProvider.checkUser(userIdx)==0){
+            return new BaseResponse<>(USER_NOT_EXISTS);
+        }
+        if (storeIdx.length == 0){ // storeIdx가 없을 경우
+            return new BaseResponse<>(EMPTY_STOREIDX_PARAM);
+        }
+
+        // 이미 좋아요 한 가게가 있는지 확인 - 1개만 들어올 때
+        if (storeProvider.checkFavoriteStore(userIdx, Integer.parseInt(storeIdx[0])) ==0){
+            return new BaseResponse<>(FAVORITE_STORE_NOT_ALREADY);
+        }
+
+        storeService.deleteFavoriteStore(userIdx, storeIdx);
+        String result = "";
+        return new BaseResponse<>(result);
+    }
+
+    /**
+     * 즐겨찾기 조회 API
+     * [GET] /stores/favorite-list
+     * @return BaseResponse<List<GetFavoriteListRes>>
+     */
+    @ResponseBody
+    @GetMapping("/favorite-list")
+    public BaseResponse<List<GetFavoriteListRes>> getFavoriteList(@RequestParam(required = false, defaultValue = "0") double longitude,
+                                                                  @RequestParam(required = false, defaultValue = "0") double latitude) throws BaseException{
+        int userIdx= jwtService.getUserIdx();
+        if (userProvider.checkUser(userIdx)==0){
+            return new BaseResponse<>(USER_NOT_EXISTS);
+        }
+
+        if (latitude==0 || longitude==0){
+            return new BaseResponse<>(EMPTY_POSITION_PARAM);
+        }
+
+        UserLocation userLocation = storeProvider.getNowUserLocation(userIdx);
+        if (userLocation.getUserLatitude()==0 || userLocation.getUserLatitude()==0){
+            userLocation.setUserLongitude(longitude);
+            userLocation.setUserLatitude(latitude);
+        }
+
+        List<GetFavoriteListRes> getFavoriteListRes = storeProvider.getFavoriteList(userIdx, userLocation);
+        return new BaseResponse<>(getFavoriteListRes);
+
+    }
+
 
 }

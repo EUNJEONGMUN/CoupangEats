@@ -1,10 +1,17 @@
 package com.example.demo.src.store;
 
+import com.example.demo.config.BaseException;
+import com.example.demo.src.store.model.Res.GetFavoriteListRes;
+import com.example.demo.src.user.model.UserLocation;
 import com.example.demo.utils.JwtService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+
+import java.util.List;
+
+import static com.example.demo.config.BaseResponseStatus.*;
 
 @Service
 public class StoreService {
@@ -22,5 +29,43 @@ public class StoreService {
         this.storeProvider = storeProvider;
 
     }
+
+    /**
+     * 즐겨찾기 등록 API
+     * [POST] /stores/favorite?storeIdx=
+     * /favorite?storeIdx=
+     * @return BaseResponse<String>
+     */
+    public void createFavoriteStore(int userIdx, int storeIdx) throws BaseException {
+        try {
+            int result = storeDao.createFavoriteStore(userIdx, storeIdx);
+            if (result == FAIL){
+                throw new BaseException(FAIL_POST_FAVORITE_STORE);
+            }
+        } catch (Exception exception) {
+            System.out.println("createAddress"+exception);
+            throw new BaseException(DATABASE_ERROR);
+        }
+
+    }
+
+    /**
+     * 즐겨찾기 해제 API
+     * [PUT] /stores/favorite?storeIdx=
+     * /favorite?storeIdx=
+     * @return BaseResponse<String>
+     */
+    public void deleteFavoriteStore(int userIdx, String[] storeIdx) throws BaseException {
+        try {
+            int result = storeDao.deleteFavoriteStore(userIdx, storeIdx);
+            if (result == FAIL){
+                throw new BaseException(FAIL_PUT_FAVORITE_STORE);
+            }
+        } catch (Exception exception) {
+            System.out.println("deleteFavoriteStore"+exception);
+            throw new BaseException(DATABASE_ERROR);
+        }
+    }
+
 
 }

@@ -1,6 +1,7 @@
 package com.example.demo.src.store;
 
 import com.example.demo.src.store.model.*;
+import com.example.demo.src.store.model.Res.GetFavoriteListRes;
 import com.example.demo.src.store.model.Res.GetStoreDetailRes;
 import com.example.demo.src.store.model.Res.GetStoreHomeRes;
 import com.example.demo.src.store.model.Res.GetStoreMenuOptionsRes;
@@ -707,7 +708,123 @@ public class StoreDao {
 
     }
 
+    /**
+     * 즐겨찾기 등록 API
+     * [POST] /stores/favorite?storeIdx=
+     * /favorite?storeIdx=
+     * @return BaseResponse<String>
+     */
+    public int createFavoriteStore(int userIdx, int storeIdx) {
+        String Query = "INSERT INTO Favorite (userIdx, storeIdx) VALUES (?,?);";
+        return this.jdbcTemplate.update(Query, userIdx, storeIdx);
+    }
 
+    /**
+     * 즐겨찾기 해제 API
+     * [PUT] /stores/favorite?storeIdx=
+     * /favorite?storeIdx=
+     * @return BaseResponse<String>
+     */
+    public int deleteFavoriteStore(int userIdx, String[] storeIdx) {
+        String Query = "UPDATE Favorite SET status='N' WHERE userIdx=? AND storeIdx=? AND status='Y';";
+        for (int i=0; i<storeIdx.length; i++){
+            this.jdbcTemplate.update(Query, userIdx, storeIdx[i]);
+        }
+        return 1;
+    }
+
+    /**
+     * 즐겨찾기 조회 API
+     * [GET] /stores/favorite-list
+     * @return BaseResponse<List<GetFavoriteListRes>>
+     */
+    public GetFavoriteListRes getFavoriteList(int userIdx, int storeIdx, UserLocation userLocation) {
+        String StoreInfoQuery = "SELECT S.storeIdx, S.storeImgUrl,S.storeName, S.isCheetah, S.timeDelivery, R.reviewScore, R.reviewCount,\n" +
+                "       CASE WHEN S.isToGo='Y' THEN S.timeToGo ELSE 'N' END AS timeToGo,\n" +
+                "       S.isToGo, S.isCoupon, S.status, S.minimumPrice, S.buildingName, S.storeAddress, S.storeAddressDetail,\n" +
+                "       ROUND(ST_DISTANCE_SPHERE(POINT(S.storeLongitude,S.storeLatitude), POINT(?,?))*0.001,1) AS distance\n" +
+                "                FROM Store S\n" +
+                "                LEFT JOIN (\n" +
+                "                    SELECT UO.storeIdx, ROUND(AVG(R.score),1) AS reviewScore, COUNT(R.reviewIdx) AS reviewCount\n" +
+                "                    FROM Review R JOIN UserOrder UO on R.userOrderIdx=UO.userOrderIdx\n" +
+                "                    GROUP BY UO.storeIdx) R ON R.storeIdx=S.storeIdx\n" +
+                "                WHERE S.status != 'N' AND S.storeIdx=?;";
+
+        String DeliveryFeeQuery = "SELECT CASE\n" +
+                "    WHEN IFNULL(MIN(deliveryFee),0) =0\n" +
+                "        THEN '무료배달'\n" +
+                "    ELSE CONCAT(FORMAT(IFNULL(MIN(deliveryFee),0),0),'원')\n" +
+                "    END AS fee\n" +
+                "        FROM DeliveryFee D\n" +
+                "        WHERE D.storeIdx=? AND D.status='Y';";
+
+
+        String CouponQuery = "SELECT CASE WHEN couponType='D' THEN CONCAT(FORMAT(IFNULL(C.discountPrice,0),0),'원 배달쿠폰')\n" +
+                "            WHEN couponType='T' THEN CONCAT(FORMAT(IFNULL(C.discountPrice,0),0),'원 포장쿠폰')\n" +
+                "            WHEN couponType='B' THEN CONCAT(FORMAT(IFNULL(C.discountPrice,0),0),'원 배달·포장쿠폰')\n" +
+                "            ELSE 'N' END AS coupon\n" +
+                "                FROM Store S\n" +
+                "                LEFT JOIN (SELECT RankRow.storeIdx, RankRow.couponIdx, RankRow.discountPrice, RankRow.couponType\n" +
+                "                            FROM (SELECT*, RANK() OVER (PARTITION BY storeIdX ORDER BY discountPrice DESC, couponIdx ASC) AS a\n" +
+                "                                    FROM Coupon\n" +
+                "                                    WHERE status='Y' AND  DATEDIFF(endDate, CURRENT_DATE())>=0) AS RankRow\n" +
+                "                                    WHERE RankRow.a <= 1) C ON C.storeIdx = S.storeIdx\n" +
+                "                WHERE S.storeIdx = ?;";
+
+
+        String MyOrderCountQuery = "SELECT COUNT(*)\n" +
+                "FROM UserOrder\n" +
+                "WHERE userIdx=? AND storeIdx=? AND status!='N' AND status!='F' AND status!='E';";
+        String MyLatelyOrderTimeQuery = "SELECT orderTime\n" +
+                "FROM UserOrder\n" +
+                "WHERE userIdx=? AND storeIdx=? AND status!='N' AND status!='F' AND status!='E'\n" +
+                "ORDER BY orderTime DESC\n" +
+                "LIMIT 1;";
+        String addFavoriteStoreTimeQuery ="SELECT DATE_FORMAT(createdAt, '%Y-%m-%d %H:%m:%s')\n" +
+                "FROM Favorite\n" +
+                "WHERE userIdx=? AND storeIdx=? AND status='Y';";
+
+        int myOrderCount = this.jdbcTemplate.queryForObject(MyOrderCountQuery,
+                int.class,
+                userIdx, storeIdx);
+        String latelyOrderTime = "";
+
+        if (myOrderCount!=0){
+            latelyOrderTime = this.jdbcTemplate.queryForObject(MyLatelyOrderTimeQuery,
+                    String.class,
+                    userIdx, storeIdx);
+        }
+        String myLatelyOrderTime = latelyOrderTime;
+
+
+
+        return this.jdbcTemplate.queryForObject(StoreInfoQuery,
+                (rs1, rowNum)-> new GetFavoriteListRes(
+                        rs1.getInt("storeIdx"),
+                        rs1.getString("storeImgUrl"),
+                        rs1.getString("storeName"),
+                        rs1.getString("isCheetah"),
+                        rs1.getString("timeDelivery"),
+                        rs1.getString("isToGo"),
+                        rs1.getString("isCoupon"),
+                        rs1.getDouble("distance"),
+                        rs1.getString("status"),
+                        rs1.getDouble("reviewScore"),
+                        rs1.getInt("reviewCount"),
+                        this.jdbcTemplate.queryForObject(DeliveryFeeQuery,
+                                String.class,
+                                storeIdx),
+                        this.jdbcTemplate.queryForObject(CouponQuery,
+                                String.class,
+                                storeIdx),
+                        myOrderCount,
+                        myLatelyOrderTime,
+                        this.jdbcTemplate.queryForObject(addFavoriteStoreTimeQuery,
+                                String.class,
+                                userIdx, storeIdx))
+                , userLocation.getUserLongitude(), userLocation.getUserLatitude(), storeIdx);
+
+    }
 
     // 가게 존재 여부 확인
     public int checkStore(int storeIdx) {
@@ -788,5 +905,21 @@ public class StoreDao {
                     return rs.getInt("storeIdx");
                 }, categoryIdx);
 
+    }
+
+    // 즐겨찾기 한 가게 찾기
+    public int checkFavoriteStore(int userIdx, int storeIdx) {
+        String Query = "SELECT EXISTS(SELECT * FROM Favorite WHERE userIdx=? AND storeIdx=? AND status='Y');";
+        return this.jdbcTemplate.queryForObject(Query, int.class, userIdx, storeIdx);
+    }
+
+
+    // 즐겨찾기 한 가게 idx
+    public List<Integer> getFavoriteStoreIdx(int userIdx) {
+        String Query = "SELECT storeIdx FROM Favorite WHERE userIdx=? AND status='Y';";
+        return this.jdbcTemplate.query(Query,
+                (rs,rowNum) -> {
+                    return rs.getInt("storeIdx");
+                }, userIdx);
     }
 }

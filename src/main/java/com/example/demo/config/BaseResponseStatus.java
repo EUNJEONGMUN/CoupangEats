@@ -70,7 +70,8 @@ public enum BaseResponseStatus {
     EMPTY_MENU(false, 3101, "존재하지 않는 메뉴입니다."),
     INCONSISTENCY_STORE_OWNER(false, 3102, "해당 가게의 메뉴가 아닙니다."),
     EMPTY_STORE_CATEGORY(false, 3103, "존재하지 않는 카테고리입니다."),
-
+    FAVORITE_STORE_ALREADY(false, 3104, "이미 즐겨찾기 한 가게입니다."),
+    FAVORITE_STORE_NOT_ALREADY(false, 3105, "즐겨찾기 하지 않은 가게입니다."),
     CART_DUPLICATE_STORE(false, 3200, "같은 가게의 메뉴만 담을 수 있습니다."),
     EMPTY_CART_STORE(false, 3201, "카트에 담긴 가게가 없습니다."),
     CART_NOT_DUPLICATE_STORE(false, 3202, "가게가 없거나 같은 가게만 있습니다. 다른 API로 접근해주세요."),
@@ -78,6 +79,8 @@ public enum BaseResponseStatus {
 
     USER_ORDER_NOT_EXISTS(false, 3300, "주문 내역이 존재하지 않습니다."),
     INCONSISTENCY_ORDER_USER(false, 3301, "해당 사용자의 주문 내역이 아닙니다."),
+
+
     /**
      * 4000 : Database, Server 오류
      */
@@ -103,7 +106,10 @@ public enum BaseResponseStatus {
     FAIL_MODIFY_ADDRESS(false, 4404, "주소지 수정에 실패했습니다."),
     FAIL_MODIFY_CART(false, 4405, "카드 수정에 실패했습니다."),
     FAIL_CREATE_ORDER(false, 4406, "주문하기에 실패했습니다."),
-    FAIL_DELETE_ORDER(false, 4407, "주문 취소에 실패했습니다.");
+    FAIL_DELETE_ORDER(false, 4407, "주문 취소에 실패했습니다."),
+
+    FAIL_POST_FAVORITE_STORE(false, 4500, "즐겨찾기 설정에 실패했습니다."),
+    FAIL_PUT_FAVORITE_STORE(false, 4501, "즐거찾기 해제에 실패했습니다.");
 
     // 5000 : 필요시 만들어서 쓰세요
     // 6000 : 필요시 만들어서 쓰세요
