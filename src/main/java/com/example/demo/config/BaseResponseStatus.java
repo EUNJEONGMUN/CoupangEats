@@ -45,6 +45,7 @@ public enum BaseResponseStatus {
     POST_USERS_EMPTY_NAME(false, 2025, "이름을 정확히 입력하세요."),
     PUT_ADDRESS_CHOICE_PARAM_EMPTY(false, 2026, "addressType을 입력해주세요."),
     EMPTY_COUPON_IDX_PARAMS(false, 2027, "couponIdx를 입력해주세요."),
+    POST_USERS_EMPTY_PHONE(false, 2028, "휴대폰 번호를 입력해주세요."),
     // orders
     POST_CART_PARAM_EMPTY(false, 2100, "가게 idx 혹은 메뉴 idx를 입력해주세요."),
     PUT_CART_PARAM_EMPTY(false, 2101, "가게 idx 혹은 카트 idx를 입력해주세요."),

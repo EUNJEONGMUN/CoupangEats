@@ -15,7 +15,7 @@ import java.util.List;
 @AllArgsConstructor
 public class GetStoreDetailRes {
     private int storeIdx;
-    private String storeImgUrl;
+    private List<String> storeImgUrl;
     private String storeName;
     private String isCheetah;
     private String timeDelivery;

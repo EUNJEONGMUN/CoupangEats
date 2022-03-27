@@ -96,7 +96,7 @@ public class UserController {
             return new BaseResponse<>(POST_USERS_EMPTY_EMAIL);
         }
         if (postUserReq.getPhoneNumber()==null){
-            return new BaseResponse<>(POST_USERS_INVALID_PHONE);
+            return new BaseResponse<>(POST_USERS_EMPTY_PHONE);
         }
         if (postUserReq.getUserName()==null){
             return new BaseResponse<>(POST_USERS_EMPTY_NAME);

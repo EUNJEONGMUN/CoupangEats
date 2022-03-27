@@ -495,8 +495,6 @@ public class StoreDao {
                 "       CONCAT(DATE_FORMAT(endDate, '%m/%d'),' 까지') AS endDate, couponType\n" +
                 "FROM Coupon WHERE status='Y' AND storeIdx=? AND DATEDIFF(endDate, CURRENT_DATE())>=0;";
 
-//        String DeliveryFeeInfo = "SELECT storeIdx, minPrice, maxPrice, deliveryFee FROM DeliveryFee WHERE storeIdx=?;";
-
         String DeliveryFeeInfo = "SELECT storeIdx,\n" +
                 "       CASE WHEN deliveryFee=0 THEN '무료' ELSE CONCAT(FORMAT(deliveryFee,0),'원') END AS deliveryFee,\n" +
                 "       CASE WHEN maxPrice IS NULL THEN CONCAT(FORMAT(minPrice,0),'원 ~ ') ELSE CONCAT(FORMAT(minPrice,0), '원 ~ ', FORMAT(maxPrice,0),'원') END AS orderPrice\n" +
@@ -523,6 +521,16 @@ public class StoreDao {
                 "    WHERE R.isPhoto='Y' AND R.status='Y') PhotoReview ON PhotoReview.userOrderIdx = UO.userOrderIdx\n" +
                 "WHERE UO.status='Y' AND UO.storeIdx=?;";
 
+        String StoreImageQuery = "SELECT RankRow.storeIdx, RankRow.imageUrl\n" +
+                "FROM (SELECT*, RANK() OVER (PARTITION BY SI.storeIdX ORDER BY SI.storeImageIdx) AS a\n" +
+                "      FROM StoreImage SI\n" +
+                "     ) AS RankRow\n" +
+                "WHERE RankRow.a <= 3 AND RankRow.storeIdx=?;";
+
+        List<String> storeImgUrl = this.jdbcTemplate.query(StoreImageQuery,
+                (rs1, rowNum1) -> new String(
+                        rs1.getString("imageUrl")
+                ),storeIdx);
 
         // 가게 총 주문량
 
@@ -637,7 +645,7 @@ public class StoreDao {
         return this.jdbcTemplate.queryForObject(StoreInfoQuery,
                 (rs, rowNum) -> new GetStoreDetailRes(
                         rs.getInt("storeIdx"),
-                        rs.getString("storeImgUrl"),
+                        storeImgUrl,
                         rs.getString("storeName"),
                         rs.getString("isCheetah"),
                         rs.getString("timeDelivery"),
