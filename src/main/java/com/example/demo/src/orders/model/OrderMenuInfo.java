@@ -12,6 +12,7 @@ import lombok.Setter;
 public class OrderMenuInfo {
     private int cartIdx;
     private int orderCount;
+    private String menuName;
     private String menuOptions;
     private String isGood;
 

@@ -283,12 +283,13 @@ public class OrderDao {
                 "WHERE userOrderIdx=?;";
 
 
-        String OrderMenuInfoQuery = "SELECT C.menuOptions, C.orderCount, OrderMenu.cartIdx, OrderMenu.isGood\n" +
+        String OrderMenuInfoQuery = "SELECT M.menuName, C.menuOptions, C.orderCount, OrderMenu.cartIdx, OrderMenu.isGood\n" +
                 "FROM Cart C JOIN (\n" +
-                "    SELECT CTO.userIdx, CTO.cartIdx, UO.orderTime, CTO.isGood, UO.status\n" +
-                "    FROM UserOrder UO JOIN CartToOrder CTO on UO.orderTime = CTO.orderTime\n" +
-                "    WHERE UO.userIdx=? AND UO.orderTime=? AND UO.status!='N'\n" +
-                "    ORDER BY UO.orderTime DESC) OrderMenu ON OrderMenu.cartIdx = C.cartIdx;";
+                "        SELECT CTO.userIdx, CTO.cartIdx, UO.orderTime, CTO.isGood, UO.status\n" +
+                "        FROM UserOrder UO JOIN CartToOrder CTO on UO.orderTime = CTO.orderTime\n" +
+                "        WHERE UO.userIdx=? AND UO.orderTime=? AND UO.status!='N'\n" +
+                "        ORDER BY UO.orderTime DESC) OrderMenu ON OrderMenu.cartIdx = C.cartIdx\n" +
+                "JOIN Menu M on C.menuIdx = M.menuIdx;\n";
 
         Object[] Params = new Object[]{userIdx, orderList.getOrderTime()};
 
@@ -326,6 +327,7 @@ public class OrderDao {
                                 (rs2, rowNum2) -> new OrderMenuInfo(
                                         rs2.getInt("cartIdx"),
                                         rs2.getInt("orderCount"),
+                                        rs2.getString("menuName"),
                                         rs2.getString("menuOptions"),
                                         rs2.getString("isGood")
                                 ),Params)
