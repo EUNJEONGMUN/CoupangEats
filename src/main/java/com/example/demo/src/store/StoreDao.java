@@ -1,10 +1,7 @@
 package com.example.demo.src.store;
 
 import com.example.demo.src.store.model.*;
-import com.example.demo.src.store.model.Res.GetFavoriteListRes;
-import com.example.demo.src.store.model.Res.GetStoreDetailRes;
-import com.example.demo.src.store.model.Res.GetStoreHomeRes;
-import com.example.demo.src.store.model.Res.GetStoreMenuOptionsRes;
+import com.example.demo.src.store.model.Res.*;
 import com.example.demo.src.user.model.UserLocation;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -826,6 +823,124 @@ public class StoreDao {
 
     }
 
+    /**
+     * 가게별 리뷰 조회 API
+     * [GET] /stores/review-list
+     * /review-list?storeIdx=
+     * @return BaseResponse<List<GetStoreReviewListRes>>
+     */
+    public GetStoreReviewListRes getStoreReviews(int userIdx, int storeIdx, StoreReviewIdx idx) {
+
+        String ReviewInfoQuery = "SELECT R.reviewIdx, R.userIdx, R.userOrderIdx, R.score, R.content, R.isPhoto,\n" +
+                "       CASE\n" +
+                "WHEN TIMESTAMPDIFF(DAY, R.createdAt, CURRENT_TIMESTAMP())<1\n" +
+                "THEN '오늘'\n" +
+                "WHEN TIMESTAMPDIFF(DAY, R.createdAt, CURRENT_TIMESTAMP())<7\n" +
+                "THEN CONCAT(TIMESTAMPDIFF(DAY, R.createdAt, CURRENT_TIMESTAMP()), '일 전')\n" +
+                "WHEN TIMESTAMPDIFF(WEEK, R.createdAt, CURRENT_TIMESTAMP())<2\n" +
+                "THEN '지난 주'\n" +
+                "WHEN TIMESTAMPDIFF(MONTH, R.createdAt, CURRENT_TIMESTAMP())<1\n" +
+                "THEN '이번 달'\n" +
+                "WHEN TIMESTAMPDIFF(MONTH, R.createdAt, CURRENT_TIMESTAMP())<2\n" +
+                "THEN '지난 달'\n" +
+                "ELSE DATE_FORMAT(R.createdAt, '%Y-%m-%d')\n" +
+                "END AS uploadDate\n" +
+                "FROM Review R JOIN UserOrder UO on R.userOrderIdx = UO.userOrderIdx\n" +
+                "WHERE R.reviewIdx=? AND R.status='Y';";
+
+        String HelpedCountQuery = "SELECT COUNT(*) AS helpedCount\n" +
+                "FROM ReviewLiked\n" +
+                "WHERE reviewIdx=? AND isHelped='Y' AND status='Y';";
+
+        String BossReviewQuery = "SELECT reviewIdx, content,\n" +
+                "       CASE\n" +
+                "WHEN TIMESTAMPDIFF(DAY, createdAt, CURRENT_TIMESTAMP())<1\n" +
+                "THEN '오늘'\n" +
+                "WHEN TIMESTAMPDIFF(DAY, createdAt, CURRENT_TIMESTAMP())<7\n" +
+                "THEN CONCAT(TIMESTAMPDIFF(DAY, createdAt, CURRENT_TIMESTAMP()), '일 전')\n" +
+                "WHEN TIMESTAMPDIFF(WEEK, createdAt, CURRENT_TIMESTAMP())<2\n" +
+                "THEN '지난 주'\n" +
+                "WHEN TIMESTAMPDIFF(MONTH, createdAt, CURRENT_TIMESTAMP())<1\n" +
+                "THEN '이번 달'\n" +
+                "WHEN TIMESTAMPDIFF(MONTH, createdAt, CURRENT_TIMESTAMP())<2\n" +
+                "THEN '지난 달'\n" +
+                "ELSE DATE_FORMAT(createdAt, '%Y-%m-%d')\n" +
+                "END AS uploadDate\n" +
+                "FROM BossReview\n" +
+                "WHERE reviewIdx=? AND status='Y';\n";
+
+        String MenuQuery = "SELECT GROUP_CONCAT(DISTINCT (M.menuName) SEPARATOR ' · ') AS orderMenuListString\n" +
+                "FROM Cart C JOIN (\n" +
+                "    SELECT CTO.userIdx, CTO.cartIdx, UO.orderTime, CTO.isGood, UO.status\n" +
+                "    FROM UserOrder UO JOIN CartToOrder CTO on UO.orderTime = CTO.orderTime\n" +
+                "    WHERE UO.status!='N' AND UO.userOrderIdx=?\n" +
+                "    ORDER BY UO.orderTime DESC) OrderMenu ON OrderMenu.cartIdx = C.cartIdx\n" +
+                "JOIN Menu M on C.menuIdx = M.menuIdx;";
+
+        String MyLikedQuery = "SELECT status\n" +
+                "FROM ReviewLiked\n" +
+                "WHERE userIdx=? AND reviewIdx=?;";
+        String MenuImgQuery = "SELECT reviewImgUrl\n" +
+                "FROM ReviewImg\n" +
+                "WHERE reviewIdx=? AND status='Y';";
+
+        BossReview bossReview = new BossReview();
+        if (this.jdbcTemplate.queryForObject("SELECT EXISTS(SELECT * FROM BossReview WHERE reviewIdx=?);", int.class, idx.getReviewIdx()) != 0){
+            bossReview = this.jdbcTemplate.queryForObject(BossReviewQuery,
+                    (rs, rowNum) -> new BossReview(
+                            rs.getString("content"),
+                            rs.getString("uploadDate")
+                    ), idx.getReviewIdx());
+        }
+
+        System.out.println("bossReview");
+        List<String> reviewImg = this.jdbcTemplate.query(MenuImgQuery,
+                (rs, rowNum) -> { return rs.getString("reviewImgUrl");
+                }, idx.getReviewIdx());
+        System.out.println("reviewImg");
+
+        int helpedCount = this.jdbcTemplate.queryForObject(HelpedCountQuery,
+                int.class, idx.getReviewIdx());
+        System.out.println("helpedCount");
+        // 로그인 했을 경우 좋아요 여부 확인
+        String myHelped = "N";
+        System.out.println("userIdx"+userIdx+"idx.getReviewIdx"+idx.getReviewIdx());
+        if (userIdx!=0){
+            System.out.println("userIdx"+userIdx+"idx.getReviewIdx"+idx.getReviewIdx());
+            if (this.jdbcTemplate.queryForObject("SELECT EXISTS(SELECT status FROM ReviewLiked WHERE userIdx=? AND reviewIdx=?);", int.class, userIdx, idx.getReviewIdx()) != 0){
+                myHelped = this.jdbcTemplate.queryForObject(MyLikedQuery,
+                        String.class, userIdx, idx.getReviewIdx());
+            }
+        }
+        String isMyHelped = myHelped;
+
+        // 내가 쓴 리뷰인지 확인
+        String myReview = "N";
+        if (userIdx==idx.getUserIdx()){
+            myReview = "Y";
+        }
+        String isMyReview = myReview;
+
+        String reviewUserName = this.jdbcTemplate.queryForObject("SELECT userName FROM User WHERE userIdx=?;", String.class, idx.getUserIdx());
+
+        BossReview finalBossReview = bossReview;
+        return this.jdbcTemplate.queryForObject(ReviewInfoQuery,
+                (rs1, rowNum1) -> new GetStoreReviewListRes(
+                        reviewUserName,
+                        rs1.getInt("score"),
+                        rs1.getString("uploadDate"),
+                        rs1.getString("content"),
+                        this.jdbcTemplate.queryForObject(MenuQuery,
+                                String.class, idx.getUserOrderIdx()),
+                        reviewImg,
+                        finalBossReview,
+                        helpedCount,
+                        isMyHelped,
+                        isMyReview
+                ), idx.getReviewIdx());
+
+    }
+
     // 가게 존재 여부 확인
     public int checkStore(int storeIdx) {
         String Query = "SELECT EXISTS( SELECT * FROM Store WHERE status='Y' AND storeIdx=?);";
@@ -921,5 +1036,19 @@ public class StoreDao {
                 (rs,rowNum) -> {
                     return rs.getInt("storeIdx");
                 }, userIdx);
+    }
+
+
+    // 가게별 리뷰 idx
+    public List<StoreReviewIdx> getStoreReviewIdx(int storeIdx) {
+        String Query = "SELECT R.reviewIdx, R.userIdx, R.userOrderIdx\n" +
+                "FROM Review R JOIN UserOrder UO on R.userOrderIdx = UO.userOrderIdx\n" +
+                "WHERE UO.storeIdx=? AND R.status='Y';";
+        return this.jdbcTemplate.query(Query,
+                (rs, rowNum) -> new StoreReviewIdx(
+                        rs.getInt("reviewIdx"),
+                        rs.getInt("userOrderIdx"),
+                        rs.getInt("userIdx")),
+                storeIdx);
     }
 }

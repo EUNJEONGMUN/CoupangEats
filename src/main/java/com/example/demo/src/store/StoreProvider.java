@@ -1,11 +1,9 @@
 package com.example.demo.src.store;
 
 import com.example.demo.config.BaseException;
-import com.example.demo.src.store.model.Res.GetFavoriteListRes;
-import com.example.demo.src.store.model.Res.GetStoreDetailRes;
-import com.example.demo.src.store.model.Res.GetStoreHomeRes;
-import com.example.demo.src.store.model.Res.GetStoreMenuOptionsRes;
+import com.example.demo.src.store.model.Res.*;
 import com.example.demo.src.store.model.StoreHome;
+import com.example.demo.src.store.model.StoreReviewIdx;
 import com.example.demo.src.user.model.UserLocation;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -90,10 +88,10 @@ public class StoreProvider {
     public List<GetFavoriteListRes> getFavoriteList(int userIdx, UserLocation userLocation) throws BaseException{
         try {
 
-            List<Integer> storeLIst = storeDao.getFavoriteStoreIdx(userIdx);
+            List<Integer> storeList = storeDao.getFavoriteStoreIdx(userIdx);
 
             List<GetFavoriteListRes> getFavoriteListRes = new ArrayList<>();
-            for (int idx: storeLIst){
+            for (int idx: storeList){
                 GetFavoriteListRes favoriteStore = storeDao.getFavoriteList(userIdx, idx, userLocation);
                 getFavoriteListRes.add(favoriteStore);
             }
@@ -106,6 +104,27 @@ public class StoreProvider {
 
     }
 
+    /**
+     * 가게별 리뷰 조회 API
+     * [GET] /stores/review-list
+     * /review-list?storeIdx=
+     * @return BaseResponse<List<GetStoreReviewListRes>>
+     */
+    public List<GetStoreReviewListRes> getStoreReviews(int userIdx, int storeIdx) throws BaseException{
+        try {
+            List<StoreReviewIdx> reviewList = storeDao.getStoreReviewIdx(storeIdx);
+
+            List<GetStoreReviewListRes> getStoreReviewListRes = new ArrayList<>();
+            for (StoreReviewIdx idx:reviewList){
+                GetStoreReviewListRes storeReviewList = storeDao.getStoreReviews(userIdx, storeIdx, idx);
+                getStoreReviewListRes.add(storeReviewList);
+            }
+            return getStoreReviewListRes;
+        } catch (Exception exception) {
+            System.out.println("getStoreReviews"+exception);
+            throw new BaseException(DATABASE_ERROR);
+        }
+    }
     // 가게 존재 여부 확인
     public int checkStore(int storeIdx) throws BaseException{
         try {
@@ -159,4 +178,6 @@ public class StoreProvider {
             throw new BaseException(DATABASE_ERROR);
         }
     }
+
+
 }

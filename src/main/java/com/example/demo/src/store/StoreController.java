@@ -147,16 +147,24 @@ public class StoreController {
 
     }
 
-//    /**
-//     * 가게별 리뷰 조회 API
-//     * [GET] /stores/review-list
-//     * /review-list?storeIdx=
-//     * @return BaseResponse<List<GetStoreReviewListRes>>
-//     */
-//    public BaseResponse<List<GetStoreReviewListRes>> getMenuOptions(@RequestParam(required = false, defaultValue = "0") int storeIdx){
-//
-//
-//    }
+    /**
+     * 가게별 리뷰 조회 API
+     * [GET] /stores/review-list
+     * /review-list?storeIdx=
+     * @return BaseResponse<List<GetStoreReviewListRes>>
+     */
+    @ResponseBody
+    @GetMapping("/review-list")
+    public BaseResponse<List<GetStoreReviewListRes>> getStoreReviews(@RequestParam(required = false, defaultValue = "0") int storeIdx) throws BaseException {
+
+        int userIdx= jwtService.getUserIdxOption();
+        if (storeIdx ==0){
+            return new BaseResponse<>(EMPTY_STOREIDX_PARAM);
+        }
+        List<GetStoreReviewListRes> getStoreReviewListRes = storeProvider.getStoreReviews(userIdx, storeIdx);
+        return new BaseResponse<>(getStoreReviewListRes);
+
+    }
 
 
     /**
