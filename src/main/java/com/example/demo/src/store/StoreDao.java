@@ -780,7 +780,7 @@ public class StoreDao {
                 "WHERE userIdx=? AND storeIdx=? AND status!='N' AND status!='F' AND status!='E'\n" +
                 "ORDER BY orderTime DESC\n" +
                 "LIMIT 1;";
-        String addFavoriteStoreTimeQuery ="SELECT DATE_FORMAT(createdAt, '%Y-%m-%d %H:%m:%s')\n" +
+        String addFavoriteStoreTimeQuery ="SELECT DATE_FORMAT(createdAt, '%Y-%m-%d %H:%i:%s')\n" +
                 "FROM Favorite\n" +
                 "WHERE userIdx=? AND storeIdx=? AND status='Y';";
 
