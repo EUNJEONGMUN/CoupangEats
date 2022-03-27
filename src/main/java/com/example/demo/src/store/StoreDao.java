@@ -504,7 +504,7 @@ public class StoreDao {
 
         String MenuCategoryQuery = "SELECT MC.menuCategoryIdx, storeIdx, categoryName\n" +
                 "FROM MenuCategory MC\n" +
-                "WHERE MC.storeIdx=?;";
+                "WHERE MC.storeIdx=? AND MC.status='Y';";
 
         String MenuDetailQuery = "SELECT menuIdx, menuName, menuPrice, menuDetail, menuImgUrl, isOption, status\n" +
                 "FROM Menu\n" +

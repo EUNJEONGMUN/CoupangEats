@@ -374,9 +374,7 @@ public class UserDao {
      * @return BaseResponse<List<GetUserCouponListRes>>
      */
     public List<GetUserCouponListRes> getUserCoupons(int userIdx) {
-        String Query = "SELECT UC.userCouponIdx, C.storeIdx, C.couponTitle,\n" +
-                "       CONCAT(FORMAT(discountPrice,0),'원') AS discountPrice,\n" +
-                "       CONCAT(FORMAT(limitPrice,0),'원 이상 주문 시') AS limitPrice,\n" +
+        String Query = "SELECT UC.userCouponIdx, C.storeIdx, C.couponTitle, discountPrice, limitPrice,\n" +
                 "       CONCAT(DATE_FORMAT(endDate, '%m/%d'),' 까지') AS endDate, C.couponType\n" +
                 "FROM UserCoupon UC JOIN Coupon C on UC.couponIdx = C.couponIdx\n" +
                 "WHERE userIdx=? AND C.status='Y' AND UC.status='Y' AND DATEDIFF(C.endDate, CURRENT_DATE())>=0;";
@@ -386,8 +384,8 @@ public class UserDao {
                         rs.getInt("userCouponIdx"),
                         rs.getInt("storeIdx"),
                         rs.getString("couponTitle"),
-                        rs.getString("discountPrice"),
-                        rs.getString("limitPrice"),
+                        rs.getInt("discountPrice"),
+                        rs.getInt("limitPrice"),
                         rs.getString("endDate"),
                         rs.getString("couponType")
                 ), userIdx);

@@ -13,8 +13,8 @@ public class GetUserCouponListRes {
     private int userCouponIdx;
     private int storeIdx;
     private String couponTitle;
-    private String discountPrice;
-    private String limitPrice;
+    private int discountPrice;
+    private int limitPrice;
     private String endDate;
     private String couponType;
 
