@@ -8,6 +8,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Repository;
 
+import javax.persistence.criteria.CriteriaBuilder;
 import javax.sql.DataSource;
 import java.util.Collection;
 import java.util.Iterator;
@@ -606,6 +607,10 @@ public class StoreDao {
                         rs1.getString("deliveryFee")
                 ), Param);
 
+        String UserOwnCoupon = "SELECT EXISTS(\n" +
+                "SELECT C.couponIdx\n" +
+                "FROM Coupon C\n" +
+                "WHERE C.storeIdx=? AND C.couponIdx IN (SELECT couponIdx FROM UserCoupon UC WHERE UC.userIdx=?) AND C.couponIdx=?)";
 
         List<StoreCouponInfo> storeCouponInfo = this.jdbcTemplate.query(StoreCouponQuery,
                 (rs2, rowNum2) -> new StoreCouponInfo(
@@ -614,33 +619,15 @@ public class StoreDao {
                         rs2.getString("discountPrice"),
                         rs2.getString("limitPrice"),
                         rs2.getString("endDate"),
-                        rs2.getString("couponType")
+                        rs2.getString("couponType"),
+                        this.jdbcTemplate.queryForObject(UserOwnCoupon,
+                                int.class, storeIdx, userIdx, rs2.getInt("couponIdx"))
                 ), Param);
 
 
-        /*
-        StoreInfo storeInfo = this.jdbcTemplate.queryForObject(StoreInfoQuery,
-                (rs1, rowNum1) -> new StoreInfo(
-                        rs1.getInt("storeIdx"),
-                        rs1.getString("storeImgUrl"),
-                        rs1.getString("storeName"),
-                        rs1.getString("isCheetah"),
-                        rs1.getString("timeDelivery"),
-                        rs1.getString("isToGo"),
-                        rs1.getString("isCoupon"),
-                        rs1.getInt("minimumPrice"),
-                        rs1.getString("buildingName"),
-                        rs1.getString("storeAddress"),
-                        rs1.getString("storeAddressDetail"),
-                        rs1.getString("status"),
-                        rs1.getString("createdAt"),
-                        rs1.getDouble("reviewScore"),
-                        rs1.getInt("reviewCount"),
-                        rs1.getDouble("distance"),
-                        orderCount,
-                        deliveryFee
-                ), Params);
-         */
+
+
+
 
         return this.jdbcTemplate.queryForObject(StoreInfoQuery,
                 (rs, rowNum) -> new GetStoreDetailRes(

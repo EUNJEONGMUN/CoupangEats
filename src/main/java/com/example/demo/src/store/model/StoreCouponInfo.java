@@ -22,4 +22,5 @@ public class StoreCouponInfo {
     private String limitPrice;
     private String endDate;
     private String couponType;
+    private int isUserOwn;
 }
