@@ -86,6 +86,7 @@ public enum BaseResponseStatus {
     USER_ORDER_NOT_EXISTS(false, 3300, "주문 내역이 존재하지 않습니다."),
     INCONSISTENCY_ORDER_USER(false, 3301, "해당 사용자의 주문 내역이 아닙니다."),
     REVIEW_NOT_EXISTS(false, 3302, "리뷰가 존재하지 않습니다."),
+    REVIEW_ALREADY_EXISTS(false, 3303, "리뷰가 이미 존재합니다."),
 
 
 

@@ -2,6 +2,8 @@ package com.example.demo.src.store;
 
 import com.example.demo.config.BaseException;
 import com.example.demo.config.BaseResponse;
+import com.example.demo.src.S3Image.S3Uploader;
+import com.example.demo.src.orders.OrderService;
 import com.example.demo.src.store.model.Res.*;
 import com.example.demo.src.user.UserProvider;
 import com.example.demo.src.user.model.UserLocation;
@@ -10,7 +12,10 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
+import javax.validation.Valid;
+import java.io.IOException;
 import java.util.List;
 
 import static com.example.demo.config.BaseResponseStatus.*;
@@ -29,12 +34,19 @@ public class StoreController {
     private final JwtService jwtService;
     @Autowired
     private final UserProvider userProvider;
+    @Autowired
+    private final OrderService orderService;
+    @Autowired
+    private final S3Uploader s3Uploader;
 
-    public StoreController(StoreProvider storeProvider, StoreService storeService, JwtService jwtService,UserProvider userProvider){
+
+    public StoreController(StoreProvider storeProvider, StoreService storeService, JwtService jwtService,UserProvider userProvider, OrderService orderService, S3Uploader s3Uploader){
         this.storeProvider = storeProvider;
         this.storeService = storeService;
         this.jwtService = jwtService;
         this.userProvider = userProvider;
+        this.orderService = orderService;
+        this.s3Uploader = s3Uploader;
     }
 
     /**
@@ -185,8 +197,8 @@ public class StoreController {
             return new BaseResponse<>(EMPTY_USER_ORDER_IDX_PARAM);
         }
         // userOrderIdx가 사용자의 idx인지 확인
-        if (storeProvider.checkUserOrderOwner(userIdx, userOrderIdx) == 0){
-            return new BaseResponse<>(INCONSISTENCY_ORDER_USER);
+        if (orderService.checkOrderOwner(userIdx, userOrderIdx) == 0){
+            return new BaseResponse<>(USER_ORDER_NOT_EXISTS);
         }
         if (storeProvider.checkUserReview(userIdx, userOrderIdx) == 0){
             return new BaseResponse<>(REVIEW_NOT_EXISTS);
@@ -200,12 +212,43 @@ public class StoreController {
 
 //    /**
 //     * 리뷰 작성 API
-//     * [POST] /stores/review?storeIdx=
-//     * /review?storeIdx=
+//     * [POST] /stores/review/new?userOrderIdx=
+//     * /new?userOrderIdx=
 //     * @return BaseResponse<String>
 //     */
+//    @ResponseBody
+//    @PostMapping("/review/new")
+//    public BaseResponse<String> createReview(@RequestParam(required = false, defaultValue = "0") int userOrderIdx,
+//                                             @Valid @RequestBody PostReviewReq postReviewReq) throws BaseException {
 //
-
+//        int userIdx= jwtService.getUserIdx();
+//
+//        // 사용자 존재 여부 확인
+//        if (userProvider.checkUser(userIdx)==0){
+//            return new BaseResponse<>(USER_NOT_EXISTS);
+//        }
+//
+//        if (userOrderIdx ==0){
+//            return new BaseResponse<>(EMPTY_USER_ORDER_IDX_PARAM);
+//        }
+//        // 주문 존재 여부 확인
+//        if (orderService.checkOrder(userOrderIdx)==0){
+//            return new BaseResponse<>(USER_ORDER_NOT_EXISTS);
+//        }
+//
+//        // 주문 소유자 확인
+//        if (orderService.checkOrderOwner(userIdx, userOrderIdx)==0){
+//            return new BaseResponse<>(USER_ORDER_NOT_EXISTS);
+//        }
+//
+//        // 리뷰 작성여부 확인
+//        if (storeProvider.checkUserReview(userIdx, userOrderIdx) != 0){
+//            return new BaseResponse<>(REVIEW_ALREADY_EXISTS);
+//        }
+//        storeDao.createReview()
+//
+//
+//    }
 
 
     /**
@@ -293,4 +336,11 @@ public class StoreController {
     }
 
 
+
+    @PostMapping("/images")
+    public String upload(@RequestParam("data") MultipartFile multipartFile) throws IOException {
+        System.out.println(">>here<<");
+        s3Uploader.upload(multipartFile, "static");
+        return "test";
+    }
 }

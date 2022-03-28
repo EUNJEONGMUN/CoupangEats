@@ -196,15 +196,6 @@ public class StoreProvider {
         }
     }
 
-    // 주문 사용자 확인
-    public int checkUserOrderOwner(int userIdx, int userOrderIdx) throws BaseException {
-        try {
-            return storeDao.checkUserOrderOwner(userIdx,userOrderIdx);
-        } catch (Exception exception) {
-            throw new BaseException(DATABASE_ERROR);
-        }
-    }
-
     // 리뷰 존재 확인
     public int checkUserReview(int userIdx, int userOrderIdx) throws BaseException  {
         try {

@@ -60,7 +60,8 @@ dependencies {
     testImplementation 'org.apache.httpcomponents:httpclient'
     testImplementation group: 'org.springframework.boot', name: 'spring-boot-starter-test', version: '2.0.0.RELEASE'
 
-
+    compile ('org.springframework.cloud:spring-cloud-starter-aws:2.0.1.RELEASE')
+//    compile (group: 'org.springframework.cloud', name: 'spring-cloud-aws', version: '2.2.1.RELEASE', ext: 'pom')
 
 }
 

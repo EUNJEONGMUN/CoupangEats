@@ -1195,14 +1195,6 @@ public class StoreDao {
                 storeIdx);
     }
 
-    // 리뷰 사용자 확인
-    public int checkUserOrderOwner(int userIdx, int userOrderIdx) {
-        // 해당 사용자의 주문이 아닙니다.
-        String Query = "SELECT EXISTS(SELECT * FROM UserOrder WHERE userIdx=? AND userOrderIdx=?)";
-        return this.jdbcTemplate.queryForObject(Query, int.class, userIdx, userOrderIdx);
-
-    }
-
     public int checkUserReview(int userIdx, int userOrderIdx) {
         String Query = "SELECT EXISTS(SELECT reviewIdx\n" +
                 "FROM UserOrder UO JOIN Review R on UO.userOrderIdx = R.userOrderIdx\n" +
