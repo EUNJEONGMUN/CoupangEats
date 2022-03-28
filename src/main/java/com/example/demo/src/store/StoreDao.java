@@ -510,6 +510,13 @@ public class StoreDao {
                 "FROM Menu\n" +
                 "WHERE status!='N' AND menuCategoryIdx=?;";
 
+        String MenuImageQuery = "SELECT RankRow.menuImgUrl\n" +
+                "FROM (SELECT*, RANK() OVER (PARTITION BY M.menuIdx ORDER BY M.menuImgIdx) AS a\n" +
+                "      FROM MenuImage M\n" +
+                "     ) AS RankRow\n" +
+                "WHERE RankRow.a <= 1 AND RankRow.menuIdx=?;";
+
+
         String checkPhotoReviewThree = "SELECT EXISTS(SELECT S.storeIdx, PR.photoReviewCount\n" +
                 "FROM Store S JOIN (\n" +
                 "    SELECT UO.storeIdx, COUNT(storeIdx) AS photoReviewCount\n" +
@@ -599,7 +606,7 @@ public class StoreDao {
                                         rs4.getString("menuName"),
                                         rs4.getInt("menuPrice"),
                                         rs4.getString("menuDetail"),
-                                        rs4.getString("menuImgUrl"),
+                                        this.jdbcTemplate.queryForObject(MenuImageQuery, String.class, rs4.getInt("menuIdx")),
                                         rs4.getString("isOption"),
                                         rs4.getString("status"),
                                         this.jdbcTemplate.queryForObject(IsManyOrderQuery,
