@@ -2,7 +2,6 @@ package com.example.demo.src.store;
 
 import com.example.demo.config.BaseException;
 import com.example.demo.src.store.model.Res.*;
-import com.example.demo.src.store.model.StoreHome;
 import com.example.demo.src.store.model.StoreReviewIdx;
 import com.example.demo.src.user.model.UserLocation;
 import org.slf4j.Logger;
@@ -125,6 +124,24 @@ public class StoreProvider {
             throw new BaseException(DATABASE_ERROR);
         }
     }
+
+    /**
+     * 작성한 리뷰 조회 API
+     * [GET] /stores/review?userOrderIdx=
+     * /review?userOrderIdx=
+     * @return BaseResponse<GetStoreReviewListRes>
+     */
+    public GetStoreMyReviewRes getStoreMyReview(int userIdx, int userOrderIdx) throws BaseException {
+        try {
+            GetStoreMyReviewRes getStoreMyReviewRes = storeDao.getStoreMyReview(userIdx, userOrderIdx);
+            return getStoreMyReviewRes;
+        } catch (Exception exception) {
+            System.out.println("getStoreMyReview"+exception);
+            throw new BaseException(DATABASE_ERROR);
+        }
+    }
+
+
     // 가게 존재 여부 확인
     public int checkStore(int storeIdx) throws BaseException{
         try {
@@ -179,5 +196,21 @@ public class StoreProvider {
         }
     }
 
+    // 주문 사용자 확인
+    public int checkUserOrderOwner(int userIdx, int userOrderIdx) throws BaseException {
+        try {
+            return storeDao.checkUserOrderOwner(userIdx,userOrderIdx);
+        } catch (Exception exception) {
+            throw new BaseException(DATABASE_ERROR);
+        }
+    }
 
+    // 리뷰 존재 확인
+    public int checkUserReview(int userIdx, int userOrderIdx) throws BaseException  {
+        try {
+            return storeDao.checkUserReview(userIdx,userOrderIdx);
+        } catch (Exception exception) {
+            throw new BaseException(DATABASE_ERROR);
+        }
+    }
 }

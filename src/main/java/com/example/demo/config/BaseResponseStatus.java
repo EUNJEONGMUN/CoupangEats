@@ -53,6 +53,7 @@ public enum BaseResponseStatus {
     EMPTY_MENUIDX_PARAM(false, 2201, "menuIdx를 입력하지 않았습니다."),
     EMPTY_OTHER_ADDRESS_IDX(false, 2202, "addressIdx를 입력하지 않았습니다."),
     EMPTY_POSITION_PARAM(false, 2203, "위도, 혹은 경도를 입력하지 않았습니다."),
+    EMPTY_USER_ORDER_IDX_PARAM(false, 2204, "userOrderIdx를 입력하지 않았습니다."),
     /**
      * 3000 : Response 오류
      */
@@ -79,10 +80,14 @@ public enum BaseResponseStatus {
     CART_DUPLICATE_STORE(false, 3200, "같은 가게의 메뉴만 담을 수 있습니다."),
     EMPTY_CART_STORE(false, 3201, "카트에 담긴 가게가 없습니다."),
     CART_NOT_DUPLICATE_STORE(false, 3202, "가게가 없거나 같은 가게만 있습니다. 다른 API로 접근해주세요."),
+    INCONSISTENCY_REVIEW_USER(false, 3203,"해당 사용자의 리뷰가 아닙니다."),
 
 
     USER_ORDER_NOT_EXISTS(false, 3300, "주문 내역이 존재하지 않습니다."),
     INCONSISTENCY_ORDER_USER(false, 3301, "해당 사용자의 주문 내역이 아닙니다."),
+    REVIEW_NOT_EXISTS(false, 3302, "리뷰가 존재하지 않습니다."),
+
+
 
 
     /**

@@ -3,9 +3,7 @@ package com.example.demo.src.store;
 import com.example.demo.config.BaseException;
 import com.example.demo.config.BaseResponse;
 import com.example.demo.src.store.model.Res.*;
-import com.example.demo.src.store.model.StoreHome;
 import com.example.demo.src.user.UserProvider;
-import com.example.demo.src.user.UserService;
 import com.example.demo.src.user.model.UserLocation;
 import com.example.demo.utils.JwtService;
 import org.slf4j.Logger;
@@ -166,17 +164,49 @@ public class StoreController {
 
     }
 
+    /**
+     * 작성한 리뷰 조회 API
+     * [GET] /stores/review?userOrderIdx=
+     * /review?userOrderIdx=
+     * @return BaseResponse<GetStoreReviewListRes>
+     */
+    @ResponseBody
+    @GetMapping("/review")
+    public BaseResponse<GetStoreMyReviewRes> getStoreMyReview(@RequestParam(required = false, defaultValue = "0") int userOrderIdx) throws BaseException {
+
+        int userIdx= jwtService.getUserIdx();
+
+        // 사용자 존재 여부 확인
+        if (userProvider.checkUser(userIdx)==0){
+            return new BaseResponse<>(USER_NOT_EXISTS);
+        }
+
+        if (userOrderIdx ==0){
+            return new BaseResponse<>(EMPTY_USER_ORDER_IDX_PARAM);
+        }
+        // userOrderIdx가 사용자의 idx인지 확인
+        if (storeProvider.checkUserOrderOwner(userIdx, userOrderIdx) == 0){
+            return new BaseResponse<>(INCONSISTENCY_ORDER_USER);
+        }
+        if (storeProvider.checkUserReview(userIdx, userOrderIdx) == 0){
+            return new BaseResponse<>(REVIEW_NOT_EXISTS);
+        }
+
+        GetStoreMyReviewRes getStoreMyReviewRes = storeProvider.getStoreMyReview(userIdx, userOrderIdx);
+        return new BaseResponse<>(getStoreMyReviewRes);
+
+    }
+
+
 //    /**
-//     * 작성한 리뷰 조회 API
-//     * [GET] /stores/review?userOrderIdx=
-//     * /review?userOrderIdx=
-//     * @return BaseResponse<GetStoreReviewListRes>
+//     * 리뷰 작성 API
+//     * [POST] /stores/review?storeIdx=
+//     * /review?storeIdx=
+//     * @return BaseResponse<String>
 //     */
-//    public BaseResponse<GetStoreReviewListRes> getStoreMyReviews(@RequestParam(required = false, defaultValue = "0") int storeIdx) throws BaseException {
 //
-//
-//
-//    }
+
+
 
     /**
      * 즐겨찾기 등록 API
