@@ -75,6 +75,18 @@ public class OrderController {
             return new BaseResponse<>(POST_CART_PARAM_EMPTY);
         }
 
+
+        if (storeProvider.checkStore(storeIdx)==0){ // 가게가 없을 경우
+            return new BaseResponse<>(EMPTY_STORE);
+        }
+        if (storeProvider.checkMenu(menuIdx)==0){ // 메뉴가 없을 경우
+            return new BaseResponse<>(EMPTY_MENU);
+        }
+        if (storeProvider.checkMenuOwner(menuIdx)!=storeIdx){ // 메뉴가 속한 가게가 storeIdx와 일치하지 않을 경우
+            return new BaseResponse<>(INCONSISTENCY_STORE_OWNER);
+        }
+
+
         // 같은 가게가 아닐 경우
         int cartStoreIdx = orderProvider.checkCartStore(userIdx);
         if (cartStoreIdx!=0 && cartStoreIdx!=storeIdx){
@@ -126,6 +138,17 @@ public class OrderController {
         if (storeIdx==0 || menuIdx==0 ){
             return new BaseResponse<>(POST_CART_PARAM_EMPTY);
         }
+
+        if (storeProvider.checkStore(storeIdx)==0){ // 가게가 없을 경우
+            return new BaseResponse<>(EMPTY_STORE);
+        }
+        if (storeProvider.checkMenu(menuIdx)==0){ // 메뉴가 없을 경우
+            return new BaseResponse<>(EMPTY_MENU);
+        }
+        if (storeProvider.checkMenuOwner(menuIdx)!=storeIdx){ // 메뉴가 속한 가게가 storeIdx와 일치하지 않을 경우
+            return new BaseResponse<>(INCONSISTENCY_STORE_OWNER);
+        }
+
 
         int cartStoreIdx = orderProvider.checkCartStore(userIdx);
 
