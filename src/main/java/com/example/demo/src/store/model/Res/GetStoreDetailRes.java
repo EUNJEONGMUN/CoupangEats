@@ -32,6 +32,7 @@ public class GetStoreDetailRes {
     private int reviewCount;
     private String timeToGo;
     private List<StoreCouponInfo> storeCouponInfo;
+    private int minimumDeliveryFee;
     private List<DeliveryFeeInfo> deliveryFeeInfo;
     private List<PhotoReview> photoReview;
     private List<MenuCategory> menuCategory;

@@ -13,7 +13,7 @@ import java.util.List;
 @AllArgsConstructor
 public class GetStoreMenuOptionsRes {
     private int menuIdx;
-    private String menuImgUrl;
+    private List<String> menuImgUrl;
     private String menuName;
     private String menuDetail;
     private int menuPrice;

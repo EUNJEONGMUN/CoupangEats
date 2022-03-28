@@ -76,7 +76,8 @@ public class OrderController {
         }
 
         // 같은 가게가 아닐 경우
-        if (!(orderProvider.checkCartStore(userIdx)==storeIdx)){
+        int cartStoreIdx = orderProvider.checkCartStore(userIdx);
+        if (cartStoreIdx!=0 && cartStoreIdx!=storeIdx){
             return new BaseResponse<>(CART_DUPLICATE_STORE);
         }
         // 배달 카트에 같은 메뉴+옵션 있는지 확인

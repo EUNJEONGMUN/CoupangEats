@@ -10,10 +10,7 @@ import org.springframework.stereotype.Repository;
 
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.sql.DataSource;
-import java.util.Collection;
-import java.util.Iterator;
-import java.util.List;
-import java.util.ListIterator;
+import java.util.*;
 
 @Repository
 public class StoreDao {
@@ -474,7 +471,7 @@ public class StoreDao {
     }
 
     /**
-     * 가게 상세 화면 조회 조회 API
+     * 가게 상세 화면 조회 API
      * [GET] /stores/detail?storeIdx=
      * @return BaseResponse<List<GetStoreHomeRes>>
      */
@@ -496,6 +493,10 @@ public class StoreDao {
                 "       CONCAT(DATE_FORMAT(endDate, '%m/%d'),' 까지') AS endDate, couponType\n" +
                 "FROM Coupon WHERE status='Y' AND storeIdx=? AND DATEDIFF(endDate, CURRENT_DATE())>=0;";
 
+        String MinimumDeliveryFeeQuery = "SELECT IFNULL(MIN(deliveryFee),0) as fee\n" +
+                "        FROM DeliveryFee D\n" +
+                "        WHERE D.storeIdx=? AND D.status='Y';";
+
         String DeliveryFeeInfo = "SELECT storeIdx,\n" +
                 "       CASE WHEN deliveryFee=0 THEN '무료' ELSE CONCAT(FORMAT(deliveryFee,0),'원') END AS deliveryFee,\n" +
                 "       CASE WHEN maxPrice IS NULL THEN CONCAT(FORMAT(minPrice,0),'원 ~ ') ELSE CONCAT(FORMAT(minPrice,0), '원 ~ ', FORMAT(maxPrice,0),'원') END AS orderPrice\n" +
@@ -509,6 +510,14 @@ public class StoreDao {
                 "FROM Menu\n" +
                 "WHERE status!='N' AND menuCategoryIdx=?;";
 
+        String checkPhotoReviewThree = "SELECT EXISTS(SELECT S.storeIdx, PR.photoReviewCount\n" +
+                "FROM Store S JOIN (\n" +
+                "    SELECT UO.storeIdx, COUNT(storeIdx) AS photoReviewCount\n" +
+                "    FROM Review R JOIN UserOrder UO on R.userOrderIdx = UO.userOrderIdx\n" +
+                "    WHERE R.isPhoto='Y' AND R.status='Y' AND UO.status!='N'\n" +
+                "    GROUP BY storeIdx) PR ON PR.storeIdx = S.storeIdx\n" +
+                "WHERE S.status='Y' AND PR.photoReviewCount>=3 AND S.storeIdx=?);";
+
         String PhotoReviewQuery = "SELECT PhotoReview.reviewIdx, PhotoReview.reviewImgUrl, PhotoReview.content, PhotoReview.score, DATE_FORMAT(PhotoReview.createdAt, '%Y-%m-%d %H:%I:%S') AS createdAt\n" +
                 "FROM UserOrder UO\n" +
                 "JOIN (SELECT R.reviewIdx,FirstPhoto.reviewImgUrl,R.content,R.score,R.userOrderIdx, R.createdAt\n" +
@@ -519,8 +528,9 @@ public class StoreDao {
                 "            WHERE RI.status='Y'\n" +
                 "             ) AS First\n" +
                 "        WHERE First.a <= 1) FirstPhoto ON FirstPhoto.reviewIdx = R.reviewIdx\n" +
-                "    WHERE R.isPhoto='Y' AND R.status='Y') PhotoReview ON PhotoReview.userOrderIdx = UO.userOrderIdx\n" +
-                "WHERE UO.status='Y' AND UO.storeIdx=?;";
+                "      WHERE R.isPhoto='Y'\n" +
+                "        AND R.status='Y') PhotoReview ON PhotoReview.userOrderIdx = UO.userOrderIdx\n" +
+                "WHERE UO.status!='Y' AND UO.storeIdx=?;";
 
         String StoreImageQuery = "SELECT RankRow.storeIdx, RankRow.imageUrl\n" +
                 "FROM (SELECT*, RANK() OVER (PARTITION BY SI.storeIdX ORDER BY SI.storeImageIdx) AS a\n" +
@@ -568,15 +578,17 @@ public class StoreDao {
 
         int Param = storeIdx;
         Object[] StoreInfoParams = new Object[]{userLocation.getUserLongitude(),userLocation.getUserLatitude(), storeIdx};
-
-        List<PhotoReview> photoReview = this.jdbcTemplate.query(PhotoReviewQuery,
-                (rs1, rowNum1) -> new PhotoReview(
-                        rs1.getInt("reviewIdx"),
-                        rs1.getString("reviewImgUrl"),
-                        rs1.getString("content"),
-                        rs1.getInt("score"),
-                        rs1.getString("createdAt")
-                ), Param);
+        List<PhotoReview> photoReview = new ArrayList<>();
+        if (this.jdbcTemplate.queryForObject(checkPhotoReviewThree, int.class, storeIdx)!=0) {
+            photoReview = this.jdbcTemplate.query(PhotoReviewQuery,
+                    (rs1, rowNum1) -> new PhotoReview(
+                            rs1.getInt("reviewIdx"),
+                            rs1.getString("reviewImgUrl"),
+                            rs1.getString("content"),
+                            rs1.getInt("score"),
+                            rs1.getString("createdAt")
+                    ), Param);
+        }
 
         List<MenuCategory> menuCategory = this.jdbcTemplate.query(MenuCategoryQuery,
                 (rs3, rowNum3) -> new MenuCategory(
@@ -600,6 +612,7 @@ public class StoreDao {
                                 ), rs3.getInt("menuCategoryIdx"))
                 ), Param);
 
+        int minimumDeliveryFee = this.jdbcTemplate.queryForObject(MinimumDeliveryFeeQuery, int.class, Param);
         List<DeliveryFeeInfo> deliveryFeeInfo = this.jdbcTemplate.query(DeliveryFeeInfo,
                 (rs1, rowNum1) -> new DeliveryFeeInfo(
                         rs1.getInt("storeIdx"),
@@ -625,10 +638,7 @@ public class StoreDao {
                 ), Param);
 
 
-
-
-
-
+        List<PhotoReview> finalPhotoReview = photoReview;
         return this.jdbcTemplate.queryForObject(StoreInfoQuery,
                 (rs, rowNum) -> new GetStoreDetailRes(
                         rs.getInt("storeIdx"),
@@ -648,8 +658,9 @@ public class StoreDao {
                         rs.getInt("reviewCount"),
                         rs.getString("timeToGo"),
                         storeCouponInfo,
+                        minimumDeliveryFee,
                         deliveryFeeInfo,
-                        photoReview,
+                        finalPhotoReview,
                         menuCategory,
                         isFavoriteStore),
                 StoreInfoParams);
@@ -676,12 +687,17 @@ public class StoreDao {
                 "FROM OptionsDetail\n" +
                 "WHERE optionsIdx=?;";
 
+        String MenuImgQuery = "SELECT menuImgUrl FROM MenuImage WHERE menuIdx=?;";
+
         int Param = menuIdx;
 
         return this.jdbcTemplate.queryForObject(MenuInfoQuery,
                 (rs1, rowNum1) -> new GetStoreMenuOptionsRes(
                         rs1.getInt("menuIdx"),
-                        rs1.getString("menuImgUrl"),
+                        this.jdbcTemplate.query(MenuImgQuery,
+                                (rs, rowNum) -> new String (
+                                        rs.getString("menuImgUrl"))
+                                , menuIdx),
                         rs1.getString("menuName"),
                         rs1.getString("menuDetail"),
                         rs1.getInt("menuPrice"),
