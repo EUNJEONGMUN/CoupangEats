@@ -552,7 +552,7 @@ public class StoreDao {
         // 가게의 총 메뉴 좋아요 수
         String StoreTotalMenuGood = "SELECT ROUND(COUNT(*)*0.5)\n" +
                 "FROM CartToOrder CTO JOIN Cart C on CTO.cartIdx = C.cartIdx\n" +
-                "WHERE C.storeIdx=? AND CTO.isGood='G' AND CTO.status!='N';";
+                "WHERE C.storeIdx=? AND CTO.isGood='G';";
         int storeTotalMenuGood = this.jdbcTemplate.queryForObject(StoreTotalMenuGood, int.class, storeIdx);
 
         String IsManyOrderQuery = "SELECT CASE WHEN COUNT(*)>=? THEN 'Y' ELSE 'N' END AS isManyOrder\n" +
