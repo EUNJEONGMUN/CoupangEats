@@ -436,13 +436,16 @@ public class StoreDao {
                 "FROM (SELECT*, RANK() OVER (PARTITION BY SI.storeIdX ORDER BY SI.storeImageIdx) AS a\n" +
                 "      FROM StoreImage SI\n" +
                 "     ) AS RankRow\n" +
-                "WHERE RankRow.a <= 1 AND RankRow.storeIdx=?;";
+                "WHERE RankRow.a <= 3 AND RankRow.storeIdx=?;";
 
 
         StoreInfo storeInfo = this.jdbcTemplate.queryForObject(StoreInfoQuery,
                 (rs1, rowNum1) -> new StoreInfo(
                         rs1.getInt("storeIdx"),
-                        this.jdbcTemplate.queryForObject(StoreImageQuery, String.class,rs1.getInt("storeIdx")),
+                        this.jdbcTemplate.query(StoreImageQuery,
+                                (rs2, rowNum2) -> new String(
+                                        rs2.getString("imageUrl")),
+                                rs1.getInt("storeIdx")),
                         rs1.getString("storeName"),
                         rs1.getString("isCheetah"),
                         rs1.getString("timeDelivery"),
@@ -469,14 +472,14 @@ public class StoreDao {
                         rs2.getString("couponType")
                 ), idx);
         System.out.println("bestCoupon");
-        List<String> storeMenuImg = this.jdbcTemplate.query(StoreMenuImgQuery,
-                (rs1, rowNum1) -> new String(
-                        rs1.getString("menuImgUrl")
-                ),idx);
-        System.out.println("storeMenuImg");
+//        List<String> storeMenuImg = this.jdbcTemplate.query(StoreMenuImgQuery,
+//                (rs1, rowNum1) -> new String(
+//                        rs1.getString("menuImgUrl")
+//                ),idx);
+//        System.out.println("storeMenuImg");
 
 
-        return new GetStoreHomeRes(storeInfo, storeBestCoupon ,storeMenuImg);
+        return new GetStoreHomeRes(storeInfo, storeBestCoupon);
     }
 
     /**

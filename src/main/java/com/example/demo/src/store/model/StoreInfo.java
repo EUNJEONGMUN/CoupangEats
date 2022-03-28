@@ -16,7 +16,7 @@ import java.util.List;
 @NoArgsConstructor
 public class StoreInfo {
     private int storeIdx;
-    private String storeImgUrl;
+    private List<String> storeImgUrl;
     private String storeName;
     private String isCheetah;
     private String timeDelivery;
