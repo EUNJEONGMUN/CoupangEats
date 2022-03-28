@@ -429,10 +429,19 @@ public class StoreDao {
         System.out.println("fee" + fee);
 
         String deliveryFee = fee;
+
+
+        String StoreImageQuery = "SELECT RankRow.imageUrl\n" +
+                "FROM (SELECT*, RANK() OVER (PARTITION BY SI.storeIdX ORDER BY SI.storeImageIdx) AS a\n" +
+                "      FROM StoreImage SI\n" +
+                "     ) AS RankRow\n" +
+                "WHERE RankRow.a <= 1 AND RankRow.storeIdx=?;";
+
+
         StoreInfo storeInfo = this.jdbcTemplate.queryForObject(StoreInfoQuery,
                 (rs1, rowNum1) -> new StoreInfo(
                         rs1.getInt("storeIdx"),
-                        rs1.getString("storeImgUrl"),
+                        this.jdbcTemplate.queryForObject(StoreImageQuery, String.class,rs1.getInt("storeIdx")),
                         rs1.getString("storeName"),
                         rs1.getString("isCheetah"),
                         rs1.getString("timeDelivery"),
