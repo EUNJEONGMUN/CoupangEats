@@ -596,27 +596,54 @@ public class StoreDao {
                     ), Param);
         }
 
+//        List<MenuCategory> menuCategory = this.jdbcTemplate.query(MenuCategoryQuery,
+//                (rs3, rowNum3) -> new MenuCategory(
+//                        rs3.getString("categoryName"),
+//                        this.jdbcTemplate.query(MenuDetailQuery,
+//                                (rs4, rowNum4) -> new MenuDetail(
+//                                        rs4.getInt("menuIdx"),
+//                                        rs4.getString("menuName"),
+//                                        rs4.getInt("menuPrice"),
+//                                        rs4.getString("menuDetail"),
+//                                        this.jdbcTemplate.queryForObject(MenuImageQuery, String.class, rs4.getInt("menuIdx")),
+//                                        rs4.getString("isOption"),
+//                                        rs4.getString("status"),
+//                                        this.jdbcTemplate.queryForObject(IsManyOrderQuery,
+//                                                String.class,
+//                                                storeTotalOrder, rs4.getInt("menuIdx")),
+//                                        this.jdbcTemplate.queryForObject(IsManyReviewQuery,
+//                                                String.class,
+//                                                storeTotalMenuGood,rs4.getInt("menuIdx"))
+//
+//                                ), rs3.getInt("menuCategoryIdx"))
+//                ), Param);
+
         List<MenuCategory> menuCategory = this.jdbcTemplate.query(MenuCategoryQuery,
                 (rs3, rowNum3) -> new MenuCategory(
                         rs3.getString("categoryName"),
                         this.jdbcTemplate.query(MenuDetailQuery,
-                                (rs4, rowNum4) -> new MenuDetail(
-                                        rs4.getInt("menuIdx"),
-                                        rs4.getString("menuName"),
-                                        rs4.getInt("menuPrice"),
-                                        rs4.getString("menuDetail"),
-                                        rs4.getString("menuImgUrl"),
-                                        rs4.getString("isOption"),
-                                        rs4.getString("status"),
-                                        this.jdbcTemplate.queryForObject(IsManyOrderQuery,
+                                (rs4, rowNum4) -> {
+                                        int menuIdx = rs4.getInt("menuIdx");
+                                        String menuName = rs4.getString("menuName");
+                                        int menuPrice = rs4.getInt("menuPrice");
+                                        String menuDetail = rs4.getString("menuDetail");
+                                        String menuImgUrl = null;
+                                        if (this.jdbcTemplate.queryForObject("SELECT EXISTS(SELECT * FROM MenuImage WHERE menuIdx=?);", int.class,rs4.getInt("menuIdx"))!=0){
+                                            menuImgUrl = this.jdbcTemplate.queryForObject(MenuImageQuery, String.class, menuIdx);
+                                        }
+                                        String isOption = rs4.getString("isOption");
+                                        String status = rs4.getString("status");
+                                        String isManyOrder = this.jdbcTemplate.queryForObject(IsManyOrderQuery,
                                                 String.class,
-                                                storeTotalOrder, rs4.getInt("menuIdx")),
-                                        this.jdbcTemplate.queryForObject(IsManyReviewQuery,
+                                                storeTotalOrder, rs4.getInt("menuIdx"));
+                                        String isManyReview = this.jdbcTemplate.queryForObject(IsManyReviewQuery,
                                                 String.class,
-                                                storeTotalMenuGood,rs4.getInt("menuIdx"))
+                                                storeTotalMenuGood,rs4.getInt("menuIdx"));
+                                        return new MenuDetail(menuIdx, menuName,menuPrice, menuDetail,menuImgUrl, isOption, status,isManyOrder, isManyReview);
+                        }, rs3.getInt("menuCategoryIdx"))
+                                    ), Param);
 
-                                ), rs3.getInt("menuCategoryIdx"))
-                ), Param);
+
 
         int minimumDeliveryFee = this.jdbcTemplate.queryForObject(MinimumDeliveryFeeQuery, int.class, Param);
         List<DeliveryFeeInfo> deliveryFeeInfo = this.jdbcTemplate.query(DeliveryFeeInfo,
