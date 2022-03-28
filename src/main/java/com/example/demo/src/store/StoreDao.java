@@ -8,6 +8,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Repository;
 
+import javax.persistence.criteria.CriteriaBuilder;
 import javax.sql.DataSource;
 import java.util.*;
 
@@ -1127,32 +1128,52 @@ public class StoreDao {
      */
     public int createReview(int userIdx, int userOrderIdx, PostReviewReq postReviewReq, List<String> imageList) {
 
-        String InsertReviewInfoQuery = "INSERT INTO Review (userIdx, userOrderIdx, score, content, isPhoto, reasonForDelivery) VALUES(?,?,?,?,?,?);";
-        String UpdateIsGood = "UPDATE CartToOrder SET isGood=?, reasonForMenu=? WHERE userIdx=? AND cartIdx=?";
-        String InsertImage = "INSERT INTO ReviewImg (reviewIdx, reviewImgUrl);";
+        String InsertReviewInfoQuery1 = "INSERT INTO Review (userIdx, userOrderIdx, score, content, isPhoto, reasonForStore) VALUES(?,?,?,?,?,?);";
+        String InsertReviewInfoQuery2 = "INSERT INTO Review (userIdx, userOrderIdx, score, content, isPhoto, reasonForDelivery, reasonForStore) VALUES(?,?,?,?,?,?,?);";
+        String UpdateIsGood = "UPDATE CartToOrder SET isGood=? WHERE userIdx=? AND cartIdx=?";
+        String UpdateMenuReason = "UPDATE CartToOrder SET reasonForMenu=? WHERE userIdx=? AND cartIdx=?";
+        String InsertImage = "INSERT INTO ReviewImg (reviewIdx, reviewImgUrl) VALUES (?,?);";
         String isPhoto;
         if (imageList.size()==0){
+            // 포토리뷰가 아닐 경우
             isPhoto = "N";
         } else {
             isPhoto= "Y";
         }
 
-        this.jdbcTemplate.update(InsertReviewInfoQuery, userIdx, userOrderIdx, postReviewReq.getScore(), postReviewReq.getContent(), isPhoto, postReviewReq.getReasonForDelivery());
+        if (postReviewReq.getScore()<=2){
+            // 별점이 2점 이하일 경우 이유 작성
+            this.jdbcTemplate.update(InsertReviewInfoQuery2, userIdx, userOrderIdx, postReviewReq.getScore(), postReviewReq.getContent(), isPhoto, postReviewReq.getReasonForDelivery(), postReviewReq.getReasonForStore());
+        } else {
+            // 별점 3점 이상이 경우
+            this.jdbcTemplate.update(InsertReviewInfoQuery1, userIdx, userOrderIdx, postReviewReq.getScore(), postReviewReq.getContent(), isPhoto, postReviewReq.getReasonForDelivery());
+        }
 
         String lastInsertIdQuery = "select last_insert_id()";
         int reviewIdx = this.jdbcTemplate.queryForObject(lastInsertIdQuery,int.class);
 
-        Set<Integer> keySet = postReviewReq.getReasonForMenu().keySet();
-        Set<Integer> keySet2 = postReviewReq.getIsMenuGood().keySet();
-        Iterator<Integer> keyIterator = keySet.iterator();
-        Iterator<Integer> keyIterator2 = keySet2.iterator();
-        while(keyIterator.hasNext()){
-            int key = keyIterator.next();
-            int key2 = keyIterator2.next();
-            String value = postReviewReq.getReasonForMenu().get(key);
-            String value2 = postReviewReq.getIsMenuGood().get(key2);
-            this.jdbcTemplate.update(UpdateIsGood, value2, value, userIdx, key);
+        if (postReviewReq.getIsMenuGood().size()!=0){
+            Set<Map.Entry<Integer,String>> entrySet = postReviewReq.getIsMenuGood().entrySet();
+            Iterator<Map.Entry<Integer, String>> entryIterator = entrySet.iterator();
+
+            while(entryIterator.hasNext()){
+                Map.Entry<Integer, String> entry = entryIterator.next();
+                Integer key = entry.getKey();
+                String value = entry.getValue();
+                this.jdbcTemplate.update(UpdateIsGood, value, userIdx, key);
+            }
+        } else {
+            Set<Map.Entry<Integer,String>> entrySet = postReviewReq.getReasonForMenu().entrySet();
+            Iterator<Map.Entry<Integer, String>> entryIterator = entrySet.iterator();
+
+            while(entryIterator.hasNext()){
+                Map.Entry<Integer, String> entry = entryIterator.next();
+                Integer key = entry.getKey();
+                String value = entry.getValue();
+                this.jdbcTemplate.update(UpdateMenuReason, value, userIdx, key);
+            }
         }
+
 
         for (String url:imageList){
             this.jdbcTemplate.update(InsertImage, reviewIdx, url);
@@ -1274,8 +1295,40 @@ public class StoreDao {
     public int checkUserReview(int userIdx, int userOrderIdx) {
         String Query = "SELECT EXISTS(SELECT reviewIdx\n" +
                 "FROM UserOrder UO JOIN Review R on UO.userOrderIdx = R.userOrderIdx\n" +
-                "WHERE UO.userOrderIdx=? AND UO.userIdx=? AND R.status='Y');";
+                "WHERE UO.userOrderIdx=? AND UO.userIdx=?);";
         return this.jdbcTemplate.queryForObject(Query, int.class, userOrderIdx, userIdx);
     }
 
+    // 리뷰 작성자 확인
+    public int checkReviewOwner(int userIdx, int reviewIdx) {
+        String Query = "SELECT EXISTS(SELECT * FROM Review WHERE userIdx=? AND reviewIdx=? AND status='Y');";
+        return this.jdbcTemplate.queryForObject(Query, int.class, userIdx, reviewIdx);
+    }
+
+    // 리뷰 수정 기간 확인
+    public boolean checkReviewUploadTime(int reviewIdx) {
+        String Query ="SELECT TIMESTAMPDIFF(DAY, R.createdAt, CURRENT_TIMESTAMP())\n" +
+                "FROM Review R\n" +
+                "WHERE reviewIdx=?;";
+        int date = this.jdbcTemplate.queryForObject(Query, int.class, reviewIdx);
+        if (date >=10){
+            return false;
+        } else{
+            return true;
+        }
+    }
+
+    // 리뷰 작성 기한 확인
+    public boolean checkOrderTime(int userOrderIdx) {
+        String Query = "SELECT TIMESTAMPDIFF(DAY, UO.orderTime, CURRENT_TIMESTAMP())\n" +
+                "FROM UserOrder UO\n" +
+                "WHERE userOrderIdx=?;";
+
+        int date = this.jdbcTemplate.queryForObject(Query, int.class, userOrderIdx);
+        if (date >=10){
+            return false;
+        } else{
+            return true;
+        }
+    }
 }

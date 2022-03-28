@@ -4,6 +4,7 @@ import com.example.demo.config.BaseException;
 import com.example.demo.config.BaseResponse;
 import com.example.demo.src.S3Image.S3Uploader;
 import com.example.demo.src.orders.OrderService;
+import com.example.demo.src.store.model.Req.PatchReviewReq;
 import com.example.demo.src.store.model.Req.PostReviewReq;
 import com.example.demo.src.store.model.Res.*;
 import com.example.demo.src.user.UserProvider;
@@ -15,7 +16,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
-import javax.validation.Valid;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
@@ -220,7 +220,7 @@ public class StoreController {
     @ResponseBody
     @PostMapping("/review/new")
     public BaseResponse<String> createReview(PostReviewReq postReviewReq,
-                                             @RequestParam("image") List<MultipartFile> multipartFile) throws BaseException, IOException {
+                                             @RequestParam(value = "image", required = false) List<MultipartFile> multipartFile) throws BaseException, IOException {
 
         int userIdx= jwtService.getUserIdx();
 
@@ -243,15 +243,24 @@ public class StoreController {
         }
 
         // 리뷰 작성여부 확인
+        //
         if (storeProvider.checkUserReview(userIdx, postReviewReq.getUserOrderIdx()) != 0){
             return new BaseResponse<>(REVIEW_ALREADY_EXISTS);
         }
 
-        List<String> imageList = new ArrayList<>();
-        for (MultipartFile file:multipartFile){
-            String imageUrl = s3Uploader.upload(file, "static");
-            imageList.add(imageUrl);
+        // 리뷰 작성 기한 확인
+        if (!storeProvider.checkOrderTime(postReviewReq.getUserOrderIdx())){
+            return new BaseResponse<>(EXPIRATION_OR_REVIEW);
         }
+
+        List<String> imageList = new ArrayList<>();
+        if (multipartFile!=null && multipartFile.size()!=0){
+            for (MultipartFile file:multipartFile){
+                String imageUrl = s3Uploader.upload(file, "static");
+                imageList.add(imageUrl);
+            }
+        }
+
 
         storeService.createReview(userIdx, postReviewReq.getUserOrderIdx(), postReviewReq, imageList);
         String result = "";
@@ -259,6 +268,40 @@ public class StoreController {
 
 
     }
+
+//    /**
+//     * 리뷰 수정 API
+//     * [PATCH] /stores/review?reviewIdx=
+//     * @return BaseResponse<String>
+//     */
+//    @ResponseBody
+//    @PatchMapping("/review")
+//    public BaseResponse<String> modifyReview(PatchReviewReq patchReviewReq,
+//                                             @RequestParam(value = "image", required = false) List<MultipartFile> multipartFile) throws BaseException {
+//        int userIdx= jwtService.getUserIdx();
+//
+//        // 사용자 존재 여부 확인
+//        if (userProvider.checkUser(userIdx)==0){
+//            return new BaseResponse<>(USER_NOT_EXISTS);
+//        }
+//
+//        // 리뷰 작성자 확인
+//        if (storeProvider.checkReviewOwner(userIdx, patchReviewReq.getReviewIdx())==0){
+//            return new BaseResponse<>(INCONSISTENCY_REVIEW_USER);
+//        }
+//
+//        // 리뷰 수정 가능 기간 확인
+//        if (!storeProvider.checkReviewUploadTime(patchReviewReq.getReviewIdx())){
+//            return new BaseResponse<>(EXPIRATION_OF_REVIEW_EDIT);
+//        }
+//
+//        storeService.modifyReview(userIdx,patchReviewReq);
+//        String result = "";
+//        return new BaseResponse<>(result);
+//
+//
+//    }
+
 
 
     /**

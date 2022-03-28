@@ -1,6 +1,7 @@
 package com.example.demo.src.store;
 
 import com.example.demo.config.BaseException;
+import com.example.demo.src.store.model.Req.PatchReviewReq;
 import com.example.demo.src.store.model.Req.PostReviewReq;
 import com.example.demo.src.store.model.Res.GetFavoriteListRes;
 import com.example.demo.src.user.model.UserLocation;
@@ -87,4 +88,21 @@ public class StoreService {
         }
     }
 
+//    /**
+//     * 리뷰 수정 API
+//     * [PATCH] /stores/review?reviewIdx=
+//     * @return BaseResponse<String>
+//     */
+//    public void modifyReview(int userIdx, int reviewIdx, PatchReviewReq patchReviewReq) throws BaseException {
+//        try {{
+//        try {
+//            int result = storeDao.modifyReview(userIdx, reviewIdx, patchReviewReq);
+//            if (result == FAIL){
+//                throw new BaseException(FAIL_POST_REVIEW);
+//            }
+//        } catch (Exception exception) {
+//            System.out.println("deleteFavoriteStore"+exception);
+//            throw new BaseException(DATABASE_ERROR);
+//        }
+//    }
 }

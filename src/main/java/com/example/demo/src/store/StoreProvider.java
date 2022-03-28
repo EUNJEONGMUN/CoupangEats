@@ -204,4 +204,30 @@ public class StoreProvider {
             throw new BaseException(DATABASE_ERROR);
         }
     }
+
+    // 리뷰 작성자 확인
+    public int checkReviewOwner(int userIdx, int reviewIdx) throws BaseException  {
+        try {
+            return storeDao.checkReviewOwner(userIdx,reviewIdx);
+        } catch (Exception exception) {
+            throw new BaseException(DATABASE_ERROR);
+        }
+    }
+
+    // 리뷰 수정 기간 확인
+    public boolean checkReviewUploadTime(int reviewIdx) throws BaseException  {
+        try {
+            return storeDao.checkReviewUploadTime(reviewIdx);
+        } catch (Exception exception) {
+            throw new BaseException(DATABASE_ERROR);
+        }
+    }
+    // 리뷰 작성 기한 확인
+    public boolean checkOrderTime(int userOrderIdx) throws BaseException {
+        try {
+            return storeDao.checkOrderTime(userOrderIdx);
+        } catch (Exception exception) {
+            throw new BaseException(DATABASE_ERROR);
+        }
+    }
 }
