@@ -29,28 +29,6 @@ public class S3Uploader {
     public String bucket;  // S3 버킷 이름
 
 
-//    public String upload(MultipartFile multipartFile, String dirName) throws IOException {
-//        File uploadFile = convert(multipartFile)  // 파일 변환할 수 없으면 에러
-//                .orElseThrow(() -> new IllegalArgumentException("error: MultipartFile -> File convert fail"));
-//
-//        return upload(uploadFile, dirName);
-//    }
-
-//    // S3로 파일 업로드하기
-//    private String upload(MultipartFile uploadFile, String dirName) {
-//        String fileName = dirName + "/" + UUID.randomUUID() + uploadFile.getName();   // S3에 저장된 파일 이름
-//        String uploadImageUrl = putS3(uploadFile, fileName); // s3로 업로드
-//        IOUtils.toByteArray(uploadFile.getInputStream())
-//        removeNewFile(uploadFile);
-//        return uploadImageUrl;
-//    }
-//
-//
-//    // S3로 업로드
-//    private String putS3(MultipartFile uploadFile, String fileName) {
-//        amazonS3Client.putObject(new PutObjectRequest(bucket, fileName, (File) uploadFile).withCannedAcl(CannedAccessControlList.PublicRead));
-//        return amazonS3Client.getUrl(bucket, fileName).toString();
-//    }
         public String upload(MultipartFile multipartFile, String dirName) throws IOException {
             File uploadFile = convert(multipartFile)  // 파일 변환할 수 없으면 에러
                     .orElseThrow(() -> new IllegalArgumentException("error: MultipartFile -> File convert fail"));
@@ -58,13 +36,13 @@ public class S3Uploader {
             return upload(uploadFile, dirName);
         }
 
-            // S3로 파일 업로드하기
-            private String upload(File uploadFile, String dirName) {
-                String fileName = dirName + "/" + UUID.randomUUID() + uploadFile.getName();   // S3에 저장된 파일 이름
-                String uploadImageUrl = putS3(uploadFile, fileName); // s3로 업로드
-                removeNewFile(uploadFile);
-                return uploadImageUrl;
-            }
+        // S3로 파일 업로드하기
+        private String upload(File uploadFile, String dirName) {
+            String fileName = dirName + "/" + UUID.randomUUID() + uploadFile.getName();   // S3에 저장된 파일 이름
+            String uploadImageUrl = putS3(uploadFile, fileName); // s3로 업로드
+            removeNewFile(uploadFile);
+            return uploadImageUrl;
+        }
 
     // S3로 업로드
     private String putS3(File uploadFile, String fileName) {
@@ -74,10 +52,10 @@ public class S3Uploader {
     // 로컬에 저장된 이미지 지우기
     private void removeNewFile(File targetFile) {
         if (targetFile.delete()) {
-            //log.info("File delete success");
+            System.out.println("File delete success");
             return;
         }
-        //log.info("File delete fail");
+        System.out.println("File delete fail");
     }
     // 로컬에 파일 업로드 하기
     private Optional<File> convert(MultipartFile file) throws IOException {

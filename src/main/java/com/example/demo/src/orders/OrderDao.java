@@ -378,7 +378,7 @@ public class OrderDao {
     }
     // 주문 존재 여부 확인
     public int checkOrder(int userOrderIdx) {
-        String Query = "SELECT EXISTS(SELECT * FROM UserOrder WHERE userOrderIdx=? AND status='Y');";
+        String Query = "SELECT EXISTS(SELECT * FROM UserOrder WHERE userOrderIdx=? AND status!='N');";
         return this.jdbcTemplate.queryForObject(Query, int.class, userOrderIdx);
     }
 

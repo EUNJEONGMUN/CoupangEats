@@ -1,6 +1,7 @@
 package com.example.demo.src.store;
 
 import com.example.demo.src.store.model.*;
+import com.example.demo.src.store.model.Req.PostReviewReq;
 import com.example.demo.src.store.model.Res.*;
 import com.example.demo.src.user.model.UserLocation;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -604,7 +605,7 @@ public class StoreDao {
                                         rs4.getString("menuName"),
                                         rs4.getInt("menuPrice"),
                                         rs4.getString("menuDetail"),
-                                        this.jdbcTemplate.queryForObject(MenuImageQuery, String.class, rs4.getInt("menuIdx")),
+                                        rs4.getString("menuImgUrl"),
                                         rs4.getString("isOption"),
                                         rs4.getString("status"),
                                         this.jdbcTemplate.queryForObject(IsManyOrderQuery,
@@ -1082,7 +1083,46 @@ public class StoreDao {
 
     }
 
+    /**
+     * 리뷰 작성 API
+     * [POST] /stores/review/new?userOrderIdx=
+     * /new?userOrderIdx=
+     * @return BaseResponse<String>
+     */
+    public int createReview(int userIdx, int userOrderIdx, PostReviewReq postReviewReq, List<String> imageList) {
 
+        String InsertReviewInfoQuery = "INSERT INTO Review (userIdx, userOrderIdx, score, content, isPhoto, reasonForDelivery) VALUES(?,?,?,?,?,?);";
+        String UpdateIsGood = "UPDATE CartToOrder SET isGood=?, reasonForMenu=? WHERE userIdx=? AND cartIdx=?";
+        String InsertImage = "INSERT INTO ReviewImg (reviewIdx, reviewImgUrl);";
+        String isPhoto;
+        if (imageList.size()==0){
+            isPhoto = "N";
+        } else {
+            isPhoto= "Y";
+        }
+
+        this.jdbcTemplate.update(InsertReviewInfoQuery, userIdx, userOrderIdx, postReviewReq.getScore(), postReviewReq.getContent(), isPhoto, postReviewReq.getReasonForDelivery());
+
+        String lastInsertIdQuery = "select last_insert_id()";
+        int reviewIdx = this.jdbcTemplate.queryForObject(lastInsertIdQuery,int.class);
+
+        Set<Integer> keySet = postReviewReq.getReasonForMenu().keySet();
+        Set<Integer> keySet2 = postReviewReq.getIsMenuGood().keySet();
+        Iterator<Integer> keyIterator = keySet.iterator();
+        Iterator<Integer> keyIterator2 = keySet2.iterator();
+        while(keyIterator.hasNext()){
+            int key = keyIterator.next();
+            int key2 = keyIterator2.next();
+            String value = postReviewReq.getReasonForMenu().get(key);
+            String value2 = postReviewReq.getIsMenuGood().get(key2);
+            this.jdbcTemplate.update(UpdateIsGood, value2, value, userIdx, key);
+        }
+
+        for (String url:imageList){
+            this.jdbcTemplate.update(InsertImage, reviewIdx, url);
+        }
+        return 1;
+    }
 
     // 가게 존재 여부 확인
     public int checkStore(int storeIdx) {
@@ -1201,4 +1241,5 @@ public class StoreDao {
                 "WHERE UO.userOrderIdx=? AND UO.userIdx=? AND R.status='Y');";
         return this.jdbcTemplate.queryForObject(Query, int.class, userOrderIdx, userIdx);
     }
+
 }

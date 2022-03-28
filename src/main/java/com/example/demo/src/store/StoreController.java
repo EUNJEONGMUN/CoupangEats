@@ -4,6 +4,7 @@ import com.example.demo.config.BaseException;
 import com.example.demo.config.BaseResponse;
 import com.example.demo.src.S3Image.S3Uploader;
 import com.example.demo.src.orders.OrderService;
+import com.example.demo.src.store.model.Req.PostReviewReq;
 import com.example.demo.src.store.model.Res.*;
 import com.example.demo.src.user.UserProvider;
 import com.example.demo.src.user.model.UserLocation;
@@ -16,6 +17,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import javax.validation.Valid;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 
 import static com.example.demo.config.BaseResponseStatus.*;
@@ -210,45 +212,53 @@ public class StoreController {
     }
 
 
-//    /**
-//     * 리뷰 작성 API
-//     * [POST] /stores/review/new?userOrderIdx=
-//     * /new?userOrderIdx=
-//     * @return BaseResponse<String>
-//     */
-//    @ResponseBody
-//    @PostMapping("/review/new")
-//    public BaseResponse<String> createReview(@RequestParam(required = false, defaultValue = "0") int userOrderIdx,
-//                                             @Valid @RequestBody PostReviewReq postReviewReq) throws BaseException {
-//
-//        int userIdx= jwtService.getUserIdx();
-//
-//        // 사용자 존재 여부 확인
-//        if (userProvider.checkUser(userIdx)==0){
-//            return new BaseResponse<>(USER_NOT_EXISTS);
-//        }
-//
-//        if (userOrderIdx ==0){
-//            return new BaseResponse<>(EMPTY_USER_ORDER_IDX_PARAM);
-//        }
-//        // 주문 존재 여부 확인
-//        if (orderService.checkOrder(userOrderIdx)==0){
-//            return new BaseResponse<>(USER_ORDER_NOT_EXISTS);
-//        }
-//
-//        // 주문 소유자 확인
-//        if (orderService.checkOrderOwner(userIdx, userOrderIdx)==0){
-//            return new BaseResponse<>(USER_ORDER_NOT_EXISTS);
-//        }
-//
-//        // 리뷰 작성여부 확인
-//        if (storeProvider.checkUserReview(userIdx, userOrderIdx) != 0){
-//            return new BaseResponse<>(REVIEW_ALREADY_EXISTS);
-//        }
-//        storeDao.createReview()
-//
-//
-//    }
+    /**
+     * 리뷰 작성 API
+     * [POST] /stores/review/new
+     * @return BaseResponse<String>
+     */
+    @ResponseBody
+    @PostMapping("/review/new")
+    public BaseResponse<String> createReview(PostReviewReq postReviewReq,
+                                             @RequestParam("image") List<MultipartFile> multipartFile) throws BaseException, IOException {
+
+        int userIdx= jwtService.getUserIdx();
+
+        // 사용자 존재 여부 확인
+        if (userProvider.checkUser(userIdx)==0){
+            return new BaseResponse<>(USER_NOT_EXISTS);
+        }
+
+        if (postReviewReq.getUserOrderIdx() ==0){
+            return new BaseResponse<>(EMPTY_USER_ORDER_IDX_PARAM);
+        }
+        // 주문 존재 여부 확인
+        if (orderService.checkOrder(postReviewReq.getUserOrderIdx())==0){
+            return new BaseResponse<>(USER_ORDER_NOT_EXISTS);
+        }
+
+        // 주문 소유자 확인
+        if (orderService.checkOrderOwner(userIdx, postReviewReq.getUserOrderIdx())==0){
+            return new BaseResponse<>(USER_ORDER_NOT_EXISTS);
+        }
+
+        // 리뷰 작성여부 확인
+        if (storeProvider.checkUserReview(userIdx, postReviewReq.getUserOrderIdx()) != 0){
+            return new BaseResponse<>(REVIEW_ALREADY_EXISTS);
+        }
+
+        List<String> imageList = new ArrayList<>();
+        for (MultipartFile file:multipartFile){
+            String imageUrl = s3Uploader.upload(file, "static");
+            imageList.add(imageUrl);
+        }
+
+        storeService.createReview(userIdx, postReviewReq.getUserOrderIdx(), postReviewReq, imageList);
+        String result = "";
+        return new BaseResponse<>(result);
+
+
+    }
 
 
     /**
@@ -335,11 +345,8 @@ public class StoreController {
 
     }
 
-
-
     @PostMapping("/images")
     public String upload(@RequestParam("data") MultipartFile multipartFile) throws IOException {
-        System.out.println(">>here<<");
         s3Uploader.upload(multipartFile, "static");
         return "test";
     }

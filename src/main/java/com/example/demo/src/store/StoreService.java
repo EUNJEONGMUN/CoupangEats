@@ -1,6 +1,7 @@
 package com.example.demo.src.store;
 
 import com.example.demo.config.BaseException;
+import com.example.demo.src.store.model.Req.PostReviewReq;
 import com.example.demo.src.store.model.Res.GetFavoriteListRes;
 import com.example.demo.src.user.model.UserLocation;
 import com.example.demo.utils.JwtService;
@@ -67,5 +68,23 @@ public class StoreService {
         }
     }
 
+
+    /**
+     * 리뷰 작성 API
+     * [POST] /stores/review/new?userOrderIdx=
+     * /new?userOrderIdx=
+     * @return BaseResponse<String>
+     */
+    public void createReview(int userIdx, int userOrderIdx, PostReviewReq postReviewReq, List<String> imageList) throws BaseException {
+        try {
+            int result = storeDao.createReview(userIdx, userOrderIdx, postReviewReq, imageList);
+            if (result == FAIL){
+                throw new BaseException(FAIL_POST_REVIEW);
+            }
+        } catch (Exception exception) {
+            System.out.println("deleteFavoriteStore"+exception);
+            throw new BaseException(DATABASE_ERROR);
+        }
+    }
 
 }
