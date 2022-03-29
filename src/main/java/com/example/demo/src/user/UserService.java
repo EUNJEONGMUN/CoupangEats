@@ -156,6 +156,25 @@ public class UserService {
     }
 
     /**
+     * 주소지 삭제 API
+     * [PATCH] /users/address/deletion
+     * @return BaseResponse<String>
+     */
+    public void deleteAddress(int addressIdx) throws BaseException  {
+        try {
+            int result = userDao.deleteAddress(addressIdx);
+            if (result == FAIL){
+                throw new BaseException(FAIL_DELETE_ADDRESS);
+            }
+        } catch (Exception exception) {
+            System.out.println("deleteAddress"+exception);
+            throw new BaseException(DATABASE_ERROR);
+        }
+    }
+
+
+
+    /**
      * 현재 주소지 변경 API
      * [PUT] /users/address/choice
      * /choice?addressIdx=
@@ -188,4 +207,5 @@ public class UserService {
             throw new BaseException(DATABASE_ERROR);
         }
     }
+
 }

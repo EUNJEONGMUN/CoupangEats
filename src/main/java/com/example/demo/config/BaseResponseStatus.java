@@ -127,6 +127,7 @@ public enum BaseResponseStatus {
     FAIL_DELETE_ORDER(false, 4407, "주문 취소에 실패했습니다."),
     FAIL_CREATE_REORDER(false, 4408, "재주문 하기에 실패했습니다."),
     FAIL_DELETE_CART(false, 4409, "카트 삭제에 실패했습니다."),
+    FAIL_DELETE_ADDRESS(false, 4410, "주소지 삭제에 실패했습니다."),
 
     FAIL_POST_FAVORITE_STORE(false, 4500, "즐겨찾기 설정에 실패했습니다."),
     FAIL_PUT_FAVORITE_STORE(false, 4501, "즐거찾기 해제에 실패했습니다."),

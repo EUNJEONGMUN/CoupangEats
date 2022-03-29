@@ -196,12 +196,9 @@ public class UserDao {
 
     }
     // 주소의 소유자 확인
-    public int checkAddressUser(int userIdx, int otherIdx) {
-        String Query = "SELECT EXISTS(SELECT * FROM UserOtherAddress WHERE status='Y' AND userAddressIdx=? AND userIdx=?);";
-        Object[] Params = new Object[]{otherIdx, userIdx};
-        return this.jdbcTemplate.queryForObject(Query,
-                int.class,
-                Params);
+    public int checkAddressUserCorrect(int userIdx, int addressIdx) {
+        String Query = "SELECT EXISTS(SELECT * FROM UserAddress WHERE status='Y' AND userAddressIdx=? AND userIdx=?);";
+        return this.jdbcTemplate.queryForObject(Query, int.class, addressIdx, userIdx);
     }
 
     // 가입된 회원 확인 - 이메일
@@ -369,6 +366,17 @@ public class UserDao {
     }
 
     /**
+     * 주소지 삭제 API
+     * [PATCH] /users/address/deletion
+     * @return BaseResponse<String>
+     */
+    public int deleteAddress(int addressIdx) {
+        String Query = "UPDATE UserAddress SET status='N' WHERE userAddressIdx=?;";
+        return this.jdbcTemplate.update(Query, addressIdx);
+    }
+
+
+    /**
      * 할인 쿠폰 조회 API
      * [GET] /users/coupons
      * @return BaseResponse<List<GetUserCouponListRes>>
@@ -407,4 +415,11 @@ public class UserDao {
         String Query ="SELECT EXISTS(SELECT * FROM UserCoupon WHERE (status='Y' OR status='U') AND userIdx=? AND couponIdx=?);";
         return this.jdbcTemplate.queryForObject(Query, int.class, userIdx, couponIdx);
     }
+
+    // addressIdx 존재 확인
+    public int checkUserAddress(int addressIdx) {
+        String Query = "SELECT EXISTS(SELECT * FROM UserAddress WHERE userAddressIdx=? AND status='Y');";
+        return this.jdbcTemplate.queryForObject(Query, int.class, addressIdx);
+    }
+
 }

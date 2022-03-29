@@ -105,9 +105,9 @@ public class UserProvider {
     }
 
     // 주소의 소유자 확인
-    public int checkAddressUser(int userIdx, int otherIdx) throws BaseException {
+    public int checkAddressUserCorrect(int userIdx, int addressIdx) throws BaseException {
         try {
-            return userDao.checkAddressUser(userIdx, otherIdx);
+            return userDao.checkAddressUserCorrect(userIdx, addressIdx);
         } catch (Exception exception){
             System.out.println("checkUser"+exception);
             throw new BaseException(DATABASE_ERROR);
@@ -184,4 +184,13 @@ public class UserProvider {
         }
     }
 
+    // addressIdx 존재 확인
+    public int checkUserAddress(int addressIdx) throws BaseException {
+        try {
+            return userDao.checkUserAddress(addressIdx);
+        } catch (Exception exception){
+            System.out.println("checkUserAddress"+exception);
+            throw new BaseException(DATABASE_ERROR);
+        }
+    }
 }

@@ -231,14 +231,32 @@ public class UserController {
 
     }
 
-//    /**
-//     * 주소지 삭제 API
-//     * [PATCH] /users/address/deletion
-//     * @return BaseResponse<String>
-//     */
-//    @ResponseBody
-//    @PatchMapping("/address/deletion")
-//    public BaseResponse<String> deleteAddress(@Valid @RequestBody)
+    /**
+     * 주소지 삭제 API
+     * [PATCH] /users/address/deletion
+     * @return BaseResponse<String>
+     */
+    @ResponseBody
+    @PatchMapping("/address/deletion")
+    public BaseResponse<String> deleteAddress(@Valid @RequestBody PatchAddressReq patchAddressReq) throws BaseException {
+        int userIdx= jwtService.getUserIdx();
+        if (userProvider.checkUser(userIdx)==0){
+            return new BaseResponse<>(USER_NOT_EXISTS);
+        }
+        if (userProvider.checkUserAddress(patchAddressReq.getAddressIdx()) == 0){
+            return new BaseResponse<>(ADDRESS_NOT_EXISTS);
+        }
+        if (userProvider.checkAddressUserCorrect(userIdx, patchAddressReq.getAddressIdx())==0){
+            return new BaseResponse<>(INCONSISTENCY_ADDRESS_USER);
+        }
+
+        userService.deleteAddress(patchAddressReq.getAddressIdx());
+        String result = "";
+        return new BaseResponse<>(result);
+
+
+
+    }
 
 
 
