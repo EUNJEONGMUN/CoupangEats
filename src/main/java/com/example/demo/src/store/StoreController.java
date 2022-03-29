@@ -87,7 +87,7 @@ public class StoreController {
     }
 
     /**
-     * 가게 상세 화면 조회 조회 API
+     * 가게 상세 화면 조회 API
      * [GET] /stores/detail?storeIdx=
      * @return BaseResponse<GetStoreDetailRes>
      */
@@ -239,7 +239,7 @@ public class StoreController {
 
         // 주문 소유자 확인
         if (orderService.checkOrderOwner(userIdx, postReviewReq.getUserOrderIdx())==0){
-            return new BaseResponse<>(USER_ORDER_NOT_EXISTS);
+            return new BaseResponse<>(INCONSISTENCY_ORDER_USER);
         }
 
         // 리뷰 작성여부 확인

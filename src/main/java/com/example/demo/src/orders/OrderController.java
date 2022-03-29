@@ -271,7 +271,7 @@ public class OrderController {
 
         // 주문 소유자 확인
         if (orderService.checkOrderOwner(userIdx, userOrderIdx)==0){
-            return new BaseResponse<>(USER_ORDER_NOT_EXISTS);
+            return new BaseResponse<>(INCONSISTENCY_ORDER_USER);
         }
 
         String result = "";
