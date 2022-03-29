@@ -11,9 +11,9 @@ import java.util.Map;
 @Getter
 @Setter
 @AllArgsConstructor
-public class PatchReviewReq {
+public class PutReviewReq {
     @NotNull(message = "not null reviewIdx")
-    private int reviewIdx;
+    private int userOrderIdx;
     @NotNull(message = "not null score")
     @Size(min=1, max=5, message="별점은 1점에서 5점사이입니다.")
     private int score;
@@ -25,5 +25,4 @@ public class PatchReviewReq {
     private Map<Integer, String> reasonForMenu;
     private String isDeliveryManGood;
     private String reasonForDelivery;
-    private String status;
 }

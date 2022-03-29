@@ -230,4 +230,13 @@ public class StoreProvider {
             throw new BaseException(DATABASE_ERROR);
         }
     }
+
+    // 리뷰 아이디 찾기
+    public int findReviewIdx(int userOrderIdx) throws BaseException  {
+        try {
+            return storeDao.findReviewIdx(userOrderIdx);
+        } catch (Exception exception) {
+            throw new BaseException(DATABASE_ERROR);
+        }
+    }
 }

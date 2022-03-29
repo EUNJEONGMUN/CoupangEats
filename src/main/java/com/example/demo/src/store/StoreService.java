@@ -1,10 +1,8 @@
 package com.example.demo.src.store;
 
 import com.example.demo.config.BaseException;
-import com.example.demo.src.store.model.Req.PatchReviewReq;
+import com.example.demo.src.store.model.Req.PutReviewReq;
 import com.example.demo.src.store.model.Req.PostReviewReq;
-import com.example.demo.src.store.model.Res.GetFavoriteListRes;
-import com.example.demo.src.user.model.UserLocation;
 import com.example.demo.utils.JwtService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -87,6 +85,28 @@ public class StoreService {
             throw new BaseException(DATABASE_ERROR);
         }
     }
+
+
+    /**
+     * 리뷰 수정 API
+     * [PUT] /stores/review?reviewIdx=
+     * @return BaseResponse<String>
+     */
+    public void modifyReview(int userIdx, int reviewIdx, PutReviewReq putReviewReq, List<String> imageList) throws BaseException {
+        try {
+            int result = storeDao.modifyReview(userIdx, reviewIdx, putReviewReq, imageList);
+            if (result == FAIL){
+                throw new BaseException(FAIL_MODIFY_REVIEW);
+            }
+        } catch (Exception exception) {
+            System.out.println("deleteFavoriteStore"+exception);
+            throw new BaseException(DATABASE_ERROR);
+        }
+
+    }
+
+
+
 
 //    /**
 //     * 리뷰 수정 API

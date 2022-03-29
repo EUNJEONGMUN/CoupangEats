@@ -2,10 +2,12 @@ package com.example.demo.src.store;
 
 import com.example.demo.src.store.model.*;
 import com.example.demo.src.store.model.Req.PostReviewReq;
+import com.example.demo.src.store.model.Req.PutReviewReq;
 import com.example.demo.src.store.model.Res.*;
 import com.example.demo.src.user.model.UserLocation;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.security.core.parameters.P;
 import org.springframework.stereotype.Repository;
 
 import javax.persistence.criteria.CriteriaBuilder;
@@ -783,26 +785,53 @@ public class StoreDao {
      */
     public int createReview(int userIdx, int userOrderIdx, PostReviewReq postReviewReq, List<String> imageList) {
 
-        String InsertReviewInfoQuery1 = "INSERT INTO Review (userIdx, userOrderIdx, score, content, isPhoto, reasonForStore) VALUES(?,?,?,?,?,?);";
-        String InsertReviewInfoQuery2 = "INSERT INTO Review (userIdx, userOrderIdx, score, content, isPhoto, reasonForDelivery, reasonForStore) VALUES(?,?,?,?,?,?,?);";
-        String UpdateIsGood = "UPDATE CartToOrder SET isGood=? WHERE userIdx=? AND cartIdx=?";
+        // 매장, 배달 모두 좋아요
+        String InsertReviewInfoQuery1 = "INSERT INTO Review (userIdx, userOrderIdx, score, content, isPhoto,isDeliveryGood) VALUES(?,?,?,?,?,?);";
+
+        // 매장만 불만
+        String InsertReviewInfoQuery2 = "INSERT INTO Review (userIdx, userOrderIdx, score, content, isPhoto, reasonForStore, isDeliveryGood) VALUES(?,?,?,?,?,?,?);";
+
+        // 배달만 불만
+        String InsertReviewInfoQuery3 = "INSERT INTO Review (userIdx, userOrderIdx, score, content, isPhoto, isDeliveryGood, reasonForDelivery) VALUES(?,?,?,?,?,?,?);";
+
+        // 둘 다 불만
+        String InsertReviewInfoQuery4 = "INSERT INTO Review (userIdx, userOrderIdx, score, content, isPhoto, reasonForStore, isDeliveryGood, reasonForDelivery) VALUES(?,?,?,?,?,?,?,?);";
+
+
+        String UpdateMenuIsGood = "UPDATE CartToOrder SET isGood=? WHERE userIdx=? AND cartIdx=?";
         String UpdateMenuReason = "UPDATE CartToOrder SET reasonForMenu=? WHERE userIdx=? AND cartIdx=?";
+
         String InsertImage = "INSERT INTO ReviewImg (reviewIdx, reviewImgUrl) VALUES (?,?);";
+
         String isPhoto;
-        if (imageList.size()==0){
+        if (imageList.size() == 0) {
             // 포토리뷰가 아닐 경우
             isPhoto = "N";
         } else {
-            isPhoto= "Y";
+            isPhoto = "Y";
         }
 
-        if (postReviewReq.getScore()<=2){
-            // 별점이 2점 이하일 경우 이유 작성
-            this.jdbcTemplate.update(InsertReviewInfoQuery2, userIdx, userOrderIdx, postReviewReq.getScore(), postReviewReq.getContent(), isPhoto, postReviewReq.getReasonForDelivery(), postReviewReq.getReasonForStore());
+        if (postReviewReq.getScore() > 2 && postReviewReq.getIsDeliveryManGood().equals("G")) {
+            // 둘다 좋아요
+            this.jdbcTemplate.update(InsertReviewInfoQuery1, userIdx, userOrderIdx, postReviewReq.getScore(),
+                    postReviewReq.getContent(), isPhoto, postReviewReq.getIsDeliveryManGood());
+
+        } else if (postReviewReq.getScore() <= 2 && postReviewReq.getIsDeliveryManGood().equals("G")) {
+            // 매장만 불만
+            this.jdbcTemplate.update(InsertReviewInfoQuery2, userIdx, userOrderIdx, postReviewReq.getScore(),
+                    postReviewReq.getContent(), isPhoto, postReviewReq.getReasonForStore(), postReviewReq.getIsDeliveryManGood());
+
+        } else if (postReviewReq.getScore() > 2 && postReviewReq.getIsDeliveryManGood().equals("B")){
+            // 배달만 불만
+            this.jdbcTemplate.update(InsertReviewInfoQuery3, userIdx, userOrderIdx, postReviewReq.getScore(),
+                    postReviewReq.getContent(), isPhoto, postReviewReq.getIsDeliveryManGood(), postReviewReq.getReasonForDelivery());
         } else {
-            // 별점 3점 이상이 경우
-            this.jdbcTemplate.update(InsertReviewInfoQuery1, userIdx, userOrderIdx, postReviewReq.getScore(), postReviewReq.getContent(), isPhoto, postReviewReq.getReasonForDelivery());
+            // 다 불만
+            this.jdbcTemplate.update(InsertReviewInfoQuery4, userIdx, userOrderIdx, postReviewReq.getScore(),
+                    postReviewReq.getContent(), isPhoto, postReviewReq.getReasonForStore(), postReviewReq.getIsDeliveryManGood(), postReviewReq.getReasonForDelivery());
+
         }
+
 
         String lastInsertIdQuery = "select last_insert_id()";
         int reviewIdx = this.jdbcTemplate.queryForObject(lastInsertIdQuery,int.class);
@@ -815,7 +844,7 @@ public class StoreDao {
                 Map.Entry<Integer, String> entry = entryIterator.next();
                 Integer key = entry.getKey();
                 String value = entry.getValue();
-                this.jdbcTemplate.update(UpdateIsGood, value, userIdx, key);
+                this.jdbcTemplate.update(UpdateMenuIsGood, value, userIdx, key);
             }
         } else {
             Set<Map.Entry<Integer,String>> entrySet = postReviewReq.getReasonForMenu().entrySet();
@@ -835,6 +864,102 @@ public class StoreDao {
         }
         return 1;
     }
+
+    /**
+     * 리뷰 수정 API
+     * [PUT] /stores/review?reviewIdx=
+     * @return BaseResponse<String>
+     */
+    public int modifyReview(int userIdx, int reviewIdx, PutReviewReq putReviewReq, List<String> imageList) {
+        // 매장, 배달 모두 좋아요
+        String InsertReviewInfoQuery1 = "UPDATE Review SET score=?, content=?, isPhoto=?, isDeliveryGood=? WHERE reviewIdx=?;";
+
+        // 매장만 불만
+        String InsertReviewInfoQuery2 = "UPDATE Review SET score=?, content=?, isPhoto=?, reasonForStore=?, isDeliveryGood=? WHERE reviewIdx=?;";
+
+        // 배달만 불만
+        String InsertReviewInfoQuery3 = "UPDATE Review SET score=?, content=?, isPhoto=?, isDeliveryGood=?, reasonForDelivery=? WHERE reviewIdx=?;";
+
+        // 둘 다 불만
+        String InsertReviewInfoQuery4 = "UPDATE Review SET score=?, content=?, isPhoto=?, reasonForStore=?, isDeliveryGood=?, reasonForDelivery=? WHERE reviewIdx=?;";
+
+
+        String UpdateMenuIsGood = "UPDATE CartToOrder SET isGood=? WHERE userIdx=? AND cartIdx=?";
+        String UpdateMenuReason = "UPDATE CartToOrder SET reasonForMenu=? WHERE userIdx=? AND cartIdx=?";
+
+
+        String InsertImage = "INSERT INTO ReviewImg (reviewIdx, reviewImgUrl) VALUES (?,?);";
+        String DeleteImage = "UPDATE ReviewImg SET status='N' WHERE reviewIdx=?;";
+
+        String isPhoto;
+        if (imageList.size() == 0) {
+            // 포토리뷰가 아닐 경우
+            isPhoto = "N";
+        } else {
+            isPhoto = "Y";
+        }
+
+
+        this.jdbcTemplate.update(InsertReviewInfoQuery4, putReviewReq.getScore(), putReviewReq.getContent(),
+                    isPhoto, putReviewReq.getReasonForStore(), putReviewReq.getIsDeliveryManGood(),
+                putReviewReq.getReasonForDelivery(), reviewIdx);
+
+
+
+//        if (putReviewReq.getScore() > 2 && putReviewReq.getIsDeliveryManGood().equals("G")) {
+//            // 둘다 좋아요
+//            this.jdbcTemplate.update(InsertReviewInfoQuery1, putReviewReq.getScore(), putReviewReq.getContent(),
+//                    isPhoto, putReviewReq.getIsDeliveryManGood(), putReviewReq.getReviewIdx());
+//
+//        } else if (putReviewReq.getScore() <= 2 && putReviewReq.getIsDeliveryManGood().equals("G")) {
+//            // 매장만 불만
+//            this.jdbcTemplate.update(InsertReviewInfoQuery2, putReviewReq.getScore(), putReviewReq.getContent(),
+//                    isPhoto, putReviewReq.getReasonForStore(), putReviewReq.getIsDeliveryManGood(), putReviewReq.getReviewIdx());
+//
+//        } else if (putReviewReq.getScore() > 2 && putReviewReq.getIsDeliveryManGood().equals("B")){
+//            // 배달만 불만
+//            this.jdbcTemplate.update(InsertReviewInfoQuery3, putReviewReq.getScore(), putReviewReq.getContent(),
+//                    isPhoto, putReviewReq.getIsDeliveryManGood(), putReviewReq.getReasonForDelivery(), putReviewReq.getReviewIdx());
+//        } else {
+//            // 다 불만
+//            this.jdbcTemplate.update(InsertReviewInfoQuery4, putReviewReq.getScore(), putReviewReq.getContent(),
+//                    isPhoto, putReviewReq.getReasonForStore(), putReviewReq.getIsDeliveryManGood(), putReviewReq.getReasonForDelivery(), putReviewReq.getReviewIdx());
+//        }
+
+
+        if (putReviewReq.getIsMenuGood().size()!=0){
+            Set<Map.Entry<Integer,String>> entrySet = putReviewReq.getIsMenuGood().entrySet();
+            Iterator<Map.Entry<Integer, String>> entryIterator = entrySet.iterator();
+
+            while(entryIterator.hasNext()){
+                Map.Entry<Integer, String> entry = entryIterator.next();
+                Integer key = entry.getKey();
+                String value = entry.getValue();
+                this.jdbcTemplate.update(UpdateMenuIsGood, value, userIdx, key);
+            }
+        } else {
+            Set<Map.Entry<Integer,String>> entrySet = putReviewReq.getReasonForMenu().entrySet();
+            Iterator<Map.Entry<Integer, String>> entryIterator = entrySet.iterator();
+
+            while(entryIterator.hasNext()){
+                Map.Entry<Integer, String> entry = entryIterator.next();
+                Integer key = entry.getKey();
+                String value = entry.getValue();
+                this.jdbcTemplate.update(UpdateMenuReason, value, userIdx, key);
+            }
+        }
+
+        this.jdbcTemplate.update(DeleteImage, reviewIdx);
+        for (String url:imageList){
+            this.jdbcTemplate.update(InsertImage, reviewIdx, url);
+        }
+        return 1;
+
+    }
+
+
+
+
 
     // 가게 존재 여부 확인
     public int checkStore(int storeIdx) {
@@ -985,5 +1110,17 @@ public class StoreDao {
         } else{
             return true;
         }
+    }
+
+    // 리뷰 아이디 찾기
+    public int findReviewIdx(int userOrderIdx) {
+        String Query1 = "SELECT EXISTS(SELECT reviewIdx FROM Review WHERE userOrderIdx=? AND status='Y');";
+
+        String Query2 = "SELECT reviewIdx FROM Review WHERE userOrderIdx=? AND status='Y';";
+
+        if (this.jdbcTemplate.queryForObject(Query1, int.class, userOrderIdx)==0){
+            return 0;
+        }
+        return this.jdbcTemplate.queryForObject(Query2, int.class, userOrderIdx);
     }
 }

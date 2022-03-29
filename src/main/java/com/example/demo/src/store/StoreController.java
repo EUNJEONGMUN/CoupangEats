@@ -4,8 +4,7 @@ import com.example.demo.config.BaseException;
 import com.example.demo.config.BaseResponse;
 import com.example.demo.src.S3Image.S3Uploader;
 import com.example.demo.src.orders.OrderProvider;
-import com.example.demo.src.orders.OrderService;
-import com.example.demo.src.store.model.Req.PatchReviewReq;
+import com.example.demo.src.store.model.Req.PutReviewReq;
 import com.example.demo.src.store.model.Req.PostReviewReq;
 import com.example.demo.src.store.model.Res.*;
 import com.example.demo.src.user.UserProvider;
@@ -270,38 +269,53 @@ public class StoreController {
 
     }
 
-//    /**
-//     * 리뷰 수정 API
-//     * [PATCH] /stores/review?reviewIdx=
-//     * @return BaseResponse<String>
-//     */
-//    @ResponseBody
-//    @PatchMapping("/review")
-//    public BaseResponse<String> modifyReview(PatchReviewReq patchReviewReq,
-//                                             @RequestParam(value = "image", required = false) List<MultipartFile> multipartFile) throws BaseException {
-//        int userIdx= jwtService.getUserIdx();
-//
-//        // 사용자 존재 여부 확인
-//        if (userProvider.checkUser(userIdx)==0){
-//            return new BaseResponse<>(USER_NOT_EXISTS);
-//        }
-//
-//        // 리뷰 작성자 확인
-//        if (storeProvider.checkReviewOwner(userIdx, patchReviewReq.getReviewIdx())==0){
-//            return new BaseResponse<>(INCONSISTENCY_REVIEW_USER);
-//        }
-//
-//        // 리뷰 수정 가능 기간 확인
-//        if (!storeProvider.checkReviewUploadTime(patchReviewReq.getReviewIdx())){
-//            return new BaseResponse<>(EXPIRATION_OF_REVIEW_EDIT);
-//        }
-//
-//        storeService.modifyReview(userIdx,patchReviewReq);
-//        String result = "";
-//        return new BaseResponse<>(result);
-//
-//
-//    }
+    /**
+     * 리뷰 수정 API
+     * [PUT] /stores/review
+     * @return BaseResponse<String>
+     */
+    @ResponseBody
+    @PutMapping("/review")
+    public BaseResponse<String> modifyReview(PutReviewReq putReviewReq,
+                                             @RequestParam(value = "image", required = false) List<MultipartFile> multipartFile) throws BaseException, IOException {
+        int userIdx= jwtService.getUserIdx();
+
+        // 사용자 존재 여부 확인
+        if (userProvider.checkUser(userIdx)==0){
+            return new BaseResponse<>(USER_NOT_EXISTS);
+        }
+        // 리뷰 아이디 찾기
+        int reviewIdx = storeProvider.findReviewIdx(putReviewReq.getUserOrderIdx());
+        if (reviewIdx==0){
+            return new BaseResponse<>(REVIEW_NOT_EXISTS);
+        }
+
+        // 리뷰 작성자 확인
+        if (storeProvider.checkReviewOwner(userIdx, reviewIdx)==0){
+            return new BaseResponse<>(INCONSISTENCY_REVIEW_USER);
+        }
+
+        // 리뷰 수정 가능 기간 확인
+        if (!storeProvider.checkReviewUploadTime(reviewIdx)){
+            return new BaseResponse<>(EXPIRATION_OF_REVIEW_EDIT);
+        }
+
+
+
+        List<String> imageList = new ArrayList<>();
+        if (multipartFile!=null && multipartFile.size()!=0){
+            for (MultipartFile file:multipartFile){
+                String imageUrl = s3Uploader.upload(file, "static");
+                imageList.add(imageUrl);
+            }
+        }
+
+        storeService.modifyReview(userIdx, reviewIdx, putReviewReq, imageList);
+        String result = "";
+        return new BaseResponse<>(result);
+
+
+    }
 
 
 
