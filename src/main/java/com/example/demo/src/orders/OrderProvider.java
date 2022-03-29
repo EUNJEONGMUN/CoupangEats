@@ -91,4 +91,44 @@ public class OrderProvider {
             throw new BaseException(DATABASE_ERROR);
         }
     }
+
+    // 주문 존재 여부 확인
+    public int checkOrder(int userOrderIdx) throws BaseException {
+        try {
+            return orderDao.checkOrder(userOrderIdx);
+        }catch (Exception exception) {
+            System.out.println("checkOrder"+exception);
+            throw new BaseException(DATABASE_ERROR);
+        }
+    }
+
+    // 주문 소유자 확인
+    public int checkOrderOwner(int userIdx, int userOrderIdx) throws BaseException {
+        try {
+            return orderDao.checkOrderOwner(userIdx, userOrderIdx);
+        }catch (Exception exception) {
+            System.out.println("checkOrderOwner"+exception);
+            throw new BaseException(DATABASE_ERROR);
+        }
+    }
+
+    // 주문 상태 확인
+    public boolean checkUserOrderStatus(int userOrderIdx) throws BaseException {
+        try {
+            return orderDao.checkUserOrderStatus(userOrderIdx);
+        } catch (Exception exception) {
+            System.out.println("checkUserOrderStatus"+exception);
+            throw new BaseException(DATABASE_ERROR);
+        }
+    }
+
+    // storeIdx 가져오기
+    public int findStoreIdx(int userOrderIdx) throws BaseException {
+        try {
+            return orderDao.findStoreIdx(userOrderIdx);
+        } catch (Exception exception) {
+            System.out.println("findStoreIdx"+exception);
+            throw new BaseException(DATABASE_ERROR);
+        }
+    }
 }

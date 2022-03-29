@@ -151,24 +151,49 @@ public class OrderService {
             }
     }
 
-    // 주문 존재 여부 확인
-    public int checkOrder(int userOrderIdx) throws BaseException {
+
+    /**
+     * 재주문 하기 API
+     * [POST] /orders/delivery/reorder?userOrderIdx=
+     * /new?userOrderIdx=
+     * @return BaseResponse<String>
+     */
+    public void reCreateOrderDefault(int userOrderIdx) throws BaseException {
         try {
-            return orderDao.checkOrder(userOrderIdx);
-        }catch (Exception exception) {
-            System.out.println("checkOrder"+exception);
+            int result = orderDao.reCreateOrder(userOrderIdx);
+            if (result == FAIL){
+                throw new BaseException(FAIL_CREATE_REORDER);
+            }
+        } catch (Exception exception) {
+            System.out.println("reCreateOrderDefault"+exception);
             throw new BaseException(DATABASE_ERROR);
         }
     }
 
-    // 주문 소유자 확인
-    public int checkOrderOwner(int userIdx, int userOrderIdx) throws BaseException {
+
+
+    /**
+     * 재주문 새로 카드 담기 API
+     * [POST] /orders/delivery/reorder/new?userOrderIdx=
+     * /new?userOrderIdx=
+     * @return BaseResponse<String>
+     */
+    public void reCreateOrder(int userIdx, int userOrderIdx, int cartStoreIdx) throws BaseException {
         try {
-            return orderDao.checkOrderOwner(userIdx, userOrderIdx);
-        }catch (Exception exception) {
-            System.out.println("checkOrderOwner"+exception);
+            int deleteCart = orderDao.deleteCartStore(userIdx, cartStoreIdx);
+            if (deleteCart == FAIL){
+                throw new BaseException(FAIL_DELETE_CART_STORE);
+            }
+            int result = orderDao.reCreateOrder(userOrderIdx);
+            if (result == FAIL){
+                throw new BaseException(FAIL_CREATE_REORDER);
+            }
+        } catch (Exception exception) {
+            System.out.println("reCreateOrderNew"+exception);
             throw new BaseException(DATABASE_ERROR);
         }
+
     }
+
 
 }

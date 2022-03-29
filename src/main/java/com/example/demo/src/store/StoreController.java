@@ -3,6 +3,7 @@ package com.example.demo.src.store;
 import com.example.demo.config.BaseException;
 import com.example.demo.config.BaseResponse;
 import com.example.demo.src.S3Image.S3Uploader;
+import com.example.demo.src.orders.OrderProvider;
 import com.example.demo.src.orders.OrderService;
 import com.example.demo.src.store.model.Req.PatchReviewReq;
 import com.example.demo.src.store.model.Req.PostReviewReq;
@@ -37,17 +38,17 @@ public class StoreController {
     @Autowired
     private final UserProvider userProvider;
     @Autowired
-    private final OrderService orderService;
+    private final OrderProvider orderProvider;
     @Autowired
     private final S3Uploader s3Uploader;
 
 
-    public StoreController(StoreProvider storeProvider, StoreService storeService, JwtService jwtService,UserProvider userProvider, OrderService orderService, S3Uploader s3Uploader){
+    public StoreController(StoreProvider storeProvider, StoreService storeService, JwtService jwtService,UserProvider userProvider, OrderProvider orderProvider, S3Uploader s3Uploader){
         this.storeProvider = storeProvider;
         this.storeService = storeService;
         this.jwtService = jwtService;
         this.userProvider = userProvider;
-        this.orderService = orderService;
+        this.orderProvider = orderProvider;
         this.s3Uploader = s3Uploader;
     }
 
@@ -199,7 +200,7 @@ public class StoreController {
             return new BaseResponse<>(EMPTY_USER_ORDER_IDX_PARAM);
         }
         // userOrderIdx가 사용자의 idx인지 확인
-        if (orderService.checkOrderOwner(userIdx, userOrderIdx) == 0){
+        if (orderProvider.checkOrderOwner(userIdx, userOrderIdx) == 0){
             return new BaseResponse<>(USER_ORDER_NOT_EXISTS);
         }
         if (storeProvider.checkUserReview(userIdx, userOrderIdx) == 0){
@@ -233,12 +234,12 @@ public class StoreController {
             return new BaseResponse<>(EMPTY_USER_ORDER_IDX_PARAM);
         }
         // 주문 존재 여부 확인
-        if (orderService.checkOrder(postReviewReq.getUserOrderIdx())==0){
+        if (orderProvider.checkOrder(postReviewReq.getUserOrderIdx())==0){
             return new BaseResponse<>(USER_ORDER_NOT_EXISTS);
         }
 
         // 주문 소유자 확인
-        if (orderService.checkOrderOwner(userIdx, postReviewReq.getUserOrderIdx())==0){
+        if (orderProvider.checkOrderOwner(userIdx, postReviewReq.getUserOrderIdx())==0){
             return new BaseResponse<>(INCONSISTENCY_ORDER_USER);
         }
 

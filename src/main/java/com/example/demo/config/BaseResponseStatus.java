@@ -86,11 +86,14 @@ public enum BaseResponseStatus {
     INCONSISTENCY_REVIEW_USER(false, 3203,"해당 사용자의 리뷰가 아닙니다."),
     EXPIRATION_OF_REVIEW_EDIT(false, 3204, "리뷰 수정 기간이 지났습니다."),
     EXPIRATION_OR_REVIEW(false,3205,"리뷰 작성 가능 기간이 지났습니다."),
+    ALREADY_CART_STORE(false, 3206, "카트에 담긴 가게가 있습니다."),
 
     USER_ORDER_NOT_EXISTS(false, 3300, "주문 내역이 존재하지 않습니다."),
     INCONSISTENCY_ORDER_USER(false, 3301, "해당 사용자의 주문 내역이 아닙니다."),
     REVIEW_NOT_EXISTS(false, 3302, "리뷰가 존재하지 않습니다."),
     REVIEW_ALREADY_EXISTS(false, 3303, "리뷰가 이미 존재하거나 삭제한 리뷰입니다."),
+
+    INCONSISTENCY_STORE_STATE(false, 3400, "배달 완료 된 주문만 재주문 할 수 있습니다."),
 
 
 
@@ -119,6 +122,7 @@ public enum BaseResponseStatus {
     FAIL_MODIFY_CART(false, 4405, "카드 수정에 실패했습니다."),
     FAIL_CREATE_ORDER(false, 4406, "주문하기에 실패했습니다."),
     FAIL_DELETE_ORDER(false, 4407, "주문 취소에 실패했습니다."),
+    FAIL_CREATE_REORDER(false, 4408, "재주문 하기에 실패했습니다."),
 
     FAIL_POST_FAVORITE_STORE(false, 4500, "즐겨찾기 설정에 실패했습니다."),
     FAIL_PUT_FAVORITE_STORE(false, 4501, "즐거찾기 해제에 실패했습니다."),

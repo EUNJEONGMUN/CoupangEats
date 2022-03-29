@@ -8,7 +8,6 @@ import com.example.demo.src.store.StoreProvider;
 import com.example.demo.src.user.UserProvider;
 import com.example.demo.src.user.model.UserLocation;
 import com.example.demo.utils.JwtService;
-import com.fasterxml.jackson.databind.ser.Serializers;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -265,12 +264,12 @@ public class OrderController {
         }
 
         // 주문 존재 여부 확인
-        if (orderService.checkOrder(userOrderIdx)==0){
+        if (orderProvider.checkOrder(userOrderIdx)==0){
             return new BaseResponse<>(USER_ORDER_NOT_EXISTS);
         }
 
         // 주문 소유자 확인
-        if (orderService.checkOrderOwner(userIdx, userOrderIdx)==0){
+        if (orderProvider.checkOrderOwner(userIdx, userOrderIdx)==0){
             return new BaseResponse<>(INCONSISTENCY_ORDER_USER);
         }
 
@@ -303,16 +302,92 @@ public class OrderController {
     }
 
 
-//    /**
-//     * 재주문하기 API
-//     * [POST] /orders/delivery/reorder?userOrderIdx=
-//     * /reorder?userOrderIdx=
-//     * @return BaseResponse<String>
-//     */
-//    @ResponseBody
-//    @PostMapping("/delivery/reorder")
-//    public BaseResponse<String> reCreateOrder(@RequestParam(required = false, defaultValue = "0") int userOrderIdx) {
-//
-//    }
+    /**
+     * 재주문 하기 API
+     * [POST] /orders/delivery/reorder?userOrderIdx=
+     * /new?userOrderIdx=
+     * @return BaseResponse<String>
+     */
+    @ResponseBody
+    @PostMapping("/delivery/reorder")
+    public BaseResponse<String> reCreateOrderDefault(@RequestParam(required = false, defaultValue = "0") int userOrderIdx) throws BaseException {
+
+        int userIdx= jwtService.getUserIdx();
+
+        // 사용자 존재 여부 확인
+        if (userProvider.checkUser(userIdx)==0){
+            return new BaseResponse<>(USER_NOT_EXISTS);
+        }
+
+        if (userOrderIdx==0){
+            return new BaseResponse<>(EMPTY_USER_ORDER_IDX_PARAM);
+        }
+
+        // 주문 소유자 확인
+        if (orderProvider.checkOrderOwner(userIdx, userOrderIdx)==0){
+            return new BaseResponse<>(INCONSISTENCY_ORDER_USER);
+        }
+
+        // 주문 상태 확인
+        if (!orderProvider.checkUserOrderStatus(userOrderIdx)){
+            return new BaseResponse<>(INCONSISTENCY_STORE_STATE);
+        }
+
+        int cartStoreIdx = orderProvider.checkCartStore(userIdx);
+        // 카트에 메뉴가 있는지 확인
+        if (cartStoreIdx!=0){
+            return new BaseResponse<>(ALREADY_CART_STORE);
+        }
+
+
+        orderService.reCreateOrderDefault(userOrderIdx);
+        String result = "";
+        return new BaseResponse<>(result);
+
+    }
+
+
+    /**
+     * 재주문 하기 API
+     * [POST] /orders/delivery/reorder/new?userOrderIdx=
+     * /new?userOrderIdx=
+     * @return BaseResponse<String>
+     */
+    @ResponseBody
+    @PostMapping("/delivery/reorder/new")
+    public BaseResponse<String> reCreateOrder(@RequestParam(required = false, defaultValue = "0") int userOrderIdx) throws BaseException {
+
+        int userIdx= jwtService.getUserIdx();
+
+        // 사용자 존재 여부 확인
+        if (userProvider.checkUser(userIdx)==0){
+            return new BaseResponse<>(USER_NOT_EXISTS);
+        }
+
+        if (userOrderIdx==0){
+            return new BaseResponse<>(EMPTY_USER_ORDER_IDX_PARAM);
+        }
+
+        // 주문 소유자 확인
+        if (orderProvider.checkOrderOwner(userIdx, userOrderIdx)==0){
+            return new BaseResponse<>(INCONSISTENCY_ORDER_USER);
+        }
+
+        // 주문 상태 확인
+        if (!orderProvider.checkUserOrderStatus(userOrderIdx)){
+            return new BaseResponse<>(INCONSISTENCY_STORE_STATE);
+        }
+
+        int cartStoreIdx = orderProvider.checkCartStore(userIdx);
+
+
+        orderService.reCreateOrder(userIdx, userOrderIdx, cartStoreIdx);
+        String result = "";
+        return new BaseResponse<>(result);
+
+
+
+    }
+
 
 }

@@ -13,6 +13,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Repository;
 
+import javax.persistence.criteria.CriteriaBuilder;
 import javax.sql.DataSource;
 import java.sql.Date;
 import java.text.SimpleDateFormat;
@@ -376,6 +377,31 @@ public class OrderDao {
                 ), orderList.getStoreIdx());
 
     }
+
+
+    /**
+     * 재주문하기 API
+     * [POST] /orders/delivery/reorder?userOrderIdx=
+     * /reorder?userOrderIdx=
+     * @return BaseResponse<String>
+     */
+    public int reCreateOrder(int userOrderIdx) {
+        String SelectCartIdxQuery = "SELECT cartIdx\n" +
+                "FROM UserOrder UO JOIN CartToOrder CTO on UO.orderTime = CTO.orderTime\n" +
+                "WHERE UO.userOrderIdx=?;";
+
+        String InsertCart = "INSERT INTO Cart (userIdx, storeIdx, menuIdx, menuOptions, orderCount, orderPrice)\n" +
+                "SELECT userIdx, storeIdx, menuIdx, menuOptions, orderCount, orderPrice FROM Cart WHERE cartIdx = ?;";
+
+        List<Integer> cartIdxList = this.jdbcTemplate.query(SelectCartIdxQuery,
+                (rs, rowNum) -> { return rs.getInt("cartIdx");}, userOrderIdx);
+
+        for (int idx:cartIdxList){
+            this.jdbcTemplate.update(InsertCart, idx);
+        }
+        return 1;
+
+    }
     // 주문 존재 여부 확인
     public int checkOrder(int userOrderIdx) {
         String Query = "SELECT EXISTS(SELECT * FROM UserOrder WHERE userOrderIdx=? AND status!='N');";
@@ -402,5 +428,22 @@ public class OrderDao {
                         rs.getString("orderTime"),
                         rs.getInt("userOrderIdx")
                 ), userIdx);
+    }
+
+    // 주문 상태 확인
+    public boolean checkUserOrderStatus(int userOrderIdx) {
+        String Query = "SELECT status FROM UserOrder WHERE userOrderIdx=?;";
+        String userOrderStatus = this.jdbcTemplate.queryForObject(Query, String.class, userOrderIdx);
+        if (userOrderStatus.equals("E")||userOrderStatus.equals("F")){
+            return false;
+        }
+        return true;
+
+
+    }
+
+    public int findStoreIdx(int userOrderIdx) {
+        String Query = "SELECT storeIdx FROM UserOrder WHERE userOrderIdx=?";
+        return this.jdbcTemplate.queryForObject(Query, int.class, userOrderIdx);
     }
 }
