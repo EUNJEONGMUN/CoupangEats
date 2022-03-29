@@ -106,7 +106,7 @@ public class OrderDao {
 
         String storeInfoQuery = "SELECT S.storeIdx, S.storeImgUrl,S.storeName, S.isCheetah, S.timeDelivery,\n" +
                 "    S.isToGo, S.isCoupon, S.status, S.minimumPrice, S.buildingName, S.storeAddress, S.storeAddressDetail,\n" +
-                "       CASE WHEN S.isToGo='Y' THEN S.timeToGo ELSE 'N' END AS timeToGo,\n" +
+                "       CASE WHEN S.isToGo='Y' THEN S.timeToGo ELSE 'N' END AS timeToGo, S.storeLongitude,S.storeLatitude,\n" +
                 "    ROUND(ST_DISTANCE_SPHERE(POINT(S.storeLongitude,S.storeLatitude), POINT(?,?))*0.001,1) AS distance\n" +
                 "FROM Store S\n" +
                 "WHERE S.status != 'N' AND S.storeIdx=?;";
@@ -159,6 +159,8 @@ public class OrderDao {
                         rs1.getString("storeAddress"),
                         rs1.getString("storeAddressDetail"),
                         rs1.getDouble("distance"),
+                        rs1.getDouble("storeLongitude"),
+                        rs1.getDouble("storeLatitude"),
                         totalPrice,
                         this.jdbcTemplate.query(DeliveryFeeQuery,
                                 (rs2, rowNum2) -> new DeliveryFeeList(

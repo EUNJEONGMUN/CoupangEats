@@ -29,6 +29,8 @@ public class GetCartListRes {
     private String storeAddress;
     private String storeAddressDetail;
     private double distance;
+    private double storeLongitude;
+    private double storeLatitude;
     private int totalPrice;
     private List<DeliveryFeeList> deliveryFeeList;
 //    private CartStoreInfo cartStoreInfo;
