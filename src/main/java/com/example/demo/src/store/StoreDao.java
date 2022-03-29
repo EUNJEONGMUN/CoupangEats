@@ -957,7 +957,15 @@ public class StoreDao {
 
     }
 
-
+    /**
+     * 리뷰 삭제 API
+     * [PATCH] /stores/review
+     * @return BaseResponse<String>
+     */
+    public int deleteReview(int userOrderIdx) {
+        String Query = "UPDATE Review SET status='N' WHERE userOrderIdx=?;";
+        return this.jdbcTemplate.update(Query, userOrderIdx);
+    }
 
 
 
@@ -1123,4 +1131,6 @@ public class StoreDao {
         }
         return this.jdbcTemplate.queryForObject(Query2, int.class, userOrderIdx);
     }
+
+
 }

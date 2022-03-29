@@ -4,6 +4,7 @@ import com.example.demo.config.BaseException;
 import com.example.demo.config.BaseResponse;
 import com.example.demo.src.S3Image.S3Uploader;
 import com.example.demo.src.orders.OrderProvider;
+import com.example.demo.src.store.model.Req.PatchReviewReq;
 import com.example.demo.src.store.model.Req.PutReviewReq;
 import com.example.demo.src.store.model.Req.PostReviewReq;
 import com.example.demo.src.store.model.Res.*;
@@ -13,9 +14,11 @@ import com.example.demo.utils.JwtService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
+import javax.validation.Valid;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
@@ -315,6 +318,36 @@ public class StoreController {
         return new BaseResponse<>(result);
 
 
+    }
+
+    /**
+     * 리뷰 삭제 API
+     * [PATCH] /stores/review
+     * @return BaseResponse<String>
+     */
+    @ResponseBody
+    @PatchMapping("/review/deletion")
+    public BaseResponse<String> deleteReview(@Valid @RequestBody PatchReviewReq patchReviewReq) throws BaseException {
+        int userIdx= jwtService.getUserIdx();
+
+        // 사용자 존재 여부 확인
+        if (userProvider.checkUser(userIdx)==0){
+            return new BaseResponse<>(USER_NOT_EXISTS);
+        }
+        // 리뷰 아이디 찾기
+        int reviewIdx = storeProvider.findReviewIdx(patchReviewReq.getUserOrderIdx());
+        if (reviewIdx==0){
+            return new BaseResponse<>(REVIEW_NOT_EXISTS);
+        }
+
+        // 리뷰 작성자 확인
+        if (storeProvider.checkReviewOwner(userIdx, reviewIdx)==0){
+            return new BaseResponse<>(INCONSISTENCY_REVIEW_USER);
+        }
+
+        storeService.deleteReview(patchReviewReq.getUserOrderIdx());
+        String result = "";
+        return new BaseResponse<>(result);
     }
 
 

@@ -132,7 +132,8 @@ public enum BaseResponseStatus {
     FAIL_PUT_FAVORITE_STORE(false, 4501, "즐거찾기 해제에 실패했습니다."),
     FAIL_CREATE_USER_COUPON(false, 4502, "쿠폰 받기에 실패했습니다."),
     FAIL_POST_REVIEW(false, 4503, "리뷰 작성에 실패했습니다."),
-    FAIL_MODIFY_REVIEW(false, 4504, "리뷰 수정에 실패했습니다.");
+    FAIL_MODIFY_REVIEW(false, 4504, "리뷰 수정에 실패했습니다."),
+    FAIL_DELETE_REVIEW(false, 4505, "리뷰 삭제에 실패했습니다.");
 
     // 5000 : 필요시 만들어서 쓰세요
     // 6000 : 필요시 만들어서 쓰세요

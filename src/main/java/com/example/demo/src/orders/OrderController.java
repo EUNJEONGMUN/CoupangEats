@@ -227,7 +227,7 @@ public class OrderController {
      * @return BaseResponse<String>
      */
     @ResponseBody
-    @PatchMapping("/cart/status")
+    @PatchMapping("/cart/deletion")
     public BaseResponse<String> deleteCart(@RequestBody PatchCartReq patchCartReq) throws BaseException {
         int userIdx= jwtService.getUserIdx();
 

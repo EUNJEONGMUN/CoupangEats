@@ -104,6 +104,22 @@ public class StoreService {
         }
 
     }
+    /**
+     * 리뷰 삭제 API
+     * [PATCH] /stores/review
+     * @return BaseResponse<String>
+     */
+    public void deleteReview(int userOrderIdx) throws BaseException {
+        try {
+            int result = storeDao.deleteReview(userOrderIdx);
+            if (result == FAIL){
+                throw new BaseException(FAIL_DELETE_REVIEW);
+            }
+        } catch (Exception exception) {
+            System.out.println("deleteReview"+exception);
+            throw new BaseException(DATABASE_ERROR);
+        }
+    }
 
 
 
