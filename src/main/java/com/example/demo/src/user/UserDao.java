@@ -323,11 +323,11 @@ public class UserDao {
      */
     public int modifyAddress(int userIdx, int addressIdx, PutAddressReq putAddressReq) {
         String Query = "UPDATE UserAddress \n" +
-                "SET buildingName=?, address=?, addressDetail=?, addressGuide=?, addressTitle=?, addressLongitude=?, addressLatitude=?, addressType=?, status=? \n" +
+                "SET buildingName=?, address=?, addressDetail=?, addressGuide=?, addressTitle=?, addressLongitude=?, addressLatitude=?, addressType=? \n" +
                 "WHERE userIdx=? AND userAddressIdx=?;";
         Object[] Params = new Object[]{putAddressReq.getBuildingName(), putAddressReq.getAddress(), putAddressReq.getAddressDetail(),putAddressReq.getAddressGuide(),
-                putAddressReq.getAddressTitle(), putAddressReq.getAddressLongitude(), putAddressReq.getAddressLatitude(), putAddressReq.getAddressType(), putAddressReq.getStatus(),
-        userIdx, addressIdx};
+                putAddressReq.getAddressTitle(), putAddressReq.getAddressLongitude(), putAddressReq.getAddressLatitude(), putAddressReq.getAddressType(),
+                userIdx, addressIdx};
 
         return this.jdbcTemplate.update(Query, Params);
 

@@ -33,6 +33,4 @@ public class PutAddressReq {
 
     private String addressType;
 
-    private String status;
-
 }

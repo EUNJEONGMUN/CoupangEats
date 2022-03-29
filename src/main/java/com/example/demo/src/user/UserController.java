@@ -203,9 +203,9 @@ public class UserController {
             return new BaseResponse<>(EMPTY_OTHER_ADDRESS_IDX);
         }
 
-        if (putAddressReq.getStatus()==null || putAddressReq.getStatus().equals("")){
-            putAddressReq.setStatus("Y");
-        }
+//        if (putAddressReq.getStatus()==null || putAddressReq.getStatus().equals("")){
+//            putAddressReq.setStatus("Y");
+//        }
 
         if (putAddressReq.getAddressType()==null || putAddressReq.getAddressType().equals("")){
             putAddressReq.setAddressType("O");
@@ -230,6 +230,17 @@ public class UserController {
 
 
     }
+
+//    /**
+//     * 주소지 삭제 API
+//     * [PATCH] /users/address/deletion
+//     * @return BaseResponse<String>
+//     */
+//    @ResponseBody
+//    @PatchMapping("/address/deletion")
+//    public BaseResponse<String> deleteAddress(@Valid @RequestBody)
+
+
 
     /**
      * 현재 주소지 변경 API
