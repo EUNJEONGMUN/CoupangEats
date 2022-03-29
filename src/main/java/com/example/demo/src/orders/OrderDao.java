@@ -111,7 +111,7 @@ public class OrderDao {
                 "FROM Store S\n" +
                 "WHERE S.status != 'N' AND S.storeIdx=?;";
 
-        String menuInfoQuery = "SELECT M.menuName, C.menuOptions, C.orderPrice, C.orderCount, C.orderPrice*C.orderCount AS mulPrice\n" +
+        String menuInfoQuery = "SELECT C.cartIdx, M.menuName, C.menuOptions, C.orderPrice, C.orderCount, C.orderPrice*C.orderCount AS mulPrice\n" +
                 "FROM Cart C JOIN Menu M on C.menuIdx = M.menuIdx\n" +
                 "WHERE C.userIdx=? AND C.status='Y';";
 
@@ -167,6 +167,7 @@ public class OrderDao {
                                 ), storeIdx),
                         this.jdbcTemplate.query(menuInfoQuery,
                                 (rs3, rowNum3) -> new CartMenu(
+                                        rs3.getInt("cartIdx"),
                                         rs3.getString("menuName"),
                                         rs3.getString("menuOptions"),
                                         rs3.getInt("mulPrice"),
@@ -210,17 +211,26 @@ public class OrderDao {
     }
 
     /**
-     * 배달 카트 수정 삭제 API
+     * 배달 카트 수정 API
      * [PUT] /orders/cart/status
      * /status?storeIdx=&cardIdx=
      * @return BaseResponse<String>
      */
     public int modifyCart(int storeIdx, int cartIdx, PutModifyCartReq putModifyCartReq) {
-        String Query = "UPDATE Cart SET orderCount=?, status=? WHERE cartIdx=? AND storeIdx=?;";
-        Object[] Params = new Object[]{putModifyCartReq.getChangeCount(), putModifyCartReq.getStatus(), cartIdx, storeIdx};
+        String Query = "UPDATE Cart SET orderCount=? WHERE cartIdx=? AND storeIdx=?;";
+        Object[] Params = new Object[]{putModifyCartReq.getChangeCount(), cartIdx, storeIdx};
         return this.jdbcTemplate.update(Query, Params);
     }
 
+    /**
+     * 배달 카트 삭제 API
+     * [PATCH] /orders/cart/deletion
+     * @return BaseResponse<String>
+     */
+    public int deleteCart(int userIdx, int cartIdx) {
+        String Query = "UPDATE Cart SET status='N' WHERE cartIdx=? AND userIdx=?;";
+        return this.jdbcTemplate.update(Query, cartIdx, userIdx);
+    }
 
     /**
      * 주문하기 API
@@ -446,4 +456,11 @@ public class OrderDao {
         String Query = "SELECT storeIdx FROM UserOrder WHERE userOrderIdx=?";
         return this.jdbcTemplate.queryForObject(Query, int.class, userOrderIdx);
     }
+
+    // 카트의 사용자 확인
+    public int checkCartUser(int userIdx, int cartIdx) {
+        String Query = "SELECT EXISTS(SELECT * FROM Cart WHERE cartIdx=? AND userIdx=? AND status='Y');";
+        return this.jdbcTemplate.queryForObject(Query, int.class, cartIdx, userIdx);
+    }
+
 }

@@ -188,13 +188,13 @@ public class OrderController {
     }
 
     /**
-     * 배달 카트 수정 삭제 API
-     * [PUT] /orders/cart/status
-     * /status?storeIdx=&cardIdx=
+     * 배달 카트 수정 API
+     * [PUT] /orders/cart
+     * /cart?storeIdx=&cardIdx=
      * @return BaseResponse<String>
      */
     @ResponseBody
-    @PutMapping("/cart/status")
+    @PutMapping("/cart")
     public BaseResponse<String> modifyCart(@RequestParam(required = false, defaultValue = "0") int storeIdx,
                                            @RequestParam(required = false, defaultValue = "0") int cartIdx,
                                            @Valid @RequestBody PutModifyCartReq putModifyCartReq) throws BaseException {
@@ -210,9 +210,9 @@ public class OrderController {
             return new BaseResponse<>(PUT_CART_PARAM_EMPTY);
         }
 
-        if (putModifyCartReq.getStatus()==null){
-            putModifyCartReq.setStatus("Y");
-        }
+//        if (putModifyCartReq.getStatus()==null){
+//            putModifyCartReq.setStatus("Y");
+//        }
 
         String result = "";
         orderService.modifyCart(storeIdx, cartIdx, putModifyCartReq);
@@ -220,6 +220,34 @@ public class OrderController {
 
 
     }
+
+    /**
+     * 배달 카트 삭제 API
+     * [PATCH] /orders/cart/deletion
+     * @return BaseResponse<String>
+     */
+    @ResponseBody
+    @PatchMapping("/cart/status")
+    public BaseResponse<String> deleteCart(@RequestBody PatchCartReq patchCartReq) throws BaseException {
+        int userIdx= jwtService.getUserIdx();
+
+        // 사용자 존재 여부 확인
+        if (userProvider.checkUser(userIdx)==0){
+            return new BaseResponse<>(USER_NOT_EXISTS);
+        }
+
+        // 카트 사용자 확인
+        if(orderProvider.checkCartUser(userIdx, patchCartReq.getCartIdx())==0){
+            return new BaseResponse<>(INCONSISTENCY_CART_USER);
+        }
+
+        String result = "";
+        orderService.deleteCart(userIdx, patchCartReq.getCartIdx());
+        return new BaseResponse<>(result);
+
+    }
+
+
 
     /**
      * 주문하기 API

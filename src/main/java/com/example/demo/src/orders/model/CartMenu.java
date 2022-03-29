@@ -12,6 +12,7 @@ import javax.validation.constraints.NotNull;
 @AllArgsConstructor
 @NoArgsConstructor
 public class CartMenu {
+    private int cartIdx;
     private String menuName;
     private String menuOptions;
     private int mulPrice;

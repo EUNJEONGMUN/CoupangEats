@@ -5,14 +5,13 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
-import javax.validation.constraints.NotBlank;
-import javax.validation.constraints.NotNull;
+import javax.validation.constraints.NotEmpty;
 
 @Getter
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
-public class PutModifyCartReq {
-    @NotNull(message="수량을 입력해주세요.")
-    private int changeCount;
+public class PatchCartReq {
+    @NotEmpty(message = "카트 idx를 입력하지 않았습니다.")
+    private int cartIdx;
 }

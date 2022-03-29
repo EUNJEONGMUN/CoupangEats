@@ -195,5 +195,21 @@ public class OrderService {
 
     }
 
+    /**
+     * 배달 카트 삭제 API
+     * [PATCH] /orders/cart/deletion
+     * @return BaseResponse<String>
+     */
+    public void deleteCart(int userIdx, int cartIdx) throws BaseException {
+        try {
+            int result = orderDao.deleteCart(userIdx, cartIdx);
+            if (result == FAIL){
+                throw new BaseException(FAIL_DELETE_CART);
+            }
+        } catch (Exception exception) {
+            System.out.println("deleteCart"+exception);
+            throw new BaseException(DATABASE_ERROR);
+        }
 
+    }
 }

@@ -131,4 +131,14 @@ public class OrderProvider {
             throw new BaseException(DATABASE_ERROR);
         }
     }
+
+    // 카트의 사용자 확인
+    public int checkCartUser(int userIdx, int cartIdx) throws BaseException {
+        try {
+            return orderDao.checkCartUser(userIdx, cartIdx);
+        } catch (Exception exception) {
+            System.out.println("checkCartUser"+exception);
+            throw new BaseException(DATABASE_ERROR);
+        }
+    }
 }

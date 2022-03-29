@@ -57,6 +57,7 @@ public enum BaseResponseStatus {
     EMPTY_OTHER_ADDRESS_IDX(false, 2202, "addressIdx를 입력하지 않았습니다."),
     EMPTY_POSITION_PARAM(false, 2203, "위도, 혹은 경도를 입력하지 않았습니다."),
     EMPTY_USER_ORDER_IDX_PARAM(false, 2204, "userOrderIdx를 입력하지 않았습니다."),
+    PATCH_CART_PARAM_EMPTY(false, 2205, "카트 idx를 입력하지 않았습니다."),
     /**
      * 3000 : Response 오류
      */
@@ -87,6 +88,8 @@ public enum BaseResponseStatus {
     EXPIRATION_OF_REVIEW_EDIT(false, 3204, "리뷰 수정 기간이 지났습니다."),
     EXPIRATION_OR_REVIEW(false,3205,"리뷰 작성 가능 기간이 지났습니다."),
     ALREADY_CART_STORE(false, 3206, "카트에 담긴 가게가 있습니다."),
+    INCONSISTENCY_CART_USER(false, 3207, "해당 사용자의 카트가 아닙니다."),
+
 
     USER_ORDER_NOT_EXISTS(false, 3300, "주문 내역이 존재하지 않습니다."),
     INCONSISTENCY_ORDER_USER(false, 3301, "해당 사용자의 주문 내역이 아닙니다."),
@@ -123,6 +126,7 @@ public enum BaseResponseStatus {
     FAIL_CREATE_ORDER(false, 4406, "주문하기에 실패했습니다."),
     FAIL_DELETE_ORDER(false, 4407, "주문 취소에 실패했습니다."),
     FAIL_CREATE_REORDER(false, 4408, "재주문 하기에 실패했습니다."),
+    FAIL_DELETE_CART(false, 4409, "카트 삭제에 실패했습니다."),
 
     FAIL_POST_FAVORITE_STORE(false, 4500, "즐겨찾기 설정에 실패했습니다."),
     FAIL_PUT_FAVORITE_STORE(false, 4501, "즐거찾기 해제에 실패했습니다."),
