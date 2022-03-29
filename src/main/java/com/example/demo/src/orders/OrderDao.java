@@ -131,8 +131,8 @@ public class OrderDao {
         String DeliveryFeeQuery = "SELECT storeIdx, minPrice, maxPrice, deliveryFee FROM DeliveryFee WHERE storeIdx=?;";
 
         // 사용자의 현재 위치 정보
-        AddressInfo  nowAddress = this.jdbcTemplate.queryForObject(nowQuery,
-                    (rs, rowNum) -> new AddressInfo(
+        CartAddressInfo  nowAddress = this.jdbcTemplate.queryForObject(nowQuery,
+                    (rs, rowNum) -> new CartAddressInfo(
                             rs.getInt("userAddressIdx"),
                             rs.getString("buildingName"),
                             rs.getString("address"),

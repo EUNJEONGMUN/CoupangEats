@@ -1,5 +1,6 @@
 package com.example.demo.src.orders.model.Res;
 
+import com.example.demo.src.orders.model.CartAddressInfo;
 import com.example.demo.src.orders.model.CartMenu;
 import com.example.demo.src.orders.model.DeliveryFeeList;
 import com.example.demo.src.store.model.DeliveryFeeInfo;
@@ -16,7 +17,7 @@ import java.util.List;
 @AllArgsConstructor
 @NoArgsConstructor
 public class GetCartListRes {
-    private AddressInfo nowAddress;
+    private CartAddressInfo nowAddress;
     private int storeIdx;
     private String storeName;
     private String isCheetah;
