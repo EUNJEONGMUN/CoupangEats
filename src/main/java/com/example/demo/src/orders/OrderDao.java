@@ -140,7 +140,8 @@ public class OrderDao {
                             rs.getString("addressGuide"),
                             rs.getDouble("addressLongitude"),
                             rs.getDouble("addressLatitude"),
-                            rs.getString("addressTitle")
+                            rs.getString("addressTitle"),
+                            rs.getString("addressType")
                     ), userIdx);
 
 
