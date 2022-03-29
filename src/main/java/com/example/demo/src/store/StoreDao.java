@@ -281,7 +281,10 @@ public class StoreDao {
                                         String menuName = rs4.getString("menuName");
                                         int menuPrice = rs4.getInt("menuPrice");
                                         String menuDetail = rs4.getString("menuDetail");
-                                        String menuImgUrl = null;
+                                        if (menuDetail==null){
+                                            menuDetail="";
+                                        }
+                                        String menuImgUrl = "";
                                         if (this.jdbcTemplate.queryForObject("SELECT EXISTS(SELECT * FROM MenuImage WHERE menuIdx=?);", int.class,rs4.getInt("menuIdx"))!=0){
                                             menuImgUrl = this.jdbcTemplate.queryForObject(MenuImageQuery, String.class, menuIdx);
                                         }
