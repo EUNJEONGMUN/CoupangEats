@@ -158,6 +158,9 @@ public class UserDao {
         String Query = "SELECT EXISTS(SELECT * FROM User WHERE User.email=? AND User.password=? AND User.status='Y');";
         Object[] Params = new Object[]{email, encryptPwd};
 
+        System.out.println(this.jdbcTemplate.queryForObject(Query,
+                int.class,
+                Params));
         return this.jdbcTemplate.queryForObject(Query,
                 int.class,
                 Params);

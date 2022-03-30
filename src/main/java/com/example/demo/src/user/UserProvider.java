@@ -124,7 +124,7 @@ public class UserProvider {
         }
     }
 
-    // 가입된 회원 획인 - 휴대폰 번호
+    // 가입된 회원 확인 - 휴대폰 번호
     public int checkUserByPhone(String phoneNumber) throws BaseException {
         try {
             return userDao.checkUserByPhone(phoneNumber);

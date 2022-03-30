@@ -149,7 +149,29 @@ public class UserController {
     }
 
 
+    /**
+     * 회원 정보 확인 API
+     * [POST] /users/check-information
+     * @return BaseResponse<String>
+     */
+    @ResponseBody
+    @PostMapping("/check-information")
+    public BaseResponse<PostUserCheckRes> checkUser(@Valid @RequestBody PostUserCheckReq postUserCheckReq)throws BaseException {
+        int userIdx= jwtService.getUserIdx();
 
+        if (userProvider.checkUser(userIdx) == 0) {
+            return new BaseResponse<>(USER_NOT_EXISTS);
+        }
+
+        PostUserCheckRes postUserCheckRes = new PostUserCheckRes();
+        if (userService.checkPassword(postUserCheckReq.getEmail(), postUserCheckReq.getPassword())==0){
+            postUserCheckRes.setCorrect(false);
+        } else {
+            postUserCheckRes.setCorrect(true);
+        }
+
+        return new BaseResponse<>(postUserCheckRes);
+    }
 
 
 

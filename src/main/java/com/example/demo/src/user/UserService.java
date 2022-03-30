@@ -11,6 +11,7 @@ import com.example.demo.utils.JwtService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.parameters.P;
 import org.springframework.stereotype.Service;
 import com.example.demo.utils.SHA256;
 import static com.example.demo.config.BaseResponseStatus.*;
@@ -137,7 +138,23 @@ public class UserService {
     }
 
 
+    /**
+     * 회원 정보 확인 API
+     * [POST] /users/check-information
+     * @return BaseResponse<String>
+     */
+    public int checkPassword(String email, String password) throws BaseException  {
+        String encryptPwd;
+        try {
+            // 사용자에게 바디값으로 받은 비밀번호 암호화
+            encryptPwd = new SHA256().encrypt(password);
+        } catch (Exception ignored) {
+            throw new BaseException(PASSWORD_DECRYPTION_ERROR);
+        }
 
+        return userProvider.checkPassword(email, encryptPwd);
+
+    }
 
 
     /**
