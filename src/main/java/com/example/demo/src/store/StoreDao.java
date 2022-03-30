@@ -573,7 +573,7 @@ public class StoreDao {
 
         String HelpedCountQuery = "SELECT COUNT(*) AS helpedCount\n" +
                 "FROM ReviewLiked\n" +
-                "WHERE reviewIdx=? AND isHelped='Y' AND status='Y';";
+                "WHERE reviewIdx=? AND isHelped='G' AND status='Y';";
 
         String BossReviewQuery = "SELECT reviewIdx, content,\n" +
                 "       CASE\n" +
@@ -600,9 +600,9 @@ public class StoreDao {
                 "    ORDER BY UO.orderTime DESC) OrderMenu ON OrderMenu.cartIdx = C.cartIdx\n" +
                 "JOIN Menu M on C.menuIdx = M.menuIdx;";
 
-        String MyLikedQuery = "SELECT status\n" +
+        String MyLikedQuery = "SELECT isHelped\n" +
                 "FROM ReviewLiked\n" +
-                "WHERE userIdx=? AND reviewIdx=?;";
+                "WHERE userIdx=? AND reviewIdx=? AND status='Y';";
 
         String MenuImgQuery = "SELECT reviewImgUrl\n" +
                 "FROM ReviewImg\n" +
@@ -628,9 +628,7 @@ public class StoreDao {
         System.out.println("helpedCount");
         // 로그인 했을 경우 좋아요 여부 확인
         String myHelped = "N";
-        System.out.println("userIdx"+userIdx+"idx.getReviewIdx"+idx.getReviewIdx());
         if (userIdx!=0){
-            System.out.println("userIdx"+userIdx+"idx.getReviewIdx"+idx.getReviewIdx());
             if (this.jdbcTemplate.queryForObject("SELECT EXISTS(SELECT status FROM ReviewLiked WHERE userIdx=? AND reviewIdx=?);", int.class, userIdx, idx.getReviewIdx()) != 0){
                 myHelped = this.jdbcTemplate.queryForObject(MyLikedQuery,
                         String.class, userIdx, idx.getReviewIdx());
@@ -708,7 +706,7 @@ public class StoreDao {
 
         String HelpedCountQuery = "SELECT COUNT(*) AS helpedCount\n" +
                 "FROM ReviewLiked\n" +
-                "WHERE reviewIdx=? AND isHelped='Y' AND status='Y';";
+                "WHERE reviewIdx=? AND isHelped='G' AND status='Y';";
 
         String BossReviewQuery = "SELECT reviewIdx, content,\n" +
                 "       CASE\n" +
