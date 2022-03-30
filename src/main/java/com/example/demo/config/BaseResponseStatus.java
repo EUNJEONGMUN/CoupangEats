@@ -58,6 +58,7 @@ public enum BaseResponseStatus {
     EMPTY_POSITION_PARAM(false, 2203, "위도, 혹은 경도를 입력하지 않았습니다."),
     EMPTY_USER_ORDER_IDX_PARAM(false, 2204, "userOrderIdx를 입력하지 않았습니다."),
     PATCH_CART_PARAM_EMPTY(false, 2205, "카트 idx를 입력하지 않았습니다."),
+    EMPTY_REVIEWIDX_PARAM(false, 2206, "리뷰 idx를 입력하지 않았습니다."),
     /**
      * 3000 : Response 오류
      */
@@ -89,7 +90,9 @@ public enum BaseResponseStatus {
     EXPIRATION_OR_REVIEW(false,3205,"리뷰 작성 가능 기간이 지났습니다."),
     ALREADY_CART_STORE(false, 3206, "카트에 담긴 가게가 있습니다."),
     INCONSISTENCY_CART_USER(false, 3207, "해당 사용자의 카트가 아닙니다."),
-
+    LIKED_REVIEW_ALREADY(false, 3208, "이미 도움돼요 혹은 도움되지 않아요 한 리뷰입니다."),
+    EMPTY_REVIEWIDX(false, 3209, "존재하지 않는 리뷰입니다."),
+    EMPTY_LIKED_REVIEW(false, 3210, "도움 돼요 혹은 도움 되지 않아요 한 기록이 없습니다."),
 
     USER_ORDER_NOT_EXISTS(false, 3300, "주문 내역이 존재하지 않습니다."),
     INCONSISTENCY_ORDER_USER(false, 3301, "해당 사용자의 주문 내역이 아닙니다."),
@@ -134,7 +137,9 @@ public enum BaseResponseStatus {
     FAIL_CREATE_USER_COUPON(false, 4502, "쿠폰 받기에 실패했습니다."),
     FAIL_POST_REVIEW(false, 4503, "리뷰 작성에 실패했습니다."),
     FAIL_MODIFY_REVIEW(false, 4504, "리뷰 수정에 실패했습니다."),
-    FAIL_DELETE_REVIEW(false, 4505, "리뷰 삭제에 실패했습니다.");
+    FAIL_DELETE_REVIEW(false, 4505, "리뷰 삭제에 실패했습니다."),
+    FAIL_LIKED_REVIEW(false, 4506, "도움돼요 혹은 도움되지 않아요 등록에 실패했습니다."),
+    FAIL_DELETE_EXISTS_LIKED_REVIEW(false, 4507, "기존 리뷰 도움기록 삭제에 실패했습니다.");
 
     // 5000 : 필요시 만들어서 쓰세요
     // 6000 : 필요시 만들어서 쓰세요

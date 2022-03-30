@@ -239,4 +239,22 @@ public class StoreProvider {
             throw new BaseException(DATABASE_ERROR);
         }
     }
+
+    // 이미 리뷰 한 글인지 확인
+    public String checkLikedReview(int userIdx, int reviewIdx) throws BaseException {
+        try {
+            return storeDao.checkLikedReview(userIdx, reviewIdx);
+        } catch (Exception exception) {
+            throw new BaseException(DATABASE_ERROR);
+        }
+    }
+
+
+    public int checkReviewExists(int reviewIdx) throws BaseException  {
+        try {
+            return storeDao.checkReviewExists(reviewIdx);
+        } catch (Exception exception) {
+            throw new BaseException(DATABASE_ERROR);
+        }
+    }
 }

@@ -4,9 +4,7 @@ import com.example.demo.config.BaseException;
 import com.example.demo.config.BaseResponse;
 import com.example.demo.src.S3Image.S3Uploader;
 import com.example.demo.src.orders.OrderProvider;
-import com.example.demo.src.store.model.Req.PatchReviewReq;
-import com.example.demo.src.store.model.Req.PutReviewReq;
-import com.example.demo.src.store.model.Req.PostReviewReq;
+import com.example.demo.src.store.model.Req.*;
 import com.example.demo.src.store.model.Res.*;
 import com.example.demo.src.user.UserProvider;
 import com.example.demo.src.user.model.UserLocation;
@@ -435,6 +433,94 @@ public class StoreController {
         return new BaseResponse<>(getFavoriteListRes);
 
     }
+
+    /**
+     * 리뷰 도움이 돼요 등록 API
+     * [POST] /stores/review/liked
+     * @return BaseResponse<String>
+     */
+    @ResponseBody
+    @PostMapping("/review/liked")
+    public BaseResponse<String> createReviewLiked(@Valid @RequestBody PostLikedReviewReq postLikedReviewReq) throws BaseException {
+
+        int userIdx= jwtService.getUserIdx();
+
+        if (userProvider.checkUser(userIdx)==0){
+            return new BaseResponse<>(USER_NOT_EXISTS);
+        }
+
+
+        // 리뷰가 존재하는지 확인
+        if (storeProvider.checkReviewExists(postLikedReviewReq.getReviewIdx())==0){
+            return new BaseResponse<>(EMPTY_REVIEWIDX);
+        }
+
+        if (!(postLikedReviewReq.getIsHelped().equals("G")||postLikedReviewReq.getIsHelped().equals("B"))){
+            return new BaseResponse<>(INVALID_STATUS);
+        }
+        // 이미 리뷰 한 글인지 확인
+        // 리뷰 한 기록이 없을 경우 "N"
+        // 있을 경우 "G" or "B"
+        String dbIsHelped = storeProvider.checkLikedReview(userIdx, postLikedReviewReq.getReviewIdx());
+        if (dbIsHelped.equals(postLikedReviewReq.getIsHelped())){
+            return new BaseResponse<>(LIKED_REVIEW_ALREADY);
+        }
+
+        if (dbIsHelped.equals("N")){
+            storeService.createReviewLiked(userIdx, postLikedReviewReq.getReviewIdx(), postLikedReviewReq.getIsHelped());
+        }
+
+        storeService.createReviewLikedToggle(userIdx, postLikedReviewReq.getReviewIdx(), postLikedReviewReq.getIsHelped());
+
+        String result = "";
+        return new BaseResponse<>(result);
+
+    }
+
+    /**
+     * 리뷰 도움이 돼요 삭제 API
+     * [PATCH] /stores/review/liked/deletion
+     * @return BaseResponse<String>
+     */
+    @ResponseBody
+    @PatchMapping("/review/liked/deletion")
+    public BaseResponse<String> deleteReviewLiked(@Valid @RequestBody PatchLikedReviewReq patchLikedReviewReq) throws BaseException {
+        int userIdx= jwtService.getUserIdx();
+
+        if (userProvider.checkUser(userIdx)==0){
+            return new BaseResponse<>(USER_NOT_EXISTS);
+        }
+
+        // 리뷰가 존재하는지 확인
+        if (storeProvider.checkReviewExists(patchLikedReviewReq.getReviewIdx())==0){
+            return new BaseResponse<>(EMPTY_REVIEWIDX);
+        }
+        String dbIsHelped = storeProvider.checkLikedReview(userIdx, patchLikedReviewReq.getReviewIdx());
+
+        if (dbIsHelped.equals("N")){
+            return new BaseResponse<>(EMPTY_LIKED_REVIEW);
+        }
+        storeService.deleteReviewLiked(userIdx, patchLikedReviewReq.getReviewIdx());
+        String result = "";
+        return new BaseResponse<>(result);
+    }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
     @PostMapping("/images")
     public String upload(@RequestParam("data") MultipartFile multipartFile) throws IOException {

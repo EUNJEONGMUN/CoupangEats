@@ -264,6 +264,7 @@ public class OrderController {
         if (userProvider.checkUser(userIdx)==0){
             return new BaseResponse<>(USER_NOT_EXISTS);
         }
+        System.out.println(postCreateOrderReq.getCouponIdx());
 
         if (postCreateOrderReq.getIsSpoon()==null){
             postCreateOrderReq.setIsSpoon("N");

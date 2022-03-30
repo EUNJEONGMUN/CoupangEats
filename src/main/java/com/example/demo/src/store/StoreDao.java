@@ -7,10 +7,8 @@ import com.example.demo.src.store.model.Res.*;
 import com.example.demo.src.user.model.UserLocation;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
-import org.springframework.security.core.parameters.P;
 import org.springframework.stereotype.Repository;
 
-import javax.persistence.criteria.CriteriaBuilder;
 import javax.sql.DataSource;
 import java.util.*;
 
@@ -970,6 +968,26 @@ public class StoreDao {
         return this.jdbcTemplate.update(Query, userOrderIdx);
     }
 
+    /**
+     * 리뷰 도움이 돼요 등록 API
+     * [POST] /stores/review/liked?reviewIdx
+     * /liked?reviewIdx
+     * @return BaseResponse<String>
+     */
+    public int createReviewLiked(int userIdx, int reviewIdx, String isHelped) {
+        String Query = "INSERT INTO ReviewLiked (reviewIdx, userIdx, isHelped) VALUES(?,?,?);";
+        return this.jdbcTemplate.update(Query, reviewIdx, userIdx, isHelped);
+    }
+
+
+
+    // 기존 좋아요 삭제
+    public int deleteExistsReviewLiked(int userIdx, int reviewIdx) {
+        String Query = "UPDATE ReviewLiked SET status='N' WHERE reviewIdx=? AND userIdx=? AND status='Y';";
+        return this.jdbcTemplate.update(Query, reviewIdx, userIdx);
+    }
+
+
 
 
     // 가게 존재 여부 확인
@@ -1134,6 +1152,23 @@ public class StoreDao {
         }
         return this.jdbcTemplate.queryForObject(Query2, int.class, userOrderIdx);
     }
+
+
+    // 이미 리뷰한 글인지 확인
+    public String checkLikedReview(int userIdx, int reviewIdx) {
+        String CheckIsExists = "SELECT EXISTS(SELECT isHelped FROM ReviewLiked WHERE reviewIdx=? AND userIdx=? AND status='Y');";
+        if (this.jdbcTemplate.queryForObject(CheckIsExists, int.class, reviewIdx, userIdx)==0){
+            return "N";
+        }
+        String FindType = "SELECT isHelped FROM ReviewLiked WHERE reviewIdx=? AND userIdx=? AND status='Y';";
+        return this.jdbcTemplate.queryForObject(FindType, String.class, reviewIdx, userIdx);
+    }
+
+    public int checkReviewExists(int reviewIdx) {
+        String Query = "SELECT EXISTS(SELECT * FROM Review WHERE reviewIdx=? AND status='Y');";
+        return this.jdbcTemplate.queryForObject(Query, int.class, reviewIdx);
+    }
+
 
 
 }

@@ -104,6 +104,7 @@ public class StoreService {
         }
 
     }
+
     /**
      * 리뷰 삭제 API
      * [PATCH] /stores/review
@@ -121,24 +122,62 @@ public class StoreService {
         }
     }
 
+    /**
+     * 리뷰 도움이 돼요 등록 API - 아무 것도 선택 안했을 때
+     * [POST] /stores/review/liked?reviewIdx
+     * /liked?reviewIdx
+     * @return BaseResponse<String>
+     */
+    public void createReviewLiked(int userIdx, int reviewIdx, String isHelped) throws BaseException {
+        try {
+            int result = storeDao.createReviewLiked(userIdx, reviewIdx, isHelped);
+            if (result == FAIL){
+                throw new BaseException(FAIL_LIKED_REVIEW);
+            }
+        } catch (Exception exception) {
+            System.out.println("createReviewLiked"+exception);
+            throw new BaseException(DATABASE_ERROR);
+        }
+    }
+
+    /**
+     * 리뷰 도움이 돼요 등록 API - toggle
+     * [POST] /stores/review/liked?reviewIdx
+     * /liked?reviewIdx
+     * @return BaseResponse<String>
+     */
+    public void createReviewLikedToggle(int userIdx, int reviewIdx, String isHelped) throws BaseException{
+        try {
+            int deleteSuccess = storeDao.deleteExistsReviewLiked(userIdx, reviewIdx);
+            if (deleteSuccess == FAIL){
+                throw new BaseException(FAIL_DELETE_EXISTS_LIKED_REVIEW);
+            }
+            int result = storeDao.createReviewLiked(userIdx, reviewIdx, isHelped);
+            if (result == FAIL){
+                throw new BaseException(FAIL_LIKED_REVIEW);
+            }
+        } catch (Exception exception) {
+            System.out.println("createReviewLikedToggle"+exception);
+            throw new BaseException(DATABASE_ERROR);
+        }
+    }
+    /**
+     * 리뷰 도움이 돼요 삭제 API
+     * [PATCH] /stores/review/liked/deletion
+     * @return BaseResponse<String>
+     */
+    public void deleteReviewLiked(int userIdx, int reviewIdx) throws BaseException {
+        try {
+            int deleteSuccess = storeDao.deleteExistsReviewLiked(userIdx, reviewIdx);
+            if (deleteSuccess == FAIL){
+                throw new BaseException(FAIL_DELETE_EXISTS_LIKED_REVIEW);
+            }
+        } catch (Exception exception) {
+            System.out.println("deleteReviewLiked"+exception);
+            throw new BaseException(DATABASE_ERROR);
+        }
+    }
 
 
-
-//    /**
-//     * 리뷰 수정 API
-//     * [PATCH] /stores/review?reviewIdx=
-//     * @return BaseResponse<String>
-//     */
-//    public void modifyReview(int userIdx, int reviewIdx, PatchReviewReq patchReviewReq) throws BaseException {
-//        try {{
-//        try {
-//            int result = storeDao.modifyReview(userIdx, reviewIdx, patchReviewReq);
-//            if (result == FAIL){
-//                throw new BaseException(FAIL_POST_REVIEW);
-//            }
-//        } catch (Exception exception) {
-//            System.out.println("deleteFavoriteStore"+exception);
-//            throw new BaseException(DATABASE_ERROR);
-//        }
 //    }
 }
