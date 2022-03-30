@@ -9,6 +9,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.sql.Timestamp;
 import java.util.List;
 
 import static com.example.demo.config.BaseResponseStatus.DATABASE_ERROR;
@@ -190,6 +191,44 @@ public class UserProvider {
             return userDao.checkUserAddress(addressIdx);
         } catch (Exception exception){
             System.out.println("checkUserAddress"+exception);
+            throw new BaseException(DATABASE_ERROR);
+        }
+    }
+
+    // 인증한 휴대폰 번호 존재 확인
+    public int checkCertificationPhone(String phoneNumber) throws BaseException {
+        try {
+            return userDao.checkCertificationPhone(phoneNumber);
+        } catch (Exception exception){
+            System.out.println("checkCertificationPhone"+exception);
+            throw new BaseException(DATABASE_ERROR);
+        }
+    }
+
+    /**
+     * 휴대폰 인증번호 확인 API - 인증 시간 확인
+     * [POST] /users/message/check
+     * @return BaseResponse<String>
+     */
+    public int checkCertificationTime(String phoneNumber) throws BaseException {
+        try {
+            return userDao.checkCertificationTime(phoneNumber);
+        } catch (Exception exception){
+            System.out.println("checkCertificationTime"+exception);
+            throw new BaseException(DATABASE_ERROR);
+        }
+    }
+
+    /**
+     * 휴대폰 인증번호 확인 API
+     * [POST] /users/message/check
+     * @return BaseResponse<String>
+     */
+    public boolean checkCertificationNum(String phoneNumber, int certificationNum) throws BaseException {
+        try {
+            return userDao.checkCertificationNum(phoneNumber, certificationNum);
+        } catch (Exception exception){
+            System.out.println("checkCertificationNum"+exception);
             throw new BaseException(DATABASE_ERROR);
         }
     }

@@ -10,6 +10,7 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Repository;
 
 import javax.sql.DataSource;
+import java.sql.Timestamp;
 import java.util.List;
 
 @Repository
@@ -479,5 +480,45 @@ public class UserDao {
         return this.jdbcTemplate.queryForObject(Query, int.class, addressIdx);
     }
 
+    // 휴대폰 인증 번호 저장
+    public int certifiedPhoneNumberSave(String phoneNumber, String numStr) {
+        String CheckQuery = "SELECT EXISTS(SELECT * FROM CellPhoneCertificationNum WHERE phoneNumber=?);";
+        String InsertQuery = "INSERT INTO CellPhoneCertificationNum (phoneNumber, cerNumber) VALUES (?,?);";
+        String UpdateQuery = "UPDATE CellPhoneCertificationNum SET cerNumber=? WHERE phoneNumber=?;";
 
+        if (this.jdbcTemplate.queryForObject(CheckQuery, int.class, phoneNumber) == 0){
+            // 없으면
+            return this.jdbcTemplate.update(InsertQuery, phoneNumber, numStr);
+        }
+        return this.jdbcTemplate.update(UpdateQuery,numStr, phoneNumber);
+    }
+
+    // 인증한 휴대폰 번호 존재 확인
+    public int checkCertificationPhone(String phoneNumber) {
+        String Query = "SELECT EXISTS(SELECT * FROM CellPhoneCertificationNum WHERE phoneNumber=?);";
+        return this.jdbcTemplate.queryForObject(Query, int.class, phoneNumber);
+    }
+
+    /**
+     * 휴대폰 인증번호 확인 API - 인증 시간 확인
+     * [POST] /users/message/check
+     * @return BaseResponse<String>
+     */
+    public int checkCertificationTime(String phoneNumber) {
+        String Query = "SELECT TIMESTAMPDIFF(SECOND, updatedAt, CURRENT_TIMESTAMP()) FROM CellPhoneCertificationNum WHERE phoneNumber=?";
+        return this.jdbcTemplate.queryForObject(Query, int.class, phoneNumber);
+    }
+
+    /**
+     * 휴대폰 인증번호 확인 API
+     * [POST] /users/message/check
+     * @return BaseResponse<String>
+     */
+    public boolean checkCertificationNum(String phoneNumber, int certificationNum) {
+        String Query = "SELECT EXISTS(SELECT * FROM CellPhoneCertificationNum WHERE phoneNumber=? AND cerNumber=?);";
+        if (this.jdbcTemplate.queryForObject(Query, int.class, phoneNumber, certificationNum) == 0){
+            return false;
+        }
+        return true;
+    }
 }

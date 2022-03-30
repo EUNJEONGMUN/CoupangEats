@@ -296,5 +296,11 @@ public class UserService {
 
     // 휴대폰 인증 번호 저장
     public void certifiedPhoneNumberSave(String phoneNumber, String numStr) throws BaseException {
+        try {
+            int result = userDao.certifiedPhoneNumberSave(phoneNumber, numStr);
+        } catch (Exception exception) {
+            System.out.println("certifiedPhoneNumberSave"+exception);
+            throw new BaseException(DATABASE_ERROR);
+        }
     }
 }

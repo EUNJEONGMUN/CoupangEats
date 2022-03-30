@@ -413,7 +413,9 @@ public class UserController {
         System.out.println("수신자 번호 : " + phoneNumber);
         System.out.println("인증번호 : " + numStr);
 
+        // 인증번호 발송
         userService.certifiedPhoneNumber(phoneNumber,numStr);
+        // 인증번호 저장
         userService.certifiedPhoneNumberSave(phoneNumber,numStr);
         String result = "";
         return new BaseResponse<>(result);
@@ -425,15 +427,31 @@ public class UserController {
      * [POST] /users/message/check
      * @return BaseResponse<String>
      */
-//    @ResponseBody
-//    @PostMapping("/message/check")
-//    public BaseResponse<String> messageCheck(@Valid @RequestBody PostMessageReq postMessageReq) throws BaseException {
-//
-//
-//
-//
-//
-//
-//
-//    }
+    @ResponseBody
+    @PostMapping("/message/check")
+    public BaseResponse<PostMessageCheckRes> messageCheck(@Valid @RequestBody PostMessageCheckReq postMessageCheckReq) throws BaseException {
+
+        if (postMessageCheckReq.getPhoneNumber()!=null) {
+            // 휴대폰 번호 정규식 확인
+            if (!isRegexPhone(postMessageCheckReq.getPhoneNumber())) {
+                return new BaseResponse<>(POST_USERS_INVALID_PHONE);
+            }
+        }
+
+        if (userProvider.checkCertificationPhone(postMessageCheckReq.getPhoneNumber())==0){
+            return new BaseResponse<>(EMPTY_CERTIFICATION_PHONE_NUMBER);
+        }
+
+        // 인증 번호 발송 시간과 현재 시간 차이 구하기
+        int timeDiff = userProvider.checkCertificationTime(postMessageCheckReq.getPhoneNumber());
+        if(timeDiff>=10000){ // 원래는 3분이지만, 개발 테스트의 편의를 위해 시간을 길게 설정
+            return new BaseResponse<>(FAILED_TO_CERTIFICATION_TIME);
+        }
+
+        if (!(userProvider.checkCertificationNum(postMessageCheckReq.getPhoneNumber(), postMessageCheckReq.getCertificationNum()))){
+            return new BaseResponse<>(FAILED_TO_CERTIFICATION);
+        }
+        return new BaseResponse<>(new PostMessageCheckRes(true));
+
+    }
 }
