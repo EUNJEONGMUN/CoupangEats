@@ -347,6 +347,8 @@ public class StoreDao {
                         rs.getString("buildingName"),
                         rs.getString("storeAddress"),
                         rs.getString("storeAddressDetail"),
+                        rs.getDouble(""),
+                        rs.getDouble(""),
                         rs.getDouble("distance"),
                         rs.getString("status"),
                         rs.getDouble("reviewScore"),

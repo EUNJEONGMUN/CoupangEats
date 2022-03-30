@@ -25,6 +25,8 @@ public class GetStoreDetailRes {
     private String buildingName;
     private String storeAddress;
     private String storeAddressDetail;
+    private double storeLongitude;
+    private double storeLatitude;
     private double distance;
     private String status;
 //    private String createdAt;

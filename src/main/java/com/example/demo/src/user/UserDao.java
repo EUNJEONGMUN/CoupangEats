@@ -1,5 +1,6 @@
 package com.example.demo.src.user;
 
+import com.example.demo.src.orders.kakao.model.KakaoUserInfo;
 import com.example.demo.src.user.model.*;
 import com.example.demo.src.user.model.Req.*;
 import com.example.demo.src.user.model.Res.GetUserAddressRes;
@@ -172,6 +173,31 @@ public class UserDao {
         );
 
     }
+
+    public User getUserInfoKakao(KakaoUserInfo userInfo) {
+
+        String Query = "SELECT U.userIdx, U.userName, U.phoneNumber, UL.userLongitude, UL.userLatitude\n" +
+                "FROM User U JOIN UserLocation UL on U.userIdx = UL.userIdx\n" +
+                "WHERE U.email=? AND U.userName=?";
+        Object[] Params = new Object[]{userInfo.getEmail(), userInfo.getNickname()};
+
+
+        return this.jdbcTemplate.queryForObject(Query,
+                (rs, rowNum) -> new User(
+                        rs.getInt("userIdx"),
+                        rs.getString("userName"),
+                        rs.getString("phoneNumber"),
+                        rs.getDouble("userLongitude"),
+                        rs.getDouble("userLatitude")
+                ),
+                Params
+        );
+
+
+
+    }
+
+
 
     // 사용자 존재 여부 확인
     public int checkUser(int userIdx) {
@@ -421,5 +447,6 @@ public class UserDao {
         String Query = "SELECT EXISTS(SELECT * FROM UserAddress WHERE userAddressIdx=? AND status='Y');";
         return this.jdbcTemplate.queryForObject(Query, int.class, addressIdx);
     }
+
 
 }
