@@ -26,8 +26,8 @@ public class GetFavoriteListRes {
     private String deliveryFee;
 
     private String storeBestCoupon;
-
-    private int myOrderCount;
-    private String myLatelyOrderTime;
-    private String addFavoriteStoreTime;
+//
+//    private int myOrderCount;
+//    private String myLatelyOrderTime;
+//    private String addFavoriteStoreTime;
 }

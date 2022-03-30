@@ -5,6 +5,7 @@ import com.example.demo.src.store.model.Req.PostReviewReq;
 import com.example.demo.src.store.model.Req.PutReviewReq;
 import com.example.demo.src.store.model.Res.*;
 import com.example.demo.src.user.model.UserLocation;
+import org.hibernate.criterion.Order;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Repository;
@@ -477,29 +478,29 @@ public class StoreDao {
                 "                WHERE S.storeIdx = ?;";
 
 
-        String MyOrderCountQuery = "SELECT COUNT(*)\n" +
-                "FROM UserOrder\n" +
-                "WHERE userIdx=? AND storeIdx=? AND status!='N' AND status!='F' AND status!='E';";
-        String MyLatelyOrderTimeQuery = "SELECT orderTime\n" +
-                "FROM UserOrder\n" +
-                "WHERE userIdx=? AND storeIdx=? AND status!='N' AND status!='F' AND status!='E'\n" +
-                "ORDER BY orderTime DESC\n" +
-                "LIMIT 1;";
-        String addFavoriteStoreTimeQuery ="SELECT DATE_FORMAT(createdAt, '%Y-%m-%d %H:%i:%s')\n" +
-                "FROM Favorite\n" +
-                "WHERE userIdx=? AND storeIdx=? AND status='Y';";
+//        String MyOrderCountQuery = "SELECT COUNT(*)\n" +
+//                "FROM UserOrder\n" +
+//                "WHERE userIdx=? AND storeIdx=? AND status!='N' AND status!='F' AND status!='E';";
+//        String MyLatelyOrderTimeQuery = "SELECT orderTime\n" +
+//                "FROM UserOrder\n" +
+//                "WHERE userIdx=? AND storeIdx=? AND status!='N' AND status!='F' AND status!='E'\n" +
+//                "ORDER BY orderTime DESC\n" +
+//                "LIMIT 1;";
+//        String addFavoriteStoreTimeQuery ="SELECT DATE_FORMAT(createdAt, '%Y-%m-%d %H:%i:%s')\n" +
+//                "FROM Favorite\n" +
+//                "WHERE userIdx=? AND storeIdx=? AND status='Y';";
 
-        int myOrderCount = this.jdbcTemplate.queryForObject(MyOrderCountQuery,
-                int.class,
-                userIdx, storeIdx);
-        String latelyOrderTime = "";
-
-        if (myOrderCount!=0){
-            latelyOrderTime = this.jdbcTemplate.queryForObject(MyLatelyOrderTimeQuery,
-                    String.class,
-                    userIdx, storeIdx);
-        }
-        String myLatelyOrderTime = latelyOrderTime;
+//        int myOrderCount = this.jdbcTemplate.queryForObject(MyOrderCountQuery,
+//                int.class,
+//                userIdx, storeIdx);
+//        String latelyOrderTime = "";
+//
+//        if (myOrderCount!=0){
+//            latelyOrderTime = this.jdbcTemplate.queryForObject(MyLatelyOrderTimeQuery,
+//                    String.class,
+//                    userIdx, storeIdx);
+//        }
+//        String myLatelyOrderTime = latelyOrderTime;
 
         String isStoreCouponQuery = "SELECT EXISTS(SELECT * FROM Coupon WHERE status='Y' AND DATEDIFF(endDate, CURRENT_DATE())>=0 AND storeIdx=?)";
         String isCoupon = "Y";
@@ -509,6 +510,31 @@ public class StoreDao {
 
         String finalIsCoupon = isCoupon;
 
+//        return this.jdbcTemplate.queryForObject(StoreInfoQuery,
+//                (rs1, rowNum)-> new GetFavoriteListRes(
+//                        rs1.getInt("storeIdx"),
+//                        rs1.getString("storeImgUrl"),
+//                        rs1.getString("storeName"),
+//                        rs1.getString("isCheetah"),
+//                        rs1.getString("timeDelivery"),
+//                        rs1.getString("isToGo"),
+//                        finalIsCoupon,
+//                        rs1.getDouble("distance"),
+//                        rs1.getString("status"),
+//                        rs1.getDouble("reviewScore"),
+//                        rs1.getInt("reviewCount"),
+//                        this.jdbcTemplate.queryForObject(DeliveryFeeQuery,
+//                                String.class,
+//                                storeIdx),
+//                        this.jdbcTemplate.queryForObject(CouponQuery,
+//                                String.class,
+//                                storeIdx),
+//                        myOrderCount,
+//                        myLatelyOrderTime,
+//                        this.jdbcTemplate.queryForObject(addFavoriteStoreTimeQuery,
+//                                String.class,
+//                                userIdx, storeIdx))
+//                , userLocation.getUserLongitude(), userLocation.getUserLatitude(), storeIdx);
         return this.jdbcTemplate.queryForObject(StoreInfoQuery,
                 (rs1, rowNum)-> new GetFavoriteListRes(
                         rs1.getInt("storeIdx"),
@@ -527,12 +553,7 @@ public class StoreDao {
                                 storeIdx),
                         this.jdbcTemplate.queryForObject(CouponQuery,
                                 String.class,
-                                storeIdx),
-                        myOrderCount,
-                        myLatelyOrderTime,
-                        this.jdbcTemplate.queryForObject(addFavoriteStoreTimeQuery,
-                                String.class,
-                                userIdx, storeIdx))
+                                storeIdx))
                 , userLocation.getUserLongitude(), userLocation.getUserLatitude(), storeIdx);
 
     }
@@ -1081,12 +1102,57 @@ public class StoreDao {
 
 
     // 즐겨찾기 한 가게 idx
-    public List<Integer> getFavoriteStoreIdx(int userIdx) {
-        String Query = "SELECT storeIdx FROM Favorite WHERE userIdx=? AND status='Y';";
-        return this.jdbcTemplate.query(Query,
+    public List<Integer> getFavoriteStoreIdx(int userIdx, String sort) {
+
+        String OrderCheck = "SELECT EXISTS(SELECT F.storeIdx\n" +
+                "FROM Favorite F JOIN UserOrder UO on F.storeIdx = UO.storeIdx\n" +
+                "WHERE F.userIdx=? AND F.status='Y' AND UO.status!='N' AND UO.status!='F' AND UO.status!='E'\n" +
+                "GROUP BY F.storeIdx\n" +
+                "ORDER BY COUNT(F.storeIdx) DESC);";
+        int userOrderCheck = this.jdbcTemplate.queryForObject(OrderCheck, int.class, userIdx);
+
+
+        String OrderCountQuery = "SELECT F.storeIdx\n" +
+                "FROM Favorite F JOIN UserOrder UO on F.storeIdx = UO.storeIdx\n" +
+                "WHERE F.userIdx=? AND F.status='Y' AND UO.status!='N' AND UO.status!='F' AND UO.status!='E'\n" +
+                "GROUP BY F.storeIdx\n" +
+                "ORDER BY COUNT(F.storeIdx) DESC;";
+
+        String OrderTimeQuery = "SELECT F.storeIdx, OT.orderTime\n" +
+                "FROM Favorite F JOIN(\n" +
+                "    (SELECT RankRow.storeIdx, RankRow.orderTime\n" +
+                "FROM (SELECT*, RANK() OVER (PARTITION BY UO.storeIdx ORDER BY UO.orderTime DESC) AS a\n" +
+                "      FROM UserOrder UO\n" +
+                "    WHERE UO.userIdx=? AND UO.status!='N' AND UO.status!='F' AND UO.status!='E'\n" +
+                "     ) AS RankRow\n" +
+                "WHERE RankRow.a <= 1)) OT ON OT.storeIdx = F.storeIdx\n" +
+                "WHERE F.userIdx=? AND F.status='Y'\n" +
+                "ORDER BY OT.orderTime DESC;";
+
+        String AddTime = "SELECT storeIdx, DATE_FORMAT(createdAt, '%Y-%m-%d %H:%i:%s')\n" +
+                "FROM Favorite\n" +
+                "WHERE userIdx=? AND status='Y'\n" +
+                "ORDER BY createdAt DESC;";
+
+
+        if (userOrderCheck == 0 || sort.equals("recentAdd")){
+            return this.jdbcTemplate.query(AddTime,
+                    (rs,rowNum) -> {
+                        return rs.getInt("storeIdx");
+                    }, userIdx);
+        } else if (sort.equals("recentOrder")){
+            return this.jdbcTemplate.query(OrderTimeQuery,
+                    (rs,rowNum) -> {
+                        return rs.getInt("storeIdx");
+                    }, userIdx);
+
+        }
+
+        return this.jdbcTemplate.query(OrderCountQuery,
                 (rs,rowNum) -> {
                     return rs.getInt("storeIdx");
                 }, userIdx);
+
     }
 
 

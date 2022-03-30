@@ -84,10 +84,10 @@ public class StoreProvider {
      * [GET] /stores/favorite-list
      * @return BaseResponse<List<GetFavoriteListRes>>
      */
-    public List<GetFavoriteListRes> getFavoriteList(int userIdx, UserLocation userLocation) throws BaseException{
+    public List<GetFavoriteListRes> getFavoriteList(int userIdx, UserLocation userLocation, String sort) throws BaseException{
         try {
 
-            List<Integer> storeList = storeDao.getFavoriteStoreIdx(userIdx);
+            List<Integer> storeList = storeDao.getFavoriteStoreIdx(userIdx, sort);
 
             List<GetFavoriteListRes> getFavoriteListRes = new ArrayList<>();
             for (int idx: storeList){
