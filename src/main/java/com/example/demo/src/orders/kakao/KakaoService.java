@@ -1,6 +1,7 @@
 package com.example.demo.src.orders.kakao;
 
 import com.example.demo.config.BaseException;
+import com.example.demo.src.orders.kakao.model.KakaoOAuth;
 import com.example.demo.src.orders.kakao.model.KakaoUserInfo;
 import com.example.demo.src.user.UserDao;
 import com.example.demo.src.user.UserProvider;
@@ -12,19 +13,16 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import static com.example.demo.config.BaseResponseStatus.DATABASE_ERROR;
-import static com.example.demo.config.BaseResponseStatus.FAILED_TO_LOGIN;
 
 @Service
 public class KakaoService {
 
-    private final KakaoOAuth kakaoOAuth;
     private final UserProvider userProvider;
     private final UserDao userDao;
     private final JwtService jwtService;
 
     @Autowired
-    public KakaoService(KakaoOAuth kakaoOAuth,UserProvider userProvider, UserDao userDao, JwtService jwtService){
-        this.kakaoOAuth = kakaoOAuth;
+    public KakaoService(UserProvider userProvider, UserDao userDao, JwtService jwtService){
         this.userProvider = userProvider;
         this.userDao = userDao;
         this.jwtService = jwtService;

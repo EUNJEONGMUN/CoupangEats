@@ -1,4 +1,4 @@
-package com.example.demo.src.orders.kakao;
+package com.example.demo.src.orders.kakao.model;
 
 import com.amazonaws.services.s3.model.JSONOutput;
 import com.example.demo.src.orders.kakao.model.KakaoUserInfo;
@@ -19,7 +19,6 @@ import org.springframework.util.MultiValueMap;
 import org.springframework.web.client.RestTemplate;
 
 
-@Getter
 public class KakaoOAuth {
 
     public KakaoUserInfo getUserInfo(String authorizedCode){

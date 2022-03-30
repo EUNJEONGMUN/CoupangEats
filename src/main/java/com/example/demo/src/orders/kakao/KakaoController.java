@@ -2,8 +2,8 @@ package com.example.demo.src.orders.kakao;
 
 import com.example.demo.config.BaseException;
 import com.example.demo.config.BaseResponse;
+import com.example.demo.src.orders.kakao.model.KakaoOAuth;
 import com.example.demo.src.orders.kakao.model.KakaoUserInfo;
-import com.example.demo.src.user.UserService;
 import com.example.demo.src.user.model.Res.PostSignInRes;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
@@ -23,7 +23,7 @@ public class KakaoController {
     }
 
 
-    @RequestMapping(value="/sign-in")
+    @PostMapping(value="/sign-in")
     public BaseResponse<PostSignInRes> kakaoSignIn(@RequestParam("code") String code) throws BaseException {
         KakaoUserInfo userInfo = kakaoOAuth.getUserInfo(code);
         PostSignInRes postSignInRes = kakaoService.signIn(userInfo);
