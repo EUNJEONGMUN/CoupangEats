@@ -116,7 +116,7 @@ public enum BaseResponseStatus {
     PASSWORD_DECRYPTION_ERROR(false, 4012, "비밀번호 복호화에 실패하였습니다."),
 
     FAIL_DELETE_USER(false, 4013, "회원 탈퇴에 실패했습니다."),
-
+    FAIL_SEND_MESSAGE(false, 4014, "휴대폰 인증번호 전송에 실패했습니다."),
 
     FAIL_CREATE_CART(false, 4300, "배달 카트 담기에 실패하였습니다."),
     FAIL_DELETE_CART_STORE(false, 4301, "기존 카트에 담긴 가게 삭제에 실패하였습니다."),

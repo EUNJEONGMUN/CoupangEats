@@ -15,6 +15,7 @@ import org.springframework.web.bind.annotation.*;
 import javax.validation.Valid;
 
 import java.util.List;
+import java.util.Random;
 
 import static com.example.demo.config.BaseResponseStatus.*;
 import static com.example.demo.utils.ValidationRegex.*;
@@ -173,7 +174,12 @@ public class UserController {
         return new BaseResponse<>(postUserCheckRes);
     }
 
-
+//    /**
+//     * 회원 정보 변경 API
+//     * [POST] /users/profile
+//     * @return BaseResponse<String>
+//     */
+//    public BaseResponse<PostUserCheckRes> checkUser(@Valid @RequestBody PatchUserProfileReq patchUserProfileReq) throws BaseException {
 
 
     /**
@@ -377,6 +383,37 @@ public class UserController {
         String result = "";
         return new BaseResponse<>(result);
     }
+    /**
+     * 휴대폰 인증 API
+     * [POST] /users/message
+     * @return BaseResponse<String>
+     */
+    @ResponseBody
+    @PostMapping("/message")
+    public BaseResponse<String> messageUser(@Valid @RequestBody PostMessageReq postMessageReq) throws BaseException {
 
+        String phoneNumber = postMessageReq.getPhoneNumber();
 
+        if (postMessageReq.getPhoneNumber()!=null) {
+            // 휴대폰 번호 정규식 확인
+            if (!isRegexPhone(postMessageReq.getPhoneNumber())) {
+                return new BaseResponse<>(POST_USERS_INVALID_PHONE);
+            }
+        }
+        //  난수 생성
+        Random rand  = new Random();
+        String numStr = "";
+        for(int i=0; i<4; i++) {
+            String ran = Integer.toString(rand.nextInt(10));
+            numStr+=ran;
+        }
+
+        System.out.println("수신자 번호 : " + phoneNumber);
+        System.out.println("인증번호 : " + numStr);
+
+        userService.certifiedPhoneNumber(phoneNumber,numStr);
+        String result = "";
+        return new BaseResponse<>(result);
+
+    }
 }
