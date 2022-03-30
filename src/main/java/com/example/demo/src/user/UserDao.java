@@ -34,7 +34,17 @@ public class UserDao {
         return this.jdbcTemplate.update(UserInfoQuery, UserInfoParams);
 
     }
+    /**
+     * 회원 탈퇴 API
+     * [POST] /users/deletion
+     *
+     * @return BaseResponse<String>
+     */
+    public int deleteUser(int userIdx) {
+        String Query = "UPDATE User SET status='N' WHERE userIdx=?";
+        return this.jdbcTemplate.update(Query, userIdx);
 
+    }
     /**
      * 주소지 조회 API
      * [GET] /users/address
@@ -152,7 +162,25 @@ public class UserDao {
                 int.class,
                 Params);
     }
+    public User getDeleteUserInfo(int userIdx) {
+        String Query = "SELECT U.userIdx, U.userName, U.phoneNumber, U.email, U.password\n" +
+                "FROM User U JOIN UserLocation UL on U.userIdx = UL.userIdx\n" +
+                "WHERE U.userIdx=? AND U.status='Y';";
+        Object[] Params = new Object[]{userIdx};
 
+
+        return this.jdbcTemplate.queryForObject(Query,
+                (rs, rowNum) -> new User(
+                        rs.getInt("userIdx"),
+                        rs.getString("userName"),
+                        rs.getString("phoneNumber"),
+                        rs.getDouble("userLongitude"),
+                        rs.getDouble("userLatitude")
+                ),
+                Params
+        );
+
+    }
     // 사용자 정보 가져오기
     public User getUserInfo(PostSignInReq postSignInReq) {
         String Query = "SELECT U.userIdx, U.userName, U.phoneNumber, UL.userLongitude, UL.userLatitude\n" +

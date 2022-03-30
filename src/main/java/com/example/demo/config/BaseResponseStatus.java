@@ -115,7 +115,7 @@ public enum BaseResponseStatus {
     PASSWORD_ENCRYPTION_ERROR(false, 4011, "비밀번호 암호화에 실패하였습니다."),
     PASSWORD_DECRYPTION_ERROR(false, 4012, "비밀번호 복호화에 실패하였습니다."),
 
-
+    FAIL_DELETE_USER(false, 4013, "회원 탈퇴에 실패했습니다."),
 
 
     FAIL_CREATE_CART(false, 4300, "배달 카트 담기에 실패하였습니다."),

@@ -130,11 +130,23 @@ public class UserController {
 
     /**
      * 회원 탈퇴 API
-     * [POST] /users/sign-up
+     * [PATCH] /users/deletion
      *
      * @return BaseResponse<String>
      */
+    @ResponseBody
+    @PatchMapping("/deletion")
+    public BaseResponse<String> deleteUser(@Valid @RequestBody PatchUserReq patchUserReq)throws BaseException {
+        int userIdx= jwtService.getUserIdx();
 
+        if (userProvider.checkUser(userIdx) == 0) {
+            return new BaseResponse<>(USER_NOT_EXISTS);
+        }
+
+        userService.deleteUser(userIdx, patchUserReq);
+        String result = "";
+        return new BaseResponse<>(result);
+    }
 
 
 

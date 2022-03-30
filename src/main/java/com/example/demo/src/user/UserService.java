@@ -104,6 +104,41 @@ public class UserService {
             throw new BaseException(DATABASE_ERROR);
         }
     }
+    /**
+     * 회원 탈퇴 API
+     * [POST] /users/deletion
+     *
+     * @return BaseResponse<String>
+     */
+    public void deleteUser(int userIdx, PatchUserReq patchUserReq) throws BaseException {
+
+        String encryptPwd;
+        try {
+            // 사용자에게 바디값으로 받은 비밀번호 암호화
+            encryptPwd = new SHA256().encrypt(patchUserReq.getPassword());
+            patchUserReq.setPassword(encryptPwd);
+        } catch (Exception ignored) {
+            throw new BaseException(PASSWORD_DECRYPTION_ERROR);
+        }
+
+        if(userProvider.checkPassword(patchUserReq.getEmail(),encryptPwd) != 1){
+            throw new BaseException(FAILED_TO_LOGIN);
+        }
+
+        try {
+            int result = userDao.deleteUser(userIdx);
+            if (result == FAIL) {
+                throw new BaseException(FAIL_DELETE_USER);
+            }
+        } catch (Exception exception) {
+                throw new BaseException(DATABASE_ERROR);
+            }
+
+    }
+
+
+
+
 
     /**
      * 주소지 추가 API
