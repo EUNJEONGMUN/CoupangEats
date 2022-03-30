@@ -262,7 +262,9 @@ public class OrderDao {
         Object[] Params2 = new Object[]{userIdx, postCreateOrderReq.getStoreIdx(), postCreateOrderReq.getMessage(),
                 postCreateOrderReq.getDeliveryManOptionIdx(), postCreateOrderReq.getDeliveryManContent(),
                 postCreateOrderReq.getCouponIdx(), orderTime, postCreateOrderReq.getUserAddressIdx()};
-        return this.jdbcTemplate.update(InsertUserOrderQuery,Params2); // 주문테이블
+        this.jdbcTemplate.update(InsertUserOrderQuery,Params2); // 주문테이블
+        String lastInsertIdQuery = "select last_insert_id()";
+        return this.jdbcTemplate.queryForObject(lastInsertIdQuery,int.class);
 
     }
 

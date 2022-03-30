@@ -257,7 +257,7 @@ public class OrderController {
      */
     @ResponseBody
     @PostMapping("/delivery")
-    public BaseResponse<String> createOrder(@RequestParam String[] cartList, @RequestBody PostCreateOrderReq postCreateOrderReq) throws BaseException {
+    public BaseResponse<PostCreateOrderRes> createOrder(@RequestParam String[] cartList, @RequestBody PostCreateOrderReq postCreateOrderReq) throws BaseException {
         int userIdx= jwtService.getUserIdx();
 
         // 사용자 존재 여부 확인
@@ -270,9 +270,9 @@ public class OrderController {
             postCreateOrderReq.setIsSpoon("N");
         }
 
-        orderService.createOrder(userIdx, cartList, postCreateOrderReq);
-        String result = "";
-        return new BaseResponse<>(result);
+        int userOrderIdx = orderService.createOrder(userIdx, cartList, postCreateOrderReq);
+
+        return new BaseResponse<>(new PostCreateOrderRes(userOrderIdx));
 
     }
 

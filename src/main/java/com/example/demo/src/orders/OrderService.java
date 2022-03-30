@@ -114,7 +114,7 @@ public class OrderService {
      * /delivery?cartList=
      * @return BaseResponse<String>
      */
-    public void createOrder(int userIdx, String[] cartList, PostCreateOrderReq postCreateOrderReq) throws BaseException {
+    public int createOrder(int userIdx, String[] cartList, PostCreateOrderReq postCreateOrderReq) throws BaseException {
         try {
 
             if (postCreateOrderReq.getCouponIdx()!=0){
@@ -122,10 +122,7 @@ public class OrderService {
                 orderDao.userCoupon(userIdx, postCreateOrderReq.getCouponIdx());
             }
 
-            int result = orderDao.createOrder(userIdx, cartList, postCreateOrderReq);
-            if (result == FAIL){
-                throw new BaseException(FAIL_CREATE_ORDER);
-            }
+            return orderDao.createOrder(userIdx, cartList, postCreateOrderReq);
         }catch (Exception exception) {
             System.out.println("createOrder"+exception);
             throw new BaseException(DATABASE_ERROR);
