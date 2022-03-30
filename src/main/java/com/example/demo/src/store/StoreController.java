@@ -163,18 +163,20 @@ public class StoreController {
     /**
      * 가게별 리뷰 조회 API
      * [GET] /stores/review-list
-     * /review-list?storeIdx=
+     * /review-list?storeIdx=&sort=
      * @return BaseResponse<List<GetStoreReviewListRes>>
      */
     @ResponseBody
     @GetMapping("/review-list")
-    public BaseResponse<List<GetStoreReviewListRes>> getStoreReviews(@RequestParam(required = false, defaultValue = "0") int storeIdx) throws BaseException {
+    public BaseResponse<List<GetStoreReviewListRes>> getStoreReviews(@RequestParam(required = false, defaultValue = "0") int storeIdx,
+                                                                     @RequestParam(required = false, defaultValue = "recent") String sort,
+                                                                     @RequestParam(required = false, defaultValue = "Y") String isPhoto) throws BaseException {
 
         int userIdx= jwtService.getUserIdxOption();
         if (storeIdx ==0){
             return new BaseResponse<>(EMPTY_STOREIDX_PARAM);
         }
-        List<GetStoreReviewListRes> getStoreReviewListRes = storeProvider.getStoreReviews(userIdx, storeIdx);
+        List<GetStoreReviewListRes> getStoreReviewListRes = storeProvider.getStoreReviews(userIdx, storeIdx, sort, isPhoto);
         return new BaseResponse<>(getStoreReviewListRes);
 
     }

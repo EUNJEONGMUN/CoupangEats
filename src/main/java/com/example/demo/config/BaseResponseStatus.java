@@ -77,7 +77,7 @@ public enum BaseResponseStatus {
     EMPTY_CERTIFICATION_PHONE_NUMBER(false, 3021, "인증 번호가 발송된 휴대폰 번호가 아닙니다."),
     FAILED_TO_CERTIFICATION_TIME(false, 3022, "인증 번호 유효 시간인 3분이 지났습니다."),
     FAILED_TO_CERTIFICATION(false, 3023, "인증번호가 일치하지 않습니다."),
-
+    FAILED_TO_CHECK_USER(false, 3024, "비밀번호가 일치하지 않습니다."),
 
 
     EMPTY_STORE(false, 3100, "존재하지 않는 가게입니다."),

@@ -109,11 +109,14 @@ public class StoreProvider {
      * /review-list?storeIdx=
      * @return BaseResponse<List<GetStoreReviewListRes>>
      */
-    public List<GetStoreReviewListRes> getStoreReviews(int userIdx, int storeIdx) throws BaseException{
+    public List<GetStoreReviewListRes> getStoreReviews(int userIdx, int storeIdx, String sort, String isPhoto) throws BaseException{
         try {
-            List<StoreReviewIdx> reviewList = storeDao.getStoreReviewIdx(storeIdx);
+            List<StoreReviewIdx> reviewList = storeDao.getStoreReviewIdx(storeIdx, sort, isPhoto);
 
             List<GetStoreReviewListRes> getStoreReviewListRes = new ArrayList<>();
+            if (reviewList.size()==0){
+                return getStoreReviewListRes;
+            }
             for (StoreReviewIdx idx:reviewList){
                 GetStoreReviewListRes storeReviewList = storeDao.getStoreReviews(userIdx, storeIdx, idx);
                 getStoreReviewListRes.add(storeReviewList);

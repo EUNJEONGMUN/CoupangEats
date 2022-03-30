@@ -573,9 +573,11 @@ public class StoreDao {
                 "FROM Review R JOIN UserOrder UO on R.userOrderIdx = UO.userOrderIdx\n" +
                 "WHERE R.reviewIdx=? AND R.status='Y';";
 
-        String HelpedCountQuery = "SELECT COUNT(*) AS helpedCount\n" +
-                "FROM ReviewLiked\n" +
-                "WHERE reviewIdx=? AND isHelped='G' AND status='Y';";
+        String HelpedCountQuery = "SELECT COUNT(RL.isHelped) AS helpedCount\n" +
+                "FROM ReviewLiked RL\n" +
+                "WHERE RL.isHelped='G' AND RL.reviewIdx=?\n" +
+                "GROUP BY RL.reviewIdx\n" +
+                "ORDER BY COUNT(RL.isHelped) DESC;";
 
         String BossReviewQuery = "SELECT reviewIdx, content,\n" +
                 "       CASE\n" +
@@ -631,7 +633,7 @@ public class StoreDao {
         // 로그인 했을 경우 좋아요 여부 확인
         String myHelped = "N";
         if (userIdx!=0){
-            if (this.jdbcTemplate.queryForObject("SELECT EXISTS(SELECT status FROM ReviewLiked WHERE userIdx=? AND reviewIdx=?);", int.class, userIdx, idx.getReviewIdx()) != 0){
+            if (this.jdbcTemplate.queryForObject("SELECT EXISTS(SELECT status FROM ReviewLiked WHERE userIdx=? AND reviewIdx=? AND status='Y');", int.class, userIdx, idx.getReviewIdx()) != 0){
                 myHelped = this.jdbcTemplate.queryForObject(MyLikedQuery,
                         String.class, userIdx, idx.getReviewIdx());
             }
@@ -1089,11 +1091,122 @@ public class StoreDao {
 
 
     // 가게별 리뷰 idx
-    public List<StoreReviewIdx> getStoreReviewIdx(int storeIdx) {
-        String Query = "SELECT R.reviewIdx, R.userIdx, R.userOrderIdx\n" +
+    public List<StoreReviewIdx> getStoreReviewIdx(int storeIdx, String sort, String isPhoto) {
+        String RecentPhotoQuery = "SELECT R.reviewIdx, R.userIdx, R.userOrderIdx\n" +
                 "FROM Review R JOIN UserOrder UO on R.userOrderIdx = UO.userOrderIdx\n" +
-                "WHERE UO.storeIdx=? AND R.status='Y';";
-        return this.jdbcTemplate.query(Query,
+                "WHERE UO.storeIdx=? AND R.status='Y' AND R.isPhoto='Y'\n" +
+                "ORDER BY R.createdAt DESC;";
+
+        String RecentQuery = "SELECT R.reviewIdx, R.userIdx, R.userOrderIdx\n" +
+                "FROM Review R JOIN UserOrder UO on R.userOrderIdx = UO.userOrderIdx\n" +
+                "WHERE UO.storeIdx=? AND R.status='Y'\n" +
+                "ORDER BY R.createdAt DESC;";
+
+        String ReviewPhotoQuery = "SELECT R.reviewIdx, R.userIdx, R.userOrderIdx\n" +
+                "FROM Review R JOIN UserOrder UO on R.userOrderIdx = UO.userOrderIdx\n" +
+                "JOIN (SELECT RL.reviewIdx, COUNT(RL.isHelped) AS isHelped\n" +
+                "FROM ReviewLiked RL\n" +
+                "WHERE RL.isHelped='G'\n" +
+                "GROUP BY RL.reviewIdx\n" +
+                "ORDER BY COUNT(RL.isHelped) DESC) Liked ON Liked.reviewIdx = R.reviewIdx\n" +
+                "WHERE UO.storeIdx=? AND R.status='Y' AND R.isPhoto='Y'\n" +
+                "ORDER BY R.createdAt DESC;";
+
+        String ReviewQuery = "SELECT R.reviewIdx, R.userIdx, R.userOrderIdx\n" +
+                "FROM Review R JOIN UserOrder UO on R.userOrderIdx = UO.userOrderIdx\n" +
+                "JOIN (SELECT RL.reviewIdx, COUNT(RL.isHelped) AS isHelped\n" +
+                "FROM ReviewLiked RL\n" +
+                "WHERE RL.isHelped='G'\n" +
+                "GROUP BY RL.reviewIdx\n" +
+                "ORDER BY COUNT(RL.isHelped) DESC) Liked ON Liked.reviewIdx = R.reviewIdx\n" +
+                "WHERE UO.storeIdx=? AND R.status='Y'\n" +
+                "ORDER BY R.createdAt DESC;";
+
+        String ScoreDescPhotoQuery = "SELECT R.reviewIdx, R.userIdx, R.userOrderIdx\n" +
+                "FROM Review R JOIN UserOrder UO on R.userOrderIdx = UO.userOrderIdx\n" +
+                "WHERE UO.storeIdx=? AND R.status='Y' AND R.isPhoto='Y'\n" +
+                "ORDER BY R.score DESC;\n";
+
+        String ScoreDescQuery = "SELECT R.reviewIdx, R.userIdx, R.userOrderIdx\n" +
+                "FROM Review R JOIN UserOrder UO on R.userOrderIdx = UO.userOrderIdx\n" +
+                "WHERE UO.storeIdx=? AND R.status='Y' AND R.isPhoto='Y'\n" +
+                "ORDER BY R.score DESC;\n";
+
+        String ScoreAscPhotoQuery = "SELECT R.reviewIdx, R.userIdx, R.userOrderIdx\n" +
+                "FROM Review R JOIN UserOrder UO on R.userOrderIdx = UO.userOrderIdx\n" +
+                "WHERE UO.storeIdx=? AND R.status='Y' AND R.isPhoto='Y'\n" +
+                "ORDER BY R.score;";
+
+        String ScoreAscQuery = "SELECT R.reviewIdx, R.userIdx, R.userOrderIdx\n" +
+                "FROM Review R JOIN UserOrder UO on R.userOrderIdx = UO.userOrderIdx\n" +
+                "WHERE UO.storeIdx=? AND R.status='Y'\n" +
+                "ORDER BY R.score;";
+
+        if (sort.equals("review")){
+            if (isPhoto.equals("Y")){
+                // 리뷰 도움 순 정렬 + 포토리뷰
+
+                return this.jdbcTemplate.query(ReviewPhotoQuery,
+                        (rs, rowNum) -> new StoreReviewIdx(
+                                rs.getInt("reviewIdx"),
+                                rs.getInt("userOrderIdx"),
+                                rs.getInt("userIdx")),
+                        storeIdx);
+            }
+            return this.jdbcTemplate.query(ReviewQuery,
+                    (rs, rowNum) -> new StoreReviewIdx(
+                            rs.getInt("reviewIdx"),
+                            rs.getInt("userOrderIdx"),
+                            rs.getInt("userIdx")),
+                    storeIdx);
+
+        } else if (sort.equals("highScore")){
+            if (isPhoto.equals("Y")){
+                // 별점 높은 순 정렬 + 포토리뷰
+                return this.jdbcTemplate.query(ScoreDescPhotoQuery,
+                        (rs, rowNum) -> new StoreReviewIdx(
+                                rs.getInt("reviewIdx"),
+                                rs.getInt("userOrderIdx"),
+                                rs.getInt("userIdx")),
+                        storeIdx);
+            }
+            return this.jdbcTemplate.query(ScoreDescQuery,
+                    (rs, rowNum) -> new StoreReviewIdx(
+                            rs.getInt("reviewIdx"),
+                            rs.getInt("userOrderIdx"),
+                            rs.getInt("userIdx")),
+                    storeIdx);
+
+        } else if (sort.equals("rowScore")) {
+
+            if (isPhoto.equals("Y")){
+                // 별점 낮은 순 정렬 + 포토리뷰
+                return this.jdbcTemplate.query(ScoreAscPhotoQuery,
+                        (rs, rowNum) -> new StoreReviewIdx(
+                                rs.getInt("reviewIdx"),
+                                rs.getInt("userOrderIdx"),
+                                rs.getInt("userIdx")),
+                        storeIdx);
+            }
+            return this.jdbcTemplate.query(ScoreAscQuery,
+                    (rs, rowNum) -> new StoreReviewIdx(
+                            rs.getInt("reviewIdx"),
+                            rs.getInt("userOrderIdx"),
+                            rs.getInt("userIdx")),
+                    storeIdx);
+        }
+
+        if (isPhoto.equals("Y")){
+            // 최근 순 정렬 + 포토리뷰
+            return this.jdbcTemplate.query(RecentPhotoQuery,
+                    (rs, rowNum) -> new StoreReviewIdx(
+                            rs.getInt("reviewIdx"),
+                            rs.getInt("userOrderIdx"),
+                            rs.getInt("userIdx")),
+                    storeIdx);
+        }
+
+        return this.jdbcTemplate.query(RecentQuery,
                 (rs, rowNum) -> new StoreReviewIdx(
                         rs.getInt("reviewIdx"),
                         rs.getInt("userOrderIdx"),

@@ -166,7 +166,7 @@ public class UserController {
 
         PostUserCheckRes postUserCheckRes = new PostUserCheckRes();
         if (userService.checkPassword(postUserCheckReq.getEmail(), postUserCheckReq.getPassword())==0){
-            postUserCheckRes.setCorrect(false);
+            return new BaseResponse<>(FAILED_TO_CHECK_USER);
         } else {
             postUserCheckRes.setCorrect(true);
         }
