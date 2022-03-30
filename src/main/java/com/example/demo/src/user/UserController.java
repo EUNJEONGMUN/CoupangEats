@@ -129,6 +129,20 @@ public class UserController {
     }
 
     /**
+     * 회원 탈퇴 API
+     * [POST] /users/sign-up
+     *
+     * @return BaseResponse<String>
+     */
+
+
+
+
+
+
+
+
+    /**
      * 주소지 추가 API
      * [POST] /users/address
      * @return BaseResponse<String>

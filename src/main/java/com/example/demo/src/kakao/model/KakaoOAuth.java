@@ -1,13 +1,8 @@
-package com.example.demo.src.orders.kakao.model;
+package com.example.demo.src.kakao.model;
 
-import com.amazonaws.services.s3.model.JSONOutput;
-import com.example.demo.src.orders.kakao.model.KakaoUserInfo;
-import com.fasterxml.jackson.databind.util.JSONPObject;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
-import lombok.Getter;
 
-import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
 import org.springframework.http.HttpEntity;
@@ -30,7 +25,7 @@ public class KakaoOAuth {
         return userInfo;
     }
 
-    private String getAccessToken(String authorizedCode){
+    public String getAccessToken(String authorizedCode){
         String accessToken = "";
         String refreshToken = "";
 
@@ -72,7 +67,7 @@ public class KakaoOAuth {
 
     }
 
-    private KakaoUserInfo getUserInfoByToken(String accessToken){
+    public KakaoUserInfo getUserInfoByToken(String accessToken){
         // HttpHeader 오브젝트 생성
         HttpHeaders headers = new HttpHeaders();
         headers.add("Authorization","Bearer"+accessToken);

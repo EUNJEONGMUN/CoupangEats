@@ -244,7 +244,7 @@ public class OrderDao {
     public int createOrder(int userIdx, String[] cartList, PostCreateOrderReq postCreateOrderReq) {
         String InsertCartToOrderQuery = "INSERT INTO CartToOrder (userIdx, cartIdx, orderTime) VALUES (?,?,?);";
         String UpdateUserCart = "UPDATE Cart SET status='O' WHERE cartIdx=?;";
-        String InsertUserOrderQuery = "INSERT INTO UserOrder (userIdx, storeIdx, message, deliveryManOptionIdx, deliveryManContent, useCouponIdx, orderTime) VALUES (?,?,?,?,?,?,?);";
+        String InsertUserOrderQuery = "INSERT INTO UserOrder (userIdx, storeIdx, message, deliveryManOptionIdx, deliveryManContent, useCouponIdx, orderTime, userAddressIdx) VALUES (?,?,?,?,?,?,?,?);";
 
         // 현재 날짜 구하기
         LocalDateTime now = LocalDateTime.now();
@@ -260,7 +260,8 @@ public class OrderDao {
         }
 
         Object[] Params2 = new Object[]{userIdx, postCreateOrderReq.getStoreIdx(), postCreateOrderReq.getMessage(),
-                postCreateOrderReq.getDeliveryManOptionIdx(), postCreateOrderReq.getDeliveryManContent(), postCreateOrderReq.getCouponIdx(), orderTime};
+                postCreateOrderReq.getDeliveryManOptionIdx(), postCreateOrderReq.getDeliveryManContent(),
+                postCreateOrderReq.getCouponIdx(), orderTime, postCreateOrderReq.getUserAddressIdx()};
         return this.jdbcTemplate.update(InsertUserOrderQuery,Params2); // 주문테이블
 
     }
@@ -307,6 +308,7 @@ public class OrderDao {
      */
     public GetDeliveryListRes getUserDelivery(int userIdx, OrderList orderList) {
 
+        System.out.println(">>>>"+orderList.getStoreIdx()+"<<<   >>>" + orderList.getUserOrderIdx()+"<<<   >>>" + orderList.getOrderTime());
         String StoreInfo = "SELECT storeIdx, storeName, storeImgUrl\n" +
                 "FROM Store\n" +
                 "WHERE storeIdx=?";
@@ -369,8 +371,31 @@ public class OrderDao {
                 String.class,
                 Params);
 
+
+        int userAddressIdx = this.jdbcTemplate.queryForObject("SELECT userAddressIdx FROM UserOrder WHERE userOrderIdx=?", int.class, orderList.getUserOrderIdx());
+
+
+        String UserAddressQuery = "SELECT userAddressIdx, buildingName, address, addressDetail, addressGuide, addressTitle, addressLongitude, addressLatitude, addressType, isNowLocation\n" +
+                "                FROM UserAddress\n" +
+                "                WHERE userAddressIdx=?;";
+
+        CartAddressInfo  userDeliveryAddress = this.jdbcTemplate.queryForObject(UserAddressQuery,
+                (rs, rowNum) -> new CartAddressInfo(
+                        rs.getInt("userAddressIdx"),
+                        rs.getString("buildingName"),
+                        rs.getString("address"),
+                        rs.getString("addressDetail"),
+                        rs.getString("addressGuide"),
+                        rs.getDouble("addressLongitude"),
+                        rs.getDouble("addressLatitude"),
+                        rs.getString("addressTitle"),
+                        rs.getString("addressType")
+                ), userAddressIdx);
+
+        System.out.println(orderList.getStoreIdx());
         return this.jdbcTemplate.queryForObject(StoreInfo,
                 (rs, rowNum) -> new GetDeliveryListRes(
+                        userDeliveryAddress,
                         orderList.getUserOrderIdx(),
                         rs.getInt("storeIdx"),
                         rs.getString("storeImgUrl"),

@@ -1,6 +1,6 @@
 package com.example.demo.src.user;
 
-import com.example.demo.src.orders.kakao.model.KakaoUserInfo;
+import com.example.demo.src.kakao.model.KakaoUserInfo;
 import com.example.demo.src.user.model.*;
 import com.example.demo.src.user.model.Req.*;
 import com.example.demo.src.user.model.Res.GetUserAddressRes;

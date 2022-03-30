@@ -1,8 +1,7 @@
-package com.example.demo.src.orders.kakao;
+package com.example.demo.src.kakao;
 
 import com.example.demo.config.BaseException;
-import com.example.demo.src.orders.kakao.model.KakaoOAuth;
-import com.example.demo.src.orders.kakao.model.KakaoUserInfo;
+import com.example.demo.src.kakao.model.KakaoUserInfo;
 import com.example.demo.src.user.UserDao;
 import com.example.demo.src.user.UserProvider;
 import com.example.demo.src.user.model.Res.PostSignInRes;

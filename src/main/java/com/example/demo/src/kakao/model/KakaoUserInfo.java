@@ -1,4 +1,4 @@
-package com.example.demo.src.orders.kakao.model;
+package com.example.demo.src.kakao.model;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
