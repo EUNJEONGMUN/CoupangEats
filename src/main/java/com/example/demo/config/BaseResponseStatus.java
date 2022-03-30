@@ -100,7 +100,7 @@ public enum BaseResponseStatus {
     REVIEW_ALREADY_EXISTS(false, 3303, "리뷰가 이미 존재하거나 삭제한 리뷰입니다."),
 
     INCONSISTENCY_STORE_STATE(false, 3400, "배달 완료 된 주문만 재주문 할 수 있습니다."),
-
+    USER_ORDER_ALREADY_DELETED(false, 3401, "이미 취소된 주문입니다."),
 
 
     /**

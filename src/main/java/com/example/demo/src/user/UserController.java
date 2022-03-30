@@ -383,6 +383,8 @@ public class UserController {
         String result = "";
         return new BaseResponse<>(result);
     }
+
+
     /**
      * 휴대폰 인증 API
      * [POST] /users/message
@@ -412,8 +414,26 @@ public class UserController {
         System.out.println("인증번호 : " + numStr);
 
         userService.certifiedPhoneNumber(phoneNumber,numStr);
+        userService.certifiedPhoneNumberSave(phoneNumber,numStr);
         String result = "";
         return new BaseResponse<>(result);
 
     }
+
+    /**
+     * 휴대폰 인증번호 확인 API
+     * [POST] /users/message/check
+     * @return BaseResponse<String>
+     */
+//    @ResponseBody
+//    @PostMapping("/message/check")
+//    public BaseResponse<String> messageCheck(@Valid @RequestBody PostMessageReq postMessageReq) throws BaseException {
+//
+//
+//
+//
+//
+//
+//
+//    }
 }

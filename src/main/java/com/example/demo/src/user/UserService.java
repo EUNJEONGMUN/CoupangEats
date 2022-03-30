@@ -293,4 +293,8 @@ public class UserService {
             throw new BaseException(FAIL_SEND_MESSAGE);
         }
     }
+
+    // 휴대폰 인증 번호 저장
+    public void certifiedPhoneNumberSave(String phoneNumber, String numStr) throws BaseException {
+    }
 }

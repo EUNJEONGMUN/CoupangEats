@@ -282,7 +282,7 @@ public class OrderDao {
      * @return BaseResponse<PutOrderRes>
      */
     public int deleteOrder(int userIdx, int userOrderIdx) {
-        String UpdateUserOrder = "UPDATE UserOrder SET status='N' WHERE userOrderIdx=?;";
+        String UpdateUserOrder = "UPDATE UserOrder SET status='E' WHERE userOrderIdx=?;";
         String GetOrderInfo = "SELECT orderTime, useCouponIdx FROM UserOrder WHERE userOrderIdx=?;";
         String UpdateCartToOrder = "UPDATE CartToOrder SET status='N' WHERE userIdx=? AND orderTime=?;";
         String UpdateCoupon = "UPDATE UserCoupon SET status='Y' WHERE userIdx=? AND userCouponIdx=?;";
@@ -294,13 +294,14 @@ public class OrderDao {
                         rs.getString("orderTime"),
                         rs.getInt("useCouponIdx"))
                 , userOrderIdx);
-
         Object[] Params = new Object[]{userIdx, orderInfo.getOrderTime()};
-        Object[] ParamsCoupon = new Object[]{userIdx, orderInfo.getUseCouponIdx()};
 
+        if (orderInfo.getUseCouponIdx()!=0){
+            Object[] ParamsCoupon = new Object[]{userIdx, orderInfo.getUseCouponIdx()};
+            this.jdbcTemplate.update(UpdateCoupon, ParamsCoupon);
+        }
         this.jdbcTemplate.update(UpdateUserOrder, userOrderIdx);
-        this.jdbcTemplate.update(UpdateCartToOrder, Params);
-        return this.jdbcTemplate.update(UpdateCoupon, ParamsCoupon);
+        return this.jdbcTemplate.update(UpdateCartToOrder, Params);
     }
 
     /**

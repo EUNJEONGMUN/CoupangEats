@@ -269,7 +269,9 @@ public class OrderController {
         if (postCreateOrderReq.getIsSpoon()==null){
             postCreateOrderReq.setIsSpoon("N");
         }
-
+        if (storeProvider.checkStore(postCreateOrderReq.getStoreIdx())==0){ // 가게가 없을 경우
+            return new BaseResponse<>(EMPTY_STORE);
+        }
         int userOrderIdx = orderService.createOrder(userIdx, cartList, postCreateOrderReq);
 
         return new BaseResponse<>(new PostCreateOrderRes(userOrderIdx));
@@ -295,6 +297,10 @@ public class OrderController {
         // 주문 존재 여부 확인
         if (orderProvider.checkOrder(userOrderIdx)==0){
             return new BaseResponse<>(USER_ORDER_NOT_EXISTS);
+        }
+
+        if (!orderProvider.checkUserOrderStatus(userOrderIdx)){
+            return new BaseResponse<>(USER_ORDER_ALREADY_DELETED);
         }
 
         // 주문 소유자 확인

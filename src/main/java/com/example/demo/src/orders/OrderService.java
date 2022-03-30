@@ -139,6 +139,7 @@ public class OrderService {
     public void deleteOrder(int userIdx, int userOrderIdx) throws BaseException {
         try {
             int result = orderDao.deleteOrder(userIdx, userOrderIdx);
+            System.out.println(result);
             if (result == FAIL){
                 throw new BaseException(FAIL_DELETE_ORDER);
             }
