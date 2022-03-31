@@ -8,9 +8,11 @@ import com.example.demo.src.store.StoreProvider;
 import com.example.demo.src.user.UserProvider;
 import com.example.demo.src.user.model.UserLocation;
 import com.example.demo.utils.JwtService;
+import com.fasterxml.jackson.databind.ser.Serializers;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
@@ -210,6 +212,10 @@ public class OrderController {
             return new BaseResponse<>(PUT_CART_PARAM_EMPTY);
         }
 
+        // 카트 존재여부 확인
+        if(orderProvider.checkCartExists(cartIdx)==0){
+            return new BaseResponse<>(EMPTY_CART);
+        }
 
         if (orderProvider.checkCartStoreOwner(cartIdx)!=storeIdx){ // 카트가 속한 가게가 storeIdx와 일치하지 않을 경우
             return new BaseResponse<>(INCONSISTENCY_CART_OWNER);
@@ -230,7 +236,7 @@ public class OrderController {
      */
     @ResponseBody
     @PatchMapping("/cart/deletion")
-    public BaseResponse<String> deleteCart(@RequestBody PatchCartReq patchCartReq) throws BaseException {
+    public BaseResponse<String> deleteCart(@Valid @RequestBody PatchCartReq patchCartReq) throws BaseException {
         int userIdx= jwtService.getUserIdx();
 
         // 사용자 존재 여부 확인
@@ -264,14 +270,24 @@ public class OrderController {
      */
     @ResponseBody
     @PostMapping("/delivery")
-    public BaseResponse<PostCreateOrderRes> createOrder(@RequestParam String[] cartList, @RequestBody PostCreateOrderReq postCreateOrderReq) throws BaseException {
+    public BaseResponse<PostCreateOrderRes> createOrder(@RequestParam String[] cartList, @Valid @RequestBody PostCreateOrderReq postCreateOrderReq) throws BaseException {
         int userIdx= jwtService.getUserIdx();
 
         // 사용자 존재 여부 확인
         if (userProvider.checkUser(userIdx)==0){
             return new BaseResponse<>(USER_NOT_EXISTS);
         }
-        System.out.println(postCreateOrderReq.getCouponIdx());
+        System.out.println(postCreateOrderReq.getUserAddressIdx());
+
+        if (postCreateOrderReq.getUserAddressIdx()==0){
+            return new BaseResponse<>(EMPTY_ADDRESS_IDX);
+        }
+        if (postCreateOrderReq.getDeliveryManOptionIdx()==0){
+            return new BaseResponse<>(EMPTY_DELIVERY_MAN_OPTION_IDX);
+        }
+        if (postCreateOrderReq.getStoreIdx()==0){
+            return new BaseResponse<>(EMPTY_STOREIDX_PARAM);
+        }
 
         if (postCreateOrderReq.getIsSpoon()==null){
             postCreateOrderReq.setIsSpoon("N");
@@ -279,6 +295,16 @@ public class OrderController {
         if (storeProvider.checkStore(postCreateOrderReq.getStoreIdx())==0){ // 가게가 없을 경우
             return new BaseResponse<>(EMPTY_STORE);
         }
+        if (orderProvider.checkCartStoreOwner(Integer.parseInt(cartList[0]))!=postCreateOrderReq.getStoreIdx()){ // 카트가 속한 가게가 storeIdx와 일치하지 않을 경우
+            return new BaseResponse<>(INCONSISTENCY_CART_OWNER);
+        }
+        for (int i=0; i<cartList.length; i++){
+            if (orderProvider.checkCartExists(Integer.parseInt(cartList[i]))==0){
+                return new BaseResponse<>(EMPTY_CART);
+            }
+        }
+
+
         int userOrderIdx = orderService.createOrder(userIdx, cartList, postCreateOrderReq);
 
         return new BaseResponse<>(new PostCreateOrderRes(userOrderIdx));

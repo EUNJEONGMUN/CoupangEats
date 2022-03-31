@@ -257,7 +257,7 @@ public class UserController {
         }
 
         if (addressIdx==0){
-            return new BaseResponse<>(EMPTY_OTHER_ADDRESS_IDX);
+            return new BaseResponse<>(EMPTY_ADDRESS_IDX);
         }
 
 //        if (putAddressReq.getStatus()==null || putAddressReq.getStatus().equals("")){
@@ -333,7 +333,7 @@ public class UserController {
         }
 
         if (addressIdx==0){
-            return new BaseResponse<>(EMPTY_OTHER_ADDRESS_IDX);
+            return new BaseResponse<>(EMPTY_ADDRESS_IDX);
         }
 
 

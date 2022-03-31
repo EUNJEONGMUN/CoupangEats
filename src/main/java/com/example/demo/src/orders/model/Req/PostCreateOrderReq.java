@@ -5,6 +5,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.NotNull;
 
@@ -15,6 +16,7 @@ import javax.validation.constraints.NotNull;
 public class PostCreateOrderReq {
     @NotNull(message = "userAddressIdx를 입력해주세요.")
     private int userAddressIdx;
+
     @NotNull(message = "storeIdx를 입력해주세요.")
     private int storeIdx;
 
@@ -23,7 +25,7 @@ public class PostCreateOrderReq {
     private String message;
 
     private String isSpoon;
-    @NotEmpty(message = "notEmpty deliveryManOptionIdx")
+    @NotNull(message = "notEmpty deliveryManOptionIdx")
     private int deliveryManOptionIdx;
 
     private String deliveryManContent;

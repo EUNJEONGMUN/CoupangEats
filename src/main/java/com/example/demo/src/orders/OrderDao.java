@@ -323,12 +323,29 @@ public class OrderDao {
                 "    WHERE UO.userIdx=? AND UO.orderTime=? AND UO.status!='N'\n" +
                 "    ORDER BY UO.orderTime DESC) OrderMenu ON OrderMenu.cartIdx = C.cartIdx;";
 
-        String OrderStatus = "SELECT CASE WHEN UO.status='A' THEN '주문 수락됨'\n" +
-                "           WHEN UO.status='B' THEN '메뉴 준비중'\n" +
-                "           WHEN UO.status='C' THEN '배달중'\n" +
-                "           WHEN UO.status='D' THEN '배달 완료'\n" +
-                "           ELSE UO.status\n" +
-                "               END AS status,\n" +
+        // 배달 상태
+
+//        String OrderStatus = "SELECT CASE WHEN UO.status='A' THEN '주문 수락됨'\n" +
+//                "           WHEN UO.status='B' THEN '메뉴 준비중'\n" +
+//                "           WHEN UO.status='C' THEN '배달중'\n" +
+//                "           WHEN UO.status='D' THEN '배달 완료'\n" +
+//                "           ELSE UO.status\n" +
+//                "               END AS status,\n" +
+//                "       CASE\n" +
+//                "        WHEN INSTR(DATE_FORMAT(UO.orderTime, '%Y-%m-%d %p %h:%i'), 'PM') > 0\n" +
+//                "        THEN REPLACE(DATE_FORMAT(UO.orderTime, '%Y-%m-%d %p %h:%i'), 'PM', '오후')\n" +
+//                "        ELSE REPLACE(DATE_FORMAT(UO.orderTime, '%Y-%m-%d %p %h:%i'), 'AM', '오전')\n" +
+//                "        END AS orderTime\n" +
+//                "FROM UserOrder UO\n" +
+//                "WHERE UO.userOrderIdx=?";
+
+        // 테스트 환경에서는 실제로 배달이 이루어 지지 않으므로 시간차를 둠.
+        String OrderStatus = "SELECT CASE WHEN TIMESTAMPDIFF(SECOND, UO.orderTime, CURRENT_TIMESTAMP())<30 THEN '주문 수락 됨'\n" +
+                "           WHEN TIMESTAMPDIFF(SECOND, UO.orderTime, CURRENT_TIMESTAMP())<60 THEN '메뉴 준비 중'\n" +
+                "            WHEN TIMESTAMPDIFF(SECOND, UO.orderTime, CURRENT_TIMESTAMP())<90 THEN '배달중'\n" +
+                "        ELSE '배달 완료'\n" +
+                "            END AS status\n" +
+                "       ,\n" +
                 "       CASE\n" +
                 "        WHEN INSTR(DATE_FORMAT(UO.orderTime, '%Y-%m-%d %p %h:%i'), 'PM') > 0\n" +
                 "        THEN REPLACE(DATE_FORMAT(UO.orderTime, '%Y-%m-%d %p %h:%i'), 'PM', '오후')\n" +
@@ -495,7 +512,7 @@ public class OrderDao {
     }
 
     public int checkCartStoreOwner(int cartIdx) {
-        String Query = "SELECT storeIdx FROM Cart WHERE cartIdx=? AND status='Y';";
+        String Query = "SELECT storeIdx FROM Cart WHERE cartIdx=?;";
         return this.jdbcTemplate.queryForObject(Query, int.class, cartIdx);
 
     }

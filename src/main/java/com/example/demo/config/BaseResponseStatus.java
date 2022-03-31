@@ -55,12 +55,12 @@ public enum BaseResponseStatus {
     PUT_CART_PARAM_EMPTY(false, 2101, "가게 idx 혹은 카트 idx를 입력해주세요."),
     EMPTY_STOREIDX_PARAM(false, 2200, "storeIdx를 입력하지 않았습니다."),
     EMPTY_MENUIDX_PARAM(false, 2201, "menuIdx를 입력하지 않았습니다."),
-    EMPTY_OTHER_ADDRESS_IDX(false, 2202, "addressIdx를 입력하지 않았습니다."),
+    EMPTY_ADDRESS_IDX(false, 2202, "addressIdx를 입력하지 않았습니다."),
     EMPTY_POSITION_PARAM(false, 2203, "위도, 혹은 경도를 입력하지 않았습니다."),
     EMPTY_USER_ORDER_IDX_PARAM(false, 2204, "userOrderIdx를 입력하지 않았습니다."),
     PATCH_CART_PARAM_EMPTY(false, 2205, "카트 idx를 입력하지 않았습니다."),
     EMPTY_REVIEWIDX_PARAM(false, 2206, "리뷰 idx를 입력하지 않았습니다."),
-
+    EMPTY_DELIVERY_MAN_OPTION_IDX(false, 2207, "배달기사요청사항 idx를 입력하지 않았습니다."),
     /**
      * 3000 : Response 오류
      */
