@@ -201,6 +201,7 @@ public class StoreController {
         if (userOrderIdx ==0){
             return new BaseResponse<>(EMPTY_USER_ORDER_IDX_PARAM);
         }
+
         // userOrderIdx가 사용자의 idx인지 확인
         if (orderProvider.checkOrderOwner(userIdx, userOrderIdx) == 0){
             return new BaseResponse<>(USER_ORDER_NOT_EXISTS);

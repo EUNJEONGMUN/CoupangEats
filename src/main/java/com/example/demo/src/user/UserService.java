@@ -87,6 +87,7 @@ public class UserService {
             // 사용자에게 바디값으로 받은 비밀번호 암호화
             encryptPwd = new SHA256().encrypt(postSignInReq.getPassword());
             postSignInReq.setPassword(encryptPwd);
+
         } catch (Exception ignored) {
             throw new BaseException(PASSWORD_DECRYPTION_ERROR);
         }

@@ -1157,7 +1157,7 @@ public class StoreDao {
             return this.jdbcTemplate.query(OrderTimeQuery,
                     (rs,rowNum) -> {
                         return rs.getInt("storeIdx");
-                    }, userIdx);
+                    }, userIdx, userIdx);
 
         }
 
@@ -1296,7 +1296,7 @@ public class StoreDao {
     public int checkUserReview(int userIdx, int userOrderIdx) {
         String Query = "SELECT EXISTS(SELECT reviewIdx\n" +
                 "FROM UserOrder UO JOIN Review R on UO.userOrderIdx = R.userOrderIdx\n" +
-                "WHERE UO.userOrderIdx=? AND UO.userIdx=?);";
+                "WHERE UO.userOrderIdx=? AND UO.userIdx=? AND R.status='Y');";
         return this.jdbcTemplate.queryForObject(Query, int.class, userOrderIdx, userIdx);
     }
 

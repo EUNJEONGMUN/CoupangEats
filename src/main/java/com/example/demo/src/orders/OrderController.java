@@ -416,7 +416,7 @@ public class OrderController {
 
 
     /**
-     * 재주문 하기 API
+     * 재주문 새로 하기 API
      * [POST] /orders/delivery/reorder/new?userOrderIdx=
      * /new?userOrderIdx=
      * @return BaseResponse<String>
@@ -447,8 +447,9 @@ public class OrderController {
         }
 
         int cartStoreIdx = orderProvider.checkCartStore(userIdx);
-
-
+        if (cartStoreIdx==0){
+            return new BaseResponse<>(REORDER_CART_NOEXISTS);
+        }
         orderService.reCreateOrder(userIdx, userOrderIdx, cartStoreIdx);
         String result = "";
         return new BaseResponse<>(result);

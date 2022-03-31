@@ -340,9 +340,11 @@ public class OrderDao {
 //                "WHERE UO.userOrderIdx=?";
 
         // 테스트 환경에서는 실제로 배달이 이루어 지지 않으므로 시간차를 둠.
-        String OrderStatus = "SELECT CASE WHEN TIMESTAMPDIFF(SECOND, UO.orderTime, CURRENT_TIMESTAMP())<30 THEN '주문 수락 됨'\n" +
-                "           WHEN TIMESTAMPDIFF(SECOND, UO.orderTime, CURRENT_TIMESTAMP())<60 THEN '메뉴 준비 중'\n" +
+        String OrderStatus = "SELECT CASE WHEN TIMESTAMPDIFF(SECOND, UO.orderTime, CURRENT_TIMESTAMP())<30 THEN '주문 수락됨'\n" +
+                "           WHEN TIMESTAMPDIFF(SECOND, UO.orderTime, CURRENT_TIMESTAMP())<60 THEN '메뉴 준비중'\n" +
                 "            WHEN TIMESTAMPDIFF(SECOND, UO.orderTime, CURRENT_TIMESTAMP())<90 THEN '배달중'\n" +
+                "            WHEN UO.status='E' THEN '고객 주문취소'\n" +
+                "            WHEN UO.status='F' THEN '매장 주문취소'\n" +
                 "        ELSE '배달 완료'\n" +
                 "            END AS status\n" +
                 "       ,\n" +
@@ -352,7 +354,7 @@ public class OrderDao {
                 "        ELSE REPLACE(DATE_FORMAT(UO.orderTime, '%Y-%m-%d %p %h:%i'), 'AM', '오전')\n" +
                 "        END AS orderTime\n" +
                 "FROM UserOrder UO\n" +
-                "WHERE UO.userOrderIdx=?";
+                "WHERE UO.userOrderIdx=?\n";
 
         String isReview = "SELECT EXISTS(SELECT score FROM Review WHERE userOrderIdx=?);";
         String ReviewScore = "SELECT score\n" +
@@ -522,4 +524,6 @@ public class OrderDao {
         String Query = "SELECT EXISTS(SELECT*FROM Cart WHERE cartIdx=? AND status='Y');";
         return this.jdbcTemplate.queryForObject(Query, int.class, cartIdx);
     }
+
+
 }
