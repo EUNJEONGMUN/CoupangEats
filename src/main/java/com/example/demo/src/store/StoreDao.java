@@ -30,7 +30,8 @@ public class StoreDao {
 
         String StoreInfoQuery = "SELECT S.storeIdx, S.storeImgUrl,S.storeName, S.isCheetah, S.timeDelivery, R.reviewScore, R.reviewCount,\n" +
                 "                       S.isToGo, S.isCoupon, S.status, S.minimumPrice, S.buildingName, S.storeAddress, S.storeAddressDetail, DATE_FORMAT(S.createdAt, '%Y-%m-%d %H:%I:%S') AS createdAt,\n" +
-                "       ROUND(ST_DISTANCE_SPHERE(POINT(S.storeLongitude,S.storeLatitude), POINT(?,?))*0.001,1) AS distance\n" +
+                "       ROUND(ST_DISTANCE_SPHERE(POINT(S.storeLongitude,S.storeLatitude), POINT(?,?))*0.001,1) AS distance,\n" +
+                "       CASE WHEN DATEDIFF(S.createdAt, CURRENT_DATE())>14 THEN 'N' ELSE 'Y' END AS isNewStore\n" +
                 "                FROM Store S\n" +
                 "                LEFT JOIN (\n" +
                 "                    SELECT UO.storeIdx, ROUND(AVG(R.score),1) AS reviewScore, COUNT(R.reviewIdx) AS reviewCount\n" +
@@ -128,7 +129,8 @@ public class StoreDao {
                         rs1.getInt("reviewCount"),
                         rs1.getDouble("distance"),
                         orderCount,
-                        deliveryFee
+                        deliveryFee,
+                        rs1.getString("isNewStore")
                 ), Params);
 
 
@@ -447,7 +449,8 @@ public class StoreDao {
         String StoreInfoQuery = "SELECT S.storeIdx, S.storeImgUrl,S.storeName, S.isCheetah, S.timeDelivery, R.reviewScore, R.reviewCount,\n" +
                 "       CASE WHEN S.isToGo='Y' THEN S.timeToGo ELSE 'N' END AS timeToGo,\n" +
                 "       S.isToGo, S.isCoupon, S.status, S.minimumPrice, S.buildingName, S.storeAddress, S.storeAddressDetail,\n" +
-                "       ROUND(ST_DISTANCE_SPHERE(POINT(S.storeLongitude,S.storeLatitude), POINT(?,?))*0.001,1) AS distance\n" +
+                "       ROUND(ST_DISTANCE_SPHERE(POINT(S.storeLongitude,S.storeLatitude), POINT(?,?))*0.001,1) AS distance,\n" +
+                "       CASE WHEN DATEDIFF(S.createdAt, CURRENT_DATE())>14 THEN 'N' ELSE 'Y' END AS isNewStore\n" +
                 "                FROM Store S\n" +
                 "                LEFT JOIN (\n" +
                 "                    SELECT UO.storeIdx, ROUND(AVG(R.score),1) AS reviewScore, COUNT(R.reviewIdx) AS reviewCount\n" +
@@ -552,7 +555,8 @@ public class StoreDao {
                                 storeIdx),
                         this.jdbcTemplate.queryForObject(CouponQuery,
                                 String.class,
-                                storeIdx))
+                                storeIdx),
+                        rs1.getString("isNewStore"))
                 , userLocation.getUserLongitude(), userLocation.getUserLatitude(), storeIdx);
 
     }

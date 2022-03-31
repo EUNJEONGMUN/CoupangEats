@@ -25,4 +25,5 @@ public class GetFavoriteList {
     private String deliveryFee;
 
     private String storeBestCoupon;
+    private String isNewStore;
 }
