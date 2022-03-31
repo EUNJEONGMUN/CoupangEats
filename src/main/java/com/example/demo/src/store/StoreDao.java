@@ -5,7 +5,6 @@ import com.example.demo.src.store.model.Req.PostReviewReq;
 import com.example.demo.src.store.model.Req.PutReviewReq;
 import com.example.demo.src.store.model.Res.*;
 import com.example.demo.src.user.model.UserLocation;
-import org.hibernate.criterion.Order;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Repository;
@@ -444,7 +443,7 @@ public class StoreDao {
      * [GET] /stores/favorite-list
      * @return BaseResponse<List<GetFavoriteListRes>>
      */
-    public GetFavoriteListRes getFavoriteList(int userIdx, int storeIdx, UserLocation userLocation) {
+    public GetFavoriteList getFavoriteList(int userIdx, int storeIdx, UserLocation userLocation, String sort) {
         String StoreInfoQuery = "SELECT S.storeIdx, S.storeImgUrl,S.storeName, S.isCheetah, S.timeDelivery, R.reviewScore, R.reviewCount,\n" +
                 "       CASE WHEN S.isToGo='Y' THEN S.timeToGo ELSE 'N' END AS timeToGo,\n" +
                 "       S.isToGo, S.isCoupon, S.status, S.minimumPrice, S.buildingName, S.storeAddress, S.storeAddressDetail,\n" +
@@ -536,7 +535,7 @@ public class StoreDao {
 //                                userIdx, storeIdx))
 //                , userLocation.getUserLongitude(), userLocation.getUserLatitude(), storeIdx);
         return this.jdbcTemplate.queryForObject(StoreInfoQuery,
-                (rs1, rowNum)-> new GetFavoriteListRes(
+                (rs1, rowNum)-> new GetFavoriteList(
                         rs1.getInt("storeIdx"),
                         rs1.getString("storeImgUrl"),
                         rs1.getString("storeName"),

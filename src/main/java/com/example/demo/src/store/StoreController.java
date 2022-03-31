@@ -414,7 +414,7 @@ public class StoreController {
      */
     @ResponseBody
     @GetMapping("/favorite-list")
-    public BaseResponse<List<GetFavoriteListRes>> getFavoriteList(@RequestParam(required = false, defaultValue = "0") double longitude,
+    public BaseResponse<GetFavoriteListRes> getFavoriteList(@RequestParam(required = false, defaultValue = "0") double longitude,
                                                                   @RequestParam(required = false, defaultValue = "0") double latitude,
                                                                   @RequestParam(required = false, defaultValue = "frequent") String sort) throws BaseException{
         int userIdx= jwtService.getUserIdx();
@@ -432,7 +432,10 @@ public class StoreController {
             userLocation.setUserLatitude(latitude);
         }
 
-        List<GetFavoriteListRes> getFavoriteListRes = storeProvider.getFavoriteList(userIdx, userLocation, sort);
+        if (!(sort.equals("frequent") || sort.equals("recentOrder") || sort.equals("recentAdd"))){
+            return new BaseResponse<>(INVALID_STATUS);
+        }
+        GetFavoriteListRes getFavoriteListRes = storeProvider.getFavoriteList(userIdx, userLocation, sort);
         return new BaseResponse<>(getFavoriteListRes);
 
     }

@@ -9,8 +9,8 @@ Rising Test
   - RDS 데이터베이스 구축
   - localhost:9009 포트 연결 확인
   - ERD 설계 완료
-    - https://aquerytool.com/aquerymain/index/?rurl=e4a2c069-adcf-423d-9e44-11c53c677c0b
-    - passward : a74vd2
+    - URL : https://aquerytool.com/aquerymain/index/?rurl=e32e1de9-4140-40e3-96d1-742fecd4e210&
+    - passward : 8z6s40
 
 ## 2022-03-20 진행상황
       

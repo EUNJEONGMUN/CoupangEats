@@ -1,6 +1,7 @@
 package com.example.demo.src.store;
 
 import com.example.demo.config.BaseException;
+import com.example.demo.src.store.model.GetFavoriteList;
 import com.example.demo.src.store.model.Res.*;
 import com.example.demo.src.store.model.StoreReviewIdx;
 import com.example.demo.src.user.model.UserLocation;
@@ -84,18 +85,18 @@ public class StoreProvider {
      * [GET] /stores/favorite-list
      * @return BaseResponse<List<GetFavoriteListRes>>
      */
-    public List<GetFavoriteListRes> getFavoriteList(int userIdx, UserLocation userLocation, String sort) throws BaseException{
+    public GetFavoriteListRes getFavoriteList(int userIdx, UserLocation userLocation, String sort) throws BaseException{
         try {
 
             List<Integer> storeList = storeDao.getFavoriteStoreIdx(userIdx, sort);
 
-            List<GetFavoriteListRes> getFavoriteListRes = new ArrayList<>();
+            List<GetFavoriteList> getFavoriteList = new ArrayList<>();
             for (int idx: storeList){
-                GetFavoriteListRes favoriteStore = storeDao.getFavoriteList(userIdx, idx, userLocation);
-                getFavoriteListRes.add(favoriteStore);
+                GetFavoriteList favoriteStore = storeDao.getFavoriteList(userIdx, idx, userLocation, sort);
+                getFavoriteList.add(favoriteStore);
             }
 
-            return getFavoriteListRes;
+            return new GetFavoriteListRes(getFavoriteList, sort);
         } catch (Exception exception) {
             System.out.println("getFavoriteList"+exception);
             throw new BaseException(DATABASE_ERROR);
