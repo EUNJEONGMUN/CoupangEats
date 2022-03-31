@@ -5,22 +5,22 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.NotNull;
 @Getter
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
 public class PutAddressReq {
-    @NotNull(message = "not null buildingName")
+    @NotEmpty(message = "not empty buildingName")
     private String buildingName;
 
-    @NotNull(message = "not null address")
+    @NotEmpty(message = "not empty address")
     private String address;
 
-    @NotNull(message = "not null addressDetail")
+    @NotEmpty(message = "not empty addressDetail")
     private String addressDetail;
 
-    @NotNull(message = "not null addressGuide")
     private String addressGuide;
 
     @NotNull(message = "not null addressLongitude")

@@ -91,7 +91,7 @@ public class OrderService {
     }
 
     /**
-     * 배달 카트 수정 삭제 API
+     * 배달 카트 수정 API
      * [PUT] /orders/cart/status
      * /status?storeIdx=&cardIdx=
      * @return BaseResponse<String>

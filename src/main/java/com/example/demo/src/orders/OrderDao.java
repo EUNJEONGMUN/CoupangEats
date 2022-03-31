@@ -101,7 +101,6 @@ public class OrderDao {
         // 가게 정보
         String findStoreIdx = "SELECT storeIdx FROM Cart WHERE status='Y' AND userIdx=? LIMIT 1;";
         int storeIdx = this.jdbcTemplate.queryForObject(findStoreIdx, int.class, userIdx);
-        System.out.println("storeIdx>>"+storeIdx);
 
 
         String storeInfoQuery = "SELECT S.storeIdx, S.storeImgUrl,S.storeName, S.isCheetah, S.timeDelivery,\n" +
@@ -122,7 +121,6 @@ public class OrderDao {
                 "WHERE status='Y' AND userIdx=?\n" +
                 "GROUP BY userIdx;";
         int totalPrice = this.jdbcTemplate.queryForObject(totalPriceQuery, int.class, userIdx);
-        System.out.println("totalPrice>>"+totalPrice);
 
 //        String feeQuery = "SELECT MIN(deliveryFee) AS deliveryFee FROM DeliveryFee WHERE storeIdx=? AND (minPrice<=?<maxPrice OR minPrice<=?);";
 //        Object[] feeParams = new Object[]{storeIdx, totalPrice, totalPrice};
@@ -311,7 +309,6 @@ public class OrderDao {
      */
     public GetDeliveryListRes getUserDelivery(int userIdx, OrderList orderList) {
 
-        System.out.println(">>>>"+orderList.getStoreIdx()+"<<<   >>>" + orderList.getUserOrderIdx()+"<<<   >>>" + orderList.getOrderTime());
         String StoreInfo = "SELECT storeIdx, storeName, storeImgUrl\n" +
                 "FROM Store\n" +
                 "WHERE storeIdx=?";
@@ -414,7 +411,6 @@ public class OrderDao {
                         rs.getString("addressType")
                 ), userAddressIdx);
 
-        System.out.println(orderList.getStoreIdx());
         return this.jdbcTemplate.queryForObject(StoreInfo,
                 (rs, rowNum) -> new GetDeliveryListRes(
                         userDeliveryAddress,

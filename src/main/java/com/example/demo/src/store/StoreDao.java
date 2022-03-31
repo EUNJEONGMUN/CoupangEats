@@ -656,18 +656,15 @@ public class StoreDao {
                     ), idx.getReviewIdx());
         }
 
-        System.out.println("bossReview");
         List<String> reviewImg = this.jdbcTemplate.query(MenuImgQuery,
                 (rs, rowNum) -> { return rs.getString("reviewImgUrl");
                 }, idx.getReviewIdx());
-        System.out.println("reviewImg");
 
         int helpedCount = 0;
         if (this.jdbcTemplate.queryForObject(HelpedCountCheckQuery, int.class, idx.getReviewIdx())!=0){
             helpedCount = this.jdbcTemplate.queryForObject(HelpedCountQuery,
                     int.class, idx.getReviewIdx());
         }
-        System.out.println("helpedCount");
         // 로그인 했을 경우 좋아요 여부 확인
         String myHelped = "N";
         if (userIdx!=0){

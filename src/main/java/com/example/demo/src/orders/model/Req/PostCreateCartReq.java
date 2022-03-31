@@ -15,7 +15,7 @@ import javax.validation.constraints.NotNull;
 public class PostCreateCartReq {
     private String menuOptions;
     private int orderCount;
-    @NotNull(message="not null orderPrice")
+    @NotNull(message="orderPrice를 입력해주세요")
     private int orderPrice; // 옵션 가격까지 합한 가격
 
 }

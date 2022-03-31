@@ -160,9 +160,7 @@ public class UserDao {
         String Query = "SELECT EXISTS(SELECT * FROM User WHERE User.email=? AND User.password=? AND User.status='Y');";
         Object[] Params = new Object[]{email, encryptPwd};
 
-        System.out.println(this.jdbcTemplate.queryForObject(Query,
-                int.class,
-                Params));
+
         return this.jdbcTemplate.queryForObject(Query,
                 int.class,
                 Params);
@@ -380,11 +378,9 @@ public class UserDao {
      * @return BaseResponse<String>
      */
     public UserNowAddressIdx putAddressChoice(int userIdx, int addressIdx) {
-        System.out.println(">>주소지 변경 진입<<");
         String Query = "SELECT EXISTS(SELECT * FROM UserAddress WHERE userIdx=? AND isNowLocation='Y' AND status='Y');";
         int isNowLocationExists = this.jdbcTemplate.queryForObject(Query, int.class, userIdx);
 
-        System.out.println(">>isNowLocationExists<<"+isNowLocationExists);
 
         if (isNowLocationExists != 0){
             String findPastLocationQuery = "SELECT userAddressIdx FROM UserAddress WHERE userIdx=? AND isNowLocation='Y' AND status='Y';";
