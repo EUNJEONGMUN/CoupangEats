@@ -49,7 +49,6 @@ public class UserController {
     /**
      * 회원 가입 API
      * [POST] /users/sign-up
-     *
      * @return BaseResponse<String>
      */
     @ResponseBody
@@ -62,6 +61,7 @@ public class UserController {
             if (!isRegexEmail(postUserReq.getEmail())) {
                 return new BaseResponse<>(POST_USERS_INVALID_EMAIL);
             }
+            // 가입된 회원 확인 - 이메일
             if (userProvider.checkUserByEmail(postUserReq.getEmail()) != 0){
                 return new BaseResponse<>(DUPLICATED_EMAIL);
             }
@@ -72,6 +72,7 @@ public class UserController {
             if (!isRegexPhone(postUserReq.getPhoneNumber())) {
                 return new BaseResponse<>(POST_USERS_INVALID_PHONE);
             }
+            // 가입된 회원 확인 - 휴대폰 번호
             if (userProvider.checkUserByPhone(postUserReq.getPhoneNumber()) != 0){
                 String duplicatedEmail = userProvider.getUserEmailByPhone(postUserReq.getPhoneNumber());
                 return new BaseResponse<>(DUPLICATED_PHONE, duplicatedEmail+" 아이디(이메일)로 가입된 휴대폰 번호입니다.");
@@ -79,11 +80,12 @@ public class UserController {
         }
 
 
-        // 비밀번호 정규식 확인
+        // 비밀번호 정규식 확인 - 문자+숫자/ 문자+특수문자 / 숫자+특수문자 / 문자+숫자+특수문자
         if (!isRegexPwd(postUserReq.getPassword())) {
             return new BaseResponse<>(POST_USERS_INVALID_PWD);
         }
 
+        // 비밀번호 정규식 확인 - 길이
         if (!isRegexPwdLen(postUserReq.getPassword())){
             return new BaseResponse<>(POST_USERS_INVALID_PWD_LEN);
         }
@@ -100,6 +102,7 @@ public class UserController {
             return new BaseResponse<>(PWD_CONTAINS_EMAIL);
         }
 
+        // NULL 값 확인
         if (postUserReq.getEmail()==null){
             return new BaseResponse<>(POST_USERS_EMPTY_EMAIL);
         }
@@ -160,7 +163,7 @@ public class UserController {
     /**
      * 회원 정보 확인 API
      * [POST] /users/check-information
-     * @return BaseResponse<String>
+     * @return BaseResponse<PostUserCheckRes>
      */
     @ResponseBody
     @PostMapping("/check-information")
@@ -180,13 +183,6 @@ public class UserController {
 
         return new BaseResponse<>(postUserCheckRes);
     }
-
-//    /**
-//     * 회원 정보 변경 API
-//     * [POST] /users/profile
-//     * @return BaseResponse<String>
-//     */
-//    public BaseResponse<PostUserCheckRes> checkUser(@Valid @RequestBody PatchUserProfileReq patchUserProfileReq) throws BaseException {
 
 
     /**
@@ -482,7 +478,11 @@ public class UserController {
 
     }
 
-
+    /**
+     * 카카오 로그인 API
+     * [GET] /users/kakao/sign-in
+     * @return BaseResponse<PostSignInRes>
+     */
     @RequestMapping(value="/kakao/sign-in")
     public BaseResponse<PostSignInRes> kakaoSignIn(@RequestParam("code") String code) throws BaseException {
         System.out.println("here");

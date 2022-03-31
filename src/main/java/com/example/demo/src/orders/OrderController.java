@@ -210,9 +210,11 @@ public class OrderController {
             return new BaseResponse<>(PUT_CART_PARAM_EMPTY);
         }
 
-//        if (putModifyCartReq.getStatus()==null){
-//            putModifyCartReq.setStatus("Y");
-//        }
+
+        if (orderProvider.checkCartStoreOwner(cartIdx)!=storeIdx){ // 카트가 속한 가게가 storeIdx와 일치하지 않을 경우
+            return new BaseResponse<>(INCONSISTENCY_CART_OWNER);
+        }
+
 
         String result = "";
         orderService.modifyCart(storeIdx, cartIdx, putModifyCartReq);
@@ -239,6 +241,11 @@ public class OrderController {
         // 카트 사용자 확인
         if(orderProvider.checkCartUser(userIdx, patchCartReq.getCartIdx())==0){
             return new BaseResponse<>(INCONSISTENCY_CART_USER);
+        }
+
+        // 카트 존재여부 확인
+        if(orderProvider.checkCartExists(patchCartReq.getCartIdx())==0){
+            return new BaseResponse<>(EMPTY_CART);
         }
 
         String result = "";

@@ -141,4 +141,24 @@ public class OrderProvider {
             throw new BaseException(DATABASE_ERROR);
         }
     }
+
+    // 카트에 담긴 가게 확인
+    public int checkCartStoreOwner(int cartIdx) throws BaseException {
+        try {
+            return orderDao.checkCartStoreOwner(cartIdx);
+        } catch (Exception exception) {
+            System.out.println("checkCartStoreOwner"+exception);
+            throw new BaseException(DATABASE_ERROR);
+        }
+    }
+
+    // 카트 존재여부 확인
+    public int checkCartExists(int cartIdx) throws BaseException {
+        try {
+            return orderDao.checkCartExists(cartIdx);
+        } catch (Exception exception) {
+            System.out.println("checkCartExists"+exception);
+            throw new BaseException(DATABASE_ERROR);
+        }
+    }
 }

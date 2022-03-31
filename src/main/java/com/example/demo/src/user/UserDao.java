@@ -167,25 +167,17 @@ public class UserDao {
                 int.class,
                 Params);
     }
-//    public User getDeleteUserInfo(int userIdx) {
-//        String Query = "SELECT U.userIdx, U.userName, U.phoneNumber, U.email, U.password\n" +
-//                "FROM User U JOIN UserLocation UL on U.userIdx = UL.userIdx\n" +
-//                "WHERE U.userIdx=? AND U.status='Y';";
-//        Object[] Params = new Object[]{userIdx};
-//
-//
-//        return this.jdbcTemplate.queryForObject(Query,
-//                (rs, rowNum) -> new User(
-//                        rs.getInt("userIdx"),
-//                        rs.getString("userName"),
-//                        rs.getString("phoneNumber"),
-//                        rs.getDouble("userLongitude"),
-//                        rs.getDouble("userLatitude")
-//                ),
-//                Params
-//        );
-//
-//    }
+
+
+    // 가입된 회원 확인 - 이메일
+    public int checkUserByEmail(String email) {
+        String Query = "SELECT EXISTS(SELECT * FROM User WHERE email=? AND status='Y');";
+        return this.jdbcTemplate.queryForObject(Query,
+                int.class,
+                email);
+    }
+
+
     // 사용자 정보 가져오기
     public User getUserInfo(PostSignInReq postSignInReq) {
         String Query = "SELECT U.userIdx, U.userName, U.phoneNumber\n" +
@@ -259,13 +251,7 @@ public class UserDao {
         return this.jdbcTemplate.queryForObject(Query, int.class, addressIdx, userIdx);
     }
 
-    // 가입된 회원 확인 - 이메일
-    public int checkUserByEmail(String email) {
-        String Query = "SELECT EXISTS(SELECT * FROM User WHERE email=?);";
-        return this.jdbcTemplate.queryForObject(Query,
-                int.class,
-                email);
-    }
+
 
     // 휴대폰 번호로 가입된 이메일 가져오기
     public String getUserEmailByPhone(String phoneNumber) {

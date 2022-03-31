@@ -494,4 +494,15 @@ public class OrderDao {
         return this.jdbcTemplate.queryForObject(Query, int.class, cartIdx, userIdx);
     }
 
+    public int checkCartStoreOwner(int cartIdx) {
+        String Query = "SELECT storeIdx FROM Cart WHERE cartIdx=? AND status='Y';";
+        return this.jdbcTemplate.queryForObject(Query, int.class, cartIdx);
+
+    }
+
+    // 카트 존재여부 확인
+    public int checkCartExists(int cartIdx) {
+        String Query = "SELECT EXISTS(SELECT*FROM Cart WHERE cartIdx=? AND status='Y');";
+        return this.jdbcTemplate.queryForObject(Query, int.class, cartIdx);
+    }
 }

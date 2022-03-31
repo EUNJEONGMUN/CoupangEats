@@ -60,6 +60,7 @@ public enum BaseResponseStatus {
     EMPTY_USER_ORDER_IDX_PARAM(false, 2204, "userOrderIdx를 입력하지 않았습니다."),
     PATCH_CART_PARAM_EMPTY(false, 2205, "카트 idx를 입력하지 않았습니다."),
     EMPTY_REVIEWIDX_PARAM(false, 2206, "리뷰 idx를 입력하지 않았습니다."),
+
     /**
      * 3000 : Response 오류
      */
@@ -98,6 +99,10 @@ public enum BaseResponseStatus {
     LIKED_REVIEW_ALREADY(false, 3208, "이미 도움돼요 혹은 도움되지 않아요 한 리뷰입니다."),
     EMPTY_REVIEWIDX(false, 3209, "존재하지 않는 리뷰입니다."),
     EMPTY_LIKED_REVIEW(false, 3210, "도움 돼요 혹은 도움 되지 않아요 한 기록이 없습니다."),
+    INCONSISTENCY_CART_OWNER(false, 3211, "요청하신 가게 idx가 카트에 담긴 가게 idx와 일치하지 않습니다."),
+    EMPTY_CART(false, 3212, "해당 idx의 카트가 존재하지 않습니다."),
+
+
 
     USER_ORDER_NOT_EXISTS(false, 3300, "주문 내역이 존재하지 않습니다."),
     INCONSISTENCY_ORDER_USER(false, 3301, "해당 사용자의 주문 내역이 아닙니다."),
@@ -106,6 +111,7 @@ public enum BaseResponseStatus {
 
     INCONSISTENCY_STORE_STATE(false, 3400, "배달 완료 된 주문만 재주문 할 수 있습니다."),
     USER_ORDER_ALREADY_DELETED(false, 3401, "이미 취소된 주문입니다."),
+
 
 
     /**
