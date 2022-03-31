@@ -34,6 +34,8 @@ public enum BaseResponseStatus {
     EXPIRATION_REFRESH_TOKEN(false, 2012, "RefreshToken의 만료 기간이 지났습니다."),
     INVALID_REFRESH_TOKEN(false, 2014, "유효하지 않은 refresh token 입니다."),
 
+
+
     // [POST] /users
     POST_USERS_EMPTY_EMAIL(false, 2015, "이메일을 입력하세요."),
     POST_USERS_INVALID_EMAIL(false, 2016, "이메일을 올바르게 입력해주세요."),
@@ -51,8 +53,8 @@ public enum BaseResponseStatus {
     POST_USERS_EMPTY_PHONE(false, 2028, "휴대폰 번호를 입력해주세요."),
     INVALID_STATUS(false, 2029, "상태값을 확인해주세요."),
     EMPTY_USER_EMAIL(false, 2030, "존재하지 않는 이메일입니다. 회원가입을 진행해주세요."),
-
-
+    EMPTY_JWT_TOKEN(false, 2031, "JWT 토큰 값이 없습니다."),
+    EMPTY_REFRESH_TOKEN(false, 2032, "REFRESH 토큰 값이 없습니다."),
     // orders
     POST_CART_PARAM_EMPTY(false, 2100, "가게 idx 혹은 메뉴 idx를 입력해주세요."),
     PUT_CART_PARAM_EMPTY(false, 2101, "가게 idx 혹은 카트 idx를 입력해주세요."),

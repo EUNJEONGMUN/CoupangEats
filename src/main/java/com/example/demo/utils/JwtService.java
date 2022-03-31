@@ -90,7 +90,7 @@ public class JwtService {
                     .setSigningKey(Secret.JWT_SECRET_KEY)
                     .parseClaimsJws(accessToken);
         } catch (Exception ignored) {
-            throw new BaseException(INVALID_JWT);
+            throw new BaseException(INVALID_REFRESH_TOKEN);
         }
         return claims.getBody().get("userIdx", Integer.class);
     }

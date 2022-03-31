@@ -512,8 +512,16 @@ public class UserController {
     // 토큰이 만료되었을 때
     @ResponseBody
     @PostMapping("/sign-in/refresh")
-    public BaseResponse<PostSignInRes> refreshToken(@RequestParam(value="X-ACCESS-TOKEN") String token,
-                                                 @RequestParam(value="REFRESH-TOKEN") String refreshToken) throws BaseException {
+    public BaseResponse<PostSignInRes> refreshToken(@RequestParam(value="X-ACCESS-TOKEN", required = false) String token,
+                                                 @RequestParam(value="REFRESH-TOKEN", required = false) String refreshToken) throws BaseException {
+
+        if(token==null){
+            return new BaseResponse<>();
+        }
+        if(refreshToken==null){
+            return new BaseResponse<>();
+        }
+
         PostSignInRes postSignInRes = userService.refreshToken(token, refreshToken);
 
         return new BaseResponse<>(postSignInRes);

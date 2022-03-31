@@ -25,5 +25,5 @@ public class PutReviewUrlReq {
     private Map<Integer, String> reasonForMenu;
     private String isDeliveryManGood;
     private String reasonForDelivery;
-    private List<String> imgUrl;
+    private List<String> imageUrl;
 }
