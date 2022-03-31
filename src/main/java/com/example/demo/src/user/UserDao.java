@@ -167,29 +167,29 @@ public class UserDao {
                 int.class,
                 Params);
     }
-    public User getDeleteUserInfo(int userIdx) {
-        String Query = "SELECT U.userIdx, U.userName, U.phoneNumber, U.email, U.password\n" +
-                "FROM User U JOIN UserLocation UL on U.userIdx = UL.userIdx\n" +
-                "WHERE U.userIdx=? AND U.status='Y';";
-        Object[] Params = new Object[]{userIdx};
-
-
-        return this.jdbcTemplate.queryForObject(Query,
-                (rs, rowNum) -> new User(
-                        rs.getInt("userIdx"),
-                        rs.getString("userName"),
-                        rs.getString("phoneNumber"),
-                        rs.getDouble("userLongitude"),
-                        rs.getDouble("userLatitude")
-                ),
-                Params
-        );
-
-    }
+//    public User getDeleteUserInfo(int userIdx) {
+//        String Query = "SELECT U.userIdx, U.userName, U.phoneNumber, U.email, U.password\n" +
+//                "FROM User U JOIN UserLocation UL on U.userIdx = UL.userIdx\n" +
+//                "WHERE U.userIdx=? AND U.status='Y';";
+//        Object[] Params = new Object[]{userIdx};
+//
+//
+//        return this.jdbcTemplate.queryForObject(Query,
+//                (rs, rowNum) -> new User(
+//                        rs.getInt("userIdx"),
+//                        rs.getString("userName"),
+//                        rs.getString("phoneNumber"),
+//                        rs.getDouble("userLongitude"),
+//                        rs.getDouble("userLatitude")
+//                ),
+//                Params
+//        );
+//
+//    }
     // 사용자 정보 가져오기
     public User getUserInfo(PostSignInReq postSignInReq) {
-        String Query = "SELECT U.userIdx, U.userName, U.phoneNumber, UL.userLongitude, UL.userLatitude\n" +
-                "FROM User U JOIN UserLocation UL on U.userIdx = UL.userIdx\n" +
+        String Query = "SELECT U.userIdx, U.userName, U.phoneNumber\n" +
+                "FROM User U\n" +
                 "WHERE U.email=? AND U.password=?;";
         Object[] Params = new Object[]{postSignInReq.getEmail(), postSignInReq.getPassword()};
 
@@ -199,8 +199,8 @@ public class UserDao {
                         rs.getInt("userIdx"),
                         rs.getString("userName"),
                         rs.getString("phoneNumber"),
-                        rs.getDouble("userLongitude"),
-                        rs.getDouble("userLatitude")
+                        0.0,
+                        0.0
                 ),
                 Params
         );
@@ -209,9 +209,9 @@ public class UserDao {
 
     public User getUserInfoKakao(String email) {
 
-        String Query = "SELECT U.userIdx, U.userName, U.phoneNumber, UL.userLongitude, UL.userLatitude\n" +
-                "FROM User U JOIN UserLocation UL on U.userIdx = UL.userIdx\n" +
-                "WHERE U.email=?";
+        String Query = "SELECT userIdx, userName, phoneNumber\n" +
+                "FROM User\n" +
+                "WHERE email=?;";
 
 
         return this.jdbcTemplate.queryForObject(Query,
@@ -219,8 +219,8 @@ public class UserDao {
                         rs.getInt("userIdx"),
                         rs.getString("userName"),
                         rs.getString("phoneNumber"),
-                        rs.getDouble("userLongitude"),
-                        rs.getDouble("userLatitude")
+                        0.0,
+                        0.0
                 ),
                 email
         );
