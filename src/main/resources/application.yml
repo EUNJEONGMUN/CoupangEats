@@ -13,21 +13,21 @@ spring:
     driver-class-name: com.mysql.cj.jdbc.Driver # mysql 8버전
     # driver-class-name: com.mysql.jdbc.Driver # mysql 5버전
 
-
-  security:
-    oauth2:
-      client:
-        registration:
-          kakao:
-            client-id: 08d5dd6fb5616b5500d65886ff47c7f2
-            redirect-uri: "{baseUrl}/{action}/oauth2/code/{registrationId}" # http://localhost:9009/kakao/login
-            client-authentication-method: POST
-            authorization-grant-type: authorization_code
-            scope: profile_nickname, account_email
-            client-name: Kakao
-        provider:
-          kakao:
-            authorization_uri: https://kauth.kakao.com/oauth/authorize
-            token_uri: https://kauth.kakao.com/oauth/token
-            user-info-uri: https://kapi.kakao.com/v2/user/me
-            user_name_attribute: id
+#
+#  security:
+#    oauth2:
+#      client:
+#        registration:
+#          kakao:
+#            client-id: 08d5dd6fb5616b5500d65886ff47c7f2
+#            redirect-uri: "{baseUrl}/{action}/oauth2/code/{registrationId}" # http://localhost:9009/kakao/login
+#            client-authentication-method: POST
+#            authorization-grant-type: authorization_code
+#            scope: profile_nickname, account_email
+#            client-name: Kakao
+#        provider:
+#          kakao:
+#            authorization_uri: https://kauth.kakao.com/oauth/authorize
+#            token_uri: https://kauth.kakao.com/oauth/token
+#            user-info-uri: https://kapi.kakao.com/v2/user/me
+#            user_name_attribute: id

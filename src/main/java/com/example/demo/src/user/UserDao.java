@@ -207,12 +207,11 @@ public class UserDao {
 
     }
 
-    public User getUserInfoKakao(KakaoUserInfo userInfo) {
+    public User getUserInfoKakao(String email) {
 
         String Query = "SELECT U.userIdx, U.userName, U.phoneNumber, UL.userLongitude, UL.userLatitude\n" +
                 "FROM User U JOIN UserLocation UL on U.userIdx = UL.userIdx\n" +
-                "WHERE U.email=? AND U.userName=?";
-        Object[] Params = new Object[]{userInfo.getEmail(), userInfo.getNickname()};
+                "WHERE U.email=?";
 
 
         return this.jdbcTemplate.queryForObject(Query,
@@ -223,7 +222,7 @@ public class UserDao {
                         rs.getDouble("userLongitude"),
                         rs.getDouble("userLatitude")
                 ),
-                Params
+                email
         );
 
 

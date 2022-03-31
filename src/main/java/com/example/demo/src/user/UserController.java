@@ -2,10 +2,14 @@ package com.example.demo.src.user;
 
 import com.example.demo.config.BaseException;
 import com.example.demo.config.BaseResponse;
+import com.example.demo.src.kakao.KakaoService;
+import com.example.demo.src.kakao.model.KakaoUserInfo;
 import com.example.demo.src.user.model.Req.PostAddressReq;
 import com.example.demo.src.user.model.Req.*;
 import com.example.demo.src.user.model.Res.*;
+import com.example.demo.src.user.model.User;
 import com.example.demo.src.user.model.UserNowAddressIdx;
+import com.example.demo.src.user.model.UserNowAddressInfo;
 import com.example.demo.utils.JwtService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -32,11 +36,14 @@ public class UserController {
     private final UserService userService;
     @Autowired
     private final JwtService jwtService;
+    @Autowired
+    private final KakaoService kakaoService;
 
-    public UserController(UserProvider userProvider, UserService userService, JwtService jwtService) {
+    public UserController(UserProvider userProvider, UserService userService, JwtService jwtService,KakaoService kakaoService) {
         this.userProvider = userProvider;
         this.userService = userService;
         this.jwtService = jwtService;
+        this.kakaoService = kakaoService;
     }
 
     /**
@@ -474,4 +481,28 @@ public class UserController {
         return new BaseResponse<>(new PostMessageCheckRes(true));
 
     }
+
+
+    @RequestMapping(value="/kakao/sign-in")
+    public BaseResponse<PostSignInRes> kakaoSignIn(@RequestParam("code") String code) throws BaseException {
+        System.out.println("here");
+        System.out.println(">>>>"+code+"<<<");
+
+        KakaoUserInfo userInfo = kakaoService.signIn(code);
+        if (userInfo.getEmail()==null || userProvider.checkUserByEmail(userInfo.getEmail()) == 0){
+            return new BaseResponse<>(EMPTY_USER_EMAIL);
+        }
+
+        User user = userProvider.getUserInfoKakao(userInfo.getEmail());
+
+        int userIdx = user.getUserIdx();
+        String jwt = jwtService.createJwt(userIdx);
+
+        UserNowAddressInfo userNowAddressInfo = userProvider.getUserNowInfo(userIdx);
+
+        return new BaseResponse<>(new PostSignInRes(userIdx,jwt, userNowAddressInfo));
+
+    }
+
+
 }

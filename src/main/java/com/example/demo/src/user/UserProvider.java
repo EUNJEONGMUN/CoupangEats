@@ -4,6 +4,7 @@ import com.example.demo.config.BaseException;
 import com.example.demo.src.user.model.Res.GetMyEatsRes;
 import com.example.demo.src.user.model.Res.GetUserAddressRes;
 import com.example.demo.src.user.model.Res.GetUserCouponListRes;
+import com.example.demo.src.user.model.User;
 import com.example.demo.src.user.model.UserNowAddressInfo;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -252,4 +253,15 @@ public class UserProvider {
         }
     }
 
+    // 카카오 소셜 로그인
+    public User getUserInfoKakao(String email)  throws BaseException {
+        try {
+            User user = userDao.getUserInfoKakao(email);
+            return user;
+        } catch (Exception exception){
+            System.out.println("getUserInfoKakao"+exception);
+            throw new BaseException(DATABASE_ERROR);
+        }
+
+    }
 }
