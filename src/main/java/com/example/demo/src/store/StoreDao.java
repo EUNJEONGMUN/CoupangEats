@@ -479,7 +479,12 @@ public class StoreDao {
                 "                                    WHERE RankRow.a <= 1) C ON C.storeIdx = S.storeIdx\n" +
                 "                WHERE S.storeIdx = ?;";
 
-
+        String StoreImageQuery = "SELECT RankRow.imageUrl\n" +
+                "FROM (SELECT*, RANK() OVER (PARTITION BY SI.storeIdX ORDER BY SI.storeImageIdx) AS a\n" +
+                "      FROM StoreImage SI\n" +
+                "     ) AS RankRow\n" +
+                "WHERE RankRow.a <= 1 AND RankRow.storeIdx=?;";
+        String storeImgUrl = this.jdbcTemplate.queryForObject(StoreImageQuery, String.class, storeIdx);
 //        String MyOrderCountQuery = "SELECT COUNT(*)\n" +
 //                "FROM UserOrder\n" +
 //                "WHERE userIdx=? AND storeIdx=? AND status!='N' AND status!='F' AND status!='E';";
@@ -540,7 +545,7 @@ public class StoreDao {
         return this.jdbcTemplate.queryForObject(StoreInfoQuery,
                 (rs1, rowNum)-> new GetFavoriteList(
                         rs1.getInt("storeIdx"),
-                        rs1.getString("storeImgUrl"),
+                        storeImgUrl,
                         rs1.getString("storeName"),
                         rs1.getString("isCheetah"),
                         rs1.getString("timeDelivery"),
