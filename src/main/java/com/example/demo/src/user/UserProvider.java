@@ -1,6 +1,7 @@
 package com.example.demo.src.user;
 
 import com.example.demo.config.BaseException;
+import com.example.demo.src.user.model.Res.GetMyEatsRes;
 import com.example.demo.src.user.model.Res.GetUserAddressRes;
 import com.example.demo.src.user.model.Res.GetUserCouponListRes;
 import com.example.demo.src.user.model.UserNowAddressInfo;
@@ -205,6 +206,24 @@ public class UserProvider {
         }
     }
 
+
+    /**
+     * 마이 이츠 조회 API
+     * [GET] /users/my-eats
+     * @return BaseResponse<GetMyEatsRes>
+     */
+    public GetMyEatsRes getMyEats(int userIdx) throws BaseException {
+        try {
+            GetMyEatsRes getMyEatsRes = userDao.getMyEats(userIdx);
+            return getMyEatsRes;
+        } catch (Exception exception){
+            System.out.println("getMyEats"+exception);
+            throw new BaseException(DATABASE_ERROR);
+        }
+    }
+
+
+
     /**
      * 휴대폰 인증번호 확인 API - 인증 시간 확인
      * [POST] /users/message/check
@@ -232,4 +251,5 @@ public class UserProvider {
             throw new BaseException(DATABASE_ERROR);
         }
     }
+
 }

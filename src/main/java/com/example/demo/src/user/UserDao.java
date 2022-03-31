@@ -3,6 +3,7 @@ package com.example.demo.src.user;
 import com.example.demo.src.kakao.model.KakaoUserInfo;
 import com.example.demo.src.user.model.*;
 import com.example.demo.src.user.model.Req.*;
+import com.example.demo.src.user.model.Res.GetMyEatsRes;
 import com.example.demo.src.user.model.Res.GetUserAddressRes;
 import com.example.demo.src.user.model.Res.GetUserCouponListRes;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -468,6 +469,42 @@ public class UserDao {
 
     }
 
+    /**
+     * 마이 이츠 조회 API
+     * [GET] /users/my-eats
+     * @return BaseResponse<GetMyEatsRes>
+     */
+    public GetMyEatsRes getMyEats(int userIdx) {
+        String Query = "SELECT userName, phoneNumber FROM User WHERE userIdx=?";
+        String CouponQuery = "SELECT COUNT(*) AS couponCount\n" +
+                "FROM UserCoupon UC JOIN Coupon C on UC.couponIdx = C.couponIdx\n" +
+                "WHERE UC.userIdx=? AND UC.status='Y' AND DATEDIFF(endDate, CURRENT_DATE())>=0 AND C.status='Y';";
+
+        UserInfo userInfo = this.jdbcTemplate.queryForObject(Query,
+                                (rs, rowNum) -> new UserInfo(
+                                        rs.getString("userName"),
+                                        rs.getString("phoneNumber")
+                                ), userIdx);
+        int couponCount = this.jdbcTemplate.queryForObject(CouponQuery, int.class, userIdx);
+
+        String phoneNumber = userInfo.getPhoneNumber();
+        String marking = "";
+        if (phoneNumber.length()!=11){
+            String first = phoneNumber.substring(0,3);
+            String last = phoneNumber.substring(6,10);
+            marking = first+"-***-"+last;
+        } else {
+            String first = phoneNumber.substring(0,3);
+            String last = phoneNumber.substring(7,11);
+            marking = first+"-****-"+last;
+        }
+
+
+        return new GetMyEatsRes(userInfo.getUserName(), marking,couponCount);
+    }
+
+
+
     // 사용자 쿠폰 확인
     public int checkUserCoupon(int userIdx, int couponIdx) {
         String Query ="SELECT EXISTS(SELECT * FROM UserCoupon WHERE (status='Y' OR status='U') AND userIdx=? AND couponIdx=?);";
@@ -521,4 +558,5 @@ public class UserDao {
         }
         return true;
     }
+
 }

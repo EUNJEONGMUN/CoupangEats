@@ -594,6 +594,12 @@ public class StoreDao {
                 "FROM Review R JOIN UserOrder UO on R.userOrderIdx = UO.userOrderIdx\n" +
                 "WHERE R.reviewIdx=? AND R.status='Y';";
 
+        String HelpedCountCheckQuery = "SELECT EXISTS(SELECT COUNT(RL.isHelped) AS helpedCount\n" +
+                "                FROM ReviewLiked RL\n" +
+                "                WHERE RL.isHelped='G' AND RL.reviewIdx=?\n" +
+                "                GROUP BY RL.reviewIdx\n" +
+                "                ORDER BY COUNT(RL.isHelped) DESC);";
+
         String HelpedCountQuery = "SELECT COUNT(RL.isHelped) AS helpedCount\n" +
                 "FROM ReviewLiked RL\n" +
                 "WHERE RL.isHelped='G' AND RL.reviewIdx=?\n" +
@@ -648,8 +654,11 @@ public class StoreDao {
                 }, idx.getReviewIdx());
         System.out.println("reviewImg");
 
-        int helpedCount = this.jdbcTemplate.queryForObject(HelpedCountQuery,
-                int.class, idx.getReviewIdx());
+        int helpedCount = 0;
+        if (this.jdbcTemplate.queryForObject(HelpedCountCheckQuery, int.class, idx.getReviewIdx())!=0){
+            helpedCount = this.jdbcTemplate.queryForObject(HelpedCountQuery,
+                    int.class, idx.getReviewIdx());
+        }
         System.out.println("helpedCount");
         // 로그인 했을 경우 좋아요 여부 확인
         String myHelped = "N";
@@ -678,6 +687,7 @@ public class StoreDao {
 
         BossReview finalBossReview = bossReview;
         String finalReviewUserName = reviewUserName;
+        int finalHelpedCount = helpedCount;
         return this.jdbcTemplate.queryForObject(ReviewInfoQuery,
                 (rs1, rowNum1) -> new GetStoreReviewListRes(
                         finalReviewUserName,
@@ -690,7 +700,7 @@ public class StoreDao {
                                 String.class, idx.getUserOrderIdx()),
                         reviewImg,
                         finalBossReview,
-                        helpedCount,
+                        finalHelpedCount,
                         isMyHelped,
                         isMyReview,
                         rs1.getString("isPhotoReview")

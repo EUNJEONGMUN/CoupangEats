@@ -386,6 +386,26 @@ public class UserController {
 
 
     /**
+     * 마이 이츠 조회 API
+     * [GET] /users/my-eats
+     * @return BaseResponse<GetMyEatsRes>
+     */
+    @ResponseBody
+    @GetMapping("/my-eats")
+    public BaseResponse<GetMyEatsRes> getMyEats()throws BaseException {
+        int userIdx= jwtService.getUserIdx();
+        if (userProvider.checkUser(userIdx)==0){
+            return new BaseResponse<>(USER_NOT_EXISTS);
+        }
+
+        GetMyEatsRes getMyEatsRes = userProvider.getMyEats(userIdx);
+
+        return new BaseResponse<>(getMyEatsRes);
+    }
+
+
+
+    /**
      * 휴대폰 인증 API
      * [POST] /users/message
      * @return BaseResponse<String>
@@ -405,7 +425,7 @@ public class UserController {
         //  난수 생성
         Random rand  = new Random();
         String numStr = "";
-        for(int i=0; i<4; i++) {
+        for(int i=0; i<6; i++) {
             String ran = Integer.toString(rand.nextInt(10));
             numStr+=ran;
         }
