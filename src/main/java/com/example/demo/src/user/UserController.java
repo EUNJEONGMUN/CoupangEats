@@ -516,10 +516,10 @@ public class UserController {
                                                  @RequestParam(value="REFRESH-TOKEN", required = false) String refreshToken) throws BaseException {
 
         if(token==null){
-            return new BaseResponse<>();
+            return new BaseResponse<>(EMPTY_JWT_TOKEN);
         }
         if(refreshToken==null){
-            return new BaseResponse<>();
+            return new BaseResponse<>(EMPTY_REFRESH_TOKEN);
         }
 
         PostSignInRes postSignInRes = userService.refreshToken(token, refreshToken);
