@@ -30,6 +30,9 @@ public enum BaseResponseStatus {
     NOT_NULL(false, 2010, "NOT_NULL"),
     // users
     USERS_EMPTY_USER_ID(false, 2010, "유저 아이디 값을 확인해주세요."),
+    NOT_EXPIRATION_TOKEN(false, 2011, "JWTToken의 유효기간이 지나지 않았습니다."),
+    EXPIRATION_REFRESH_TOKEN(false, 2012, "RefreshToken의 만료 기간이 지났습니다."),
+    INVALID_REFRESH_TOKEN(false, 2014, "유효하지 않은 refresh token 입니다."),
 
     // [POST] /users
     POST_USERS_EMPTY_EMAIL(false, 2015, "이메일을 입력하세요."),

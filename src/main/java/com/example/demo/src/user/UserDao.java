@@ -1,6 +1,5 @@
 package com.example.demo.src.user;
 
-import com.example.demo.src.kakao.model.KakaoUserInfo;
 import com.example.demo.src.user.model.*;
 import com.example.demo.src.user.model.Req.*;
 import com.example.demo.src.user.model.Res.GetMyEatsRes;
@@ -11,7 +10,6 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Repository;
 
 import javax.sql.DataSource;
-import java.sql.Timestamp;
 import java.util.List;
 
 @Repository
@@ -540,4 +538,16 @@ public class UserDao {
         return true;
     }
 
+    // 리프레시 토큰 저장
+    public void saveUserRefreshToken(String refreshToken, int userIdx) {
+        String Query = "UPDATE User SET refreshToken=? WHERE userIdx=?;";
+        this.jdbcTemplate.update(Query, refreshToken, userIdx);
+        return;
+    }
+
+    // 리프레시 토큰 찾기
+    public String findRefreshToken(int userIdx) {
+        String Query = "SELECT refreshToken FROM User WHERE userIdx=?";
+        return this.jdbcTemplate.queryForObject(Query, String.class, userIdx);
+    }
 }

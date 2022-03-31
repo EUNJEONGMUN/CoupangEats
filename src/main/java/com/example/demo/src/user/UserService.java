@@ -4,6 +4,7 @@ import com.example.demo.config.BaseException;
 import com.example.demo.src.user.model.Req.PostAddressReq;
 import com.example.demo.src.user.model.Req.*;
 import com.example.demo.src.user.model.Res.PostSignInRes;
+import com.example.demo.src.user.model.SignInUser;
 import com.example.demo.src.user.model.User;
 import com.example.demo.src.user.model.UserNowAddressIdx;
 import com.example.demo.src.user.model.UserNowAddressInfo;
@@ -14,7 +15,6 @@ import org.json.simple.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.core.parameters.P;
 import org.springframework.stereotype.Service;
 import com.example.demo.utils.SHA256;
 
@@ -106,9 +106,12 @@ public class UserService {
             int userIdx = user.getUserIdx();
             String jwt = jwtService.createJwt(userIdx);
 
+            String refreshToken = jwtService.createRefreshToken(userIdx);
+            userDao.saveUserRefreshToken(refreshToken, userIdx); // 저장
+
             UserNowAddressInfo userNowAddressInfo = userProvider.getUserNowInfo(userIdx);
 
-            return new PostSignInRes(userIdx,jwt, userNowAddressInfo);
+            return new PostSignInRes(userIdx,jwt,refreshToken,userNowAddressInfo);
         } catch (Exception exception) {
             throw new BaseException(DATABASE_ERROR);
         }
@@ -303,5 +306,35 @@ public class UserService {
             System.out.println("certifiedPhoneNumberSave"+exception);
             throw new BaseException(DATABASE_ERROR);
         }
+    }
+
+    // access token 재발급
+    public PostSignInRes refreshToken(String token,String refreshToken) throws BaseException {
+
+        System.out.println(refreshToken);
+//        String token = jwtService.getJwt();
+        if(!jwtService.validateTokenExceptExpiration(token)) throw new BaseException(NOT_EXPIRATION_TOKEN);
+
+        System.out.println("여기");
+
+        int userIdx = jwtService.getUserIdxToken(refreshToken);
+        System.out.println("userIdx>>>"+userIdx);
+
+        String dbRefreshToken = userDao.findRefreshToken(userIdx);
+        String newJwtToken = jwtService.createJwt(userIdx);
+
+        UserNowAddressInfo userNowAddressInfo = userProvider.getUserNowInfo(userIdx);
+
+
+        if(!refreshToken.equals(dbRefreshToken)){
+            throw new BaseException(INVALID_REFRESH_TOKEN);
+        }
+        if (!jwtService.validateTokenExceptExpiration(dbRefreshToken)){
+            return new PostSignInRes(userIdx,newJwtToken,dbRefreshToken,userNowAddressInfo);
+        }
+        String newRefreshToken =  jwtService.createRefreshToken(userIdx);
+        userDao.saveUserRefreshToken(newRefreshToken, userIdx);
+
+        return new PostSignInRes(userIdx,newJwtToken,newRefreshToken,userNowAddressInfo);
     }
 }

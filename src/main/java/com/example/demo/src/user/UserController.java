@@ -7,6 +7,7 @@ import com.example.demo.src.kakao.model.KakaoUserInfo;
 import com.example.demo.src.user.model.Req.PostAddressReq;
 import com.example.demo.src.user.model.Req.*;
 import com.example.demo.src.user.model.Res.*;
+import com.example.demo.src.user.model.SignInUser;
 import com.example.demo.src.user.model.User;
 import com.example.demo.src.user.model.UserNowAddressIdx;
 import com.example.demo.src.user.model.UserNowAddressInfo;
@@ -484,7 +485,7 @@ public class UserController {
      * @return BaseResponse<PostSignInRes>
      */
     @RequestMapping(value="/kakao/sign-in")
-    public BaseResponse<PostSignInRes> kakaoSignIn(@RequestParam("code") String code) throws BaseException {
+    public BaseResponse<PostKakaoSignInRes> kakaoSignIn(@RequestParam("code") String code) throws BaseException {
         System.out.println("here");
         System.out.println(">>>>"+code+"<<<");
 
@@ -500,9 +501,21 @@ public class UserController {
 
         UserNowAddressInfo userNowAddressInfo = userProvider.getUserNowInfo(userIdx);
 
-        return new BaseResponse<>(new PostSignInRes(userIdx,jwt, userNowAddressInfo));
+        return new BaseResponse<>(new PostKakaoSignInRes(userIdx,jwt, userNowAddressInfo));
 
     }
 
+//    @ApiImplicitParams({
+//            @ApiImplicitParam(name = "X-AUTH-TOKEN", value = "access-token", required = true, dataType = "String", paramType = "header"),
+//            @ApiImplicitParam(name = "REFRESH-TOKEN", value = "refresh-token", required = true, dataType = "String", paramType = "header")
+//    })
+    // 토큰이 만료되었을 때
+    @ResponseBody
+    @PostMapping("/sign-in/refresh")
+    public BaseResponse<PostSignInRes> refreshToken(@RequestParam(value="X-ACCESS-TOKEN") String token,
+                                                 @RequestParam(value="REFRESH-TOKEN") String refreshToken) throws BaseException {
+        PostSignInRes postSignInRes = userService.refreshToken(token, refreshToken);
 
+        return new BaseResponse<>(postSignInRes);
+    }
 }
