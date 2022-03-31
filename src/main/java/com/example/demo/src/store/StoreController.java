@@ -404,7 +404,7 @@ public class StoreController {
         }
 
 
-        storeService.modifyReviewUrl(userIdx, reviewIdx, putReviewUrlReq, putReviewUrlReq.getImgUrl());
+        storeService.modifyReviewUrl(userIdx, reviewIdx, putReviewUrlReq, putReviewUrlReq.getImageUrl());
         String result = "";
         return new BaseResponse<>(result);
 
