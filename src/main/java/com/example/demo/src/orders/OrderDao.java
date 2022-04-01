@@ -309,6 +309,14 @@ public class OrderDao {
      */
     public GetDeliveryListRes getUserDelivery(int userIdx, OrderList orderList) {
 
+        String StoreImageQuery = "SELECT RankRow.imageUrl\n" +
+                "FROM (SELECT*, RANK() OVER (PARTITION BY SI.storeIdX ORDER BY SI.storeImageIdx) AS a\n" +
+                "      FROM StoreImage SI\n" +
+                "     ) AS RankRow\n" +
+                "WHERE RankRow.a <= 1 AND RankRow.storeIdx=?;";
+        String storeImgUrl = this.jdbcTemplate.queryForObject(StoreImageQuery, String.class, orderList.getStoreIdx());
+
+
         String StoreInfo = "SELECT storeIdx, storeName, storeImgUrl\n" +
                 "FROM Store\n" +
                 "WHERE storeIdx=?";
@@ -416,7 +424,7 @@ public class OrderDao {
                         userDeliveryAddress,
                         orderList.getUserOrderIdx(),
                         rs.getInt("storeIdx"),
-                        rs.getString("storeImgUrl"),
+                        storeImgUrl,
                         rs.getString("storeName"),
                         orderStatus.getOrderTime(),
                         orderStatus.getStatus(),
