@@ -88,23 +88,6 @@ public class StoreService {
         }
     }
 
-    /**
-     * 리뷰 작성 API
-     * [POST] /stores/review/new?userOrderIdx=
-     * /new?userOrderIdx=
-     * @return BaseResponse<String>
-     */
-    public void createReviewUrl(int userIdx, int userOrderIdx, PostReviewUrlReq postReviewUrlReq, List<String> imageList) throws BaseException {
-        try {
-            int result = storeDao.createReviewUrl(userIdx, userOrderIdx, postReviewUrlReq, imageList);
-            if (result == FAIL){
-                throw new BaseException(FAIL_POST_REVIEW);
-            }
-        } catch (Exception exception) {
-            System.out.println("deleteFavoriteStore"+exception);
-            throw new BaseException(DATABASE_ERROR);
-        }
-    }
 
 
 
@@ -117,24 +100,6 @@ public class StoreService {
     public void modifyReview(int userIdx, int reviewIdx, PutReviewReq putReviewReq, List<String> imageList) throws BaseException {
         try {
             int result = storeDao.modifyReview(userIdx, reviewIdx, putReviewReq, imageList);
-            if (result == FAIL){
-                throw new BaseException(FAIL_MODIFY_REVIEW);
-            }
-        } catch (Exception exception) {
-            System.out.println("deleteFavoriteStore"+exception);
-            throw new BaseException(DATABASE_ERROR);
-        }
-
-    }
-
-    /**
-     * 리뷰 수정 API -url
-     * [PUT] /stores/review?reviewIdx=
-     * @return BaseResponse<String>
-     */
-    public void modifyReviewUrl(int userIdx, int reviewIdx, PutReviewUrlReq putReviewUrlReq, List<String> imageList) throws BaseException {
-        try {
-            int result = storeDao.modifyReviewUrl(userIdx, reviewIdx, putReviewUrlReq, imageList);
             if (result == FAIL){
                 throw new BaseException(FAIL_MODIFY_REVIEW);
             }

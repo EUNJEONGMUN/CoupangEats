@@ -274,53 +274,6 @@ public class StoreController {
     }
 
 
-    /**
-     * 리뷰 작성 API - url
-     * [POST] /stores/review/new
-     * @return BaseResponse<String>
-     */
-    @ResponseBody
-    @PostMapping("/review/new/url")
-    public BaseResponse<String> createReviewUrl(PostReviewUrlReq postReviewUrlReq) throws BaseException, IOException {
-
-        int userIdx= jwtService.getUserIdx();
-
-        // 사용자 존재 여부 확인
-        if (userProvider.checkUser(userIdx)==0){
-            return new BaseResponse<>(USER_NOT_EXISTS);
-        }
-
-        if (postReviewUrlReq.getUserOrderIdx() ==0){
-            return new BaseResponse<>(EMPTY_USER_ORDER_IDX_PARAM);
-        }
-        // 주문 존재 여부 확인
-        if (orderProvider.checkOrder(postReviewUrlReq.getUserOrderIdx())==0){
-            return new BaseResponse<>(USER_ORDER_NOT_EXISTS);
-        }
-
-        // 주문 소유자 확인
-        if (orderProvider.checkOrderOwner(userIdx, postReviewUrlReq.getUserOrderIdx())==0){
-            return new BaseResponse<>(INCONSISTENCY_ORDER_USER);
-        }
-
-        // 리뷰 작성여부 확인
-        //
-        if (storeProvider.checkUserReview(userIdx, postReviewUrlReq.getUserOrderIdx()) != 0){
-            return new BaseResponse<>(REVIEW_ALREADY_EXISTS);
-        }
-
-        // 리뷰 작성 기한 확인
-        if (!storeProvider.checkOrderTime(postReviewUrlReq.getUserOrderIdx())){
-            return new BaseResponse<>(EXPIRATION_OR_REVIEW);
-        }
-
-        storeService.createReviewUrl(userIdx, postReviewUrlReq.getUserOrderIdx(), postReviewUrlReq, postReviewUrlReq.getImageUrl());
-        String result = "";
-        return new BaseResponse<>(result);
-
-
-    }
-
 
 
 
@@ -368,43 +321,6 @@ public class StoreController {
         }
 
         storeService.modifyReview(userIdx, reviewIdx, putReviewReq, imageList);
-        String result = "";
-        return new BaseResponse<>(result);
-
-
-    }
-    /**
-     * 리뷰 수정 API - url
-     * [PUT] /stores/review
-     * @return BaseResponse<String>
-     */
-    @ResponseBody
-    @PutMapping("/review/url")
-    public BaseResponse<String> modifyReviewUrl(PutReviewUrlReq putReviewUrlReq) throws BaseException, IOException {
-        int userIdx= jwtService.getUserIdx();
-
-        // 사용자 존재 여부 확인
-        if (userProvider.checkUser(userIdx)==0){
-            return new BaseResponse<>(USER_NOT_EXISTS);
-        }
-        // 리뷰 아이디 찾기
-        int reviewIdx = storeProvider.findReviewIdx(putReviewUrlReq.getUserOrderIdx());
-        if (reviewIdx==0){
-            return new BaseResponse<>(REVIEW_NOT_EXISTS);
-        }
-
-        // 리뷰 작성자 확인
-        if (storeProvider.checkReviewOwner(userIdx, reviewIdx)==0){
-            return new BaseResponse<>(INCONSISTENCY_REVIEW_USER);
-        }
-
-        // 리뷰 수정 가능 기간 확인
-        if (!storeProvider.checkReviewUploadTime(reviewIdx)){
-            return new BaseResponse<>(EXPIRATION_OF_REVIEW_EDIT);
-        }
-
-
-        storeService.modifyReviewUrl(userIdx, reviewIdx, putReviewUrlReq, putReviewUrlReq.getImageUrl());
         String result = "";
         return new BaseResponse<>(result);
 
