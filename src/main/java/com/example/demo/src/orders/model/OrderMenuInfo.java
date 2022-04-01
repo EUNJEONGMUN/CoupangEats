@@ -15,5 +15,6 @@ public class OrderMenuInfo {
     private String menuName;
     private String menuOptions;
     private String isGood;
+    private int mulPrice;
 
 }

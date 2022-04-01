@@ -366,8 +366,7 @@ public class OrderDao {
                 "FROM Review\n" +
                 "WHERE userOrderIdx=?;";
 
-
-        String OrderMenuInfoQuery = "SELECT M.menuName, C.menuOptions, C.orderCount, OrderMenu.cartIdx, OrderMenu.isGood\n" +
+        String OrderMenuInfoQuery = "SELECT M.menuName, C.menuOptions, C.orderCount, OrderMenu.cartIdx, C.orderPrice*C.orderCount AS mulPrice, OrderMenu.isGood\n" +
                 "FROM Cart C JOIN (\n" +
                 "        SELECT CTO.userIdx, CTO.cartIdx, UO.orderTime, CTO.isGood, UO.status\n" +
                 "        FROM UserOrder UO JOIN CartToOrder CTO on UO.orderTime = CTO.orderTime\n" +
@@ -436,7 +435,8 @@ public class OrderDao {
                                         rs2.getInt("orderCount"),
                                         rs2.getString("menuName"),
                                         rs2.getString("menuOptions"),
-                                        rs2.getString("isGood")
+                                        rs2.getString("isGood"),
+                                        rs2.getInt("mulPrice")
                                 ),Params)
                 ), orderList.getStoreIdx());
 
