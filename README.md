@@ -244,3 +244,6 @@ Rising Test
   - 영업시간(BusinessHours) 테이블추가 
   - 메뉴 판매 상태 추가 : Y: 판매중, N: 삭제, T(today): 오늘만 품절, S(sold out): 품절, H(hidden): 메뉴 숨김 
   - 옵션 판매 시작시간, 종료시간 칼럼 추가(시간한정메뉴)
+
+### 2022-04-07 진행상황
+- dao interface 생성
