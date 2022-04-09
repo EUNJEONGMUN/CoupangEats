@@ -2,9 +2,7 @@ package com.example.demo.src.store;
 
 import com.example.demo.src.store.model.*;
 import com.example.demo.src.store.model.Req.PostReviewReq;
-import com.example.demo.src.store.model.Req.PostReviewUrlReq;
 import com.example.demo.src.store.model.Req.PutReviewReq;
-import com.example.demo.src.store.model.Req.PutReviewUrlReq;
 import com.example.demo.src.store.model.Res.*;
 import com.example.demo.src.user.model.UserLocation;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -12,6 +10,7 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Repository;
 
 import javax.sql.DataSource;
+import java.sql.Time;
 import java.util.*;
 
 @Repository
@@ -145,6 +144,38 @@ public class StoreDao {
 
         return new GetStoreHomeRes(storeInfo, storeBestCoupon);
     }
+
+//    public String getBusinessHours(int storeIdx){
+//        String Query = "SELECT CASE\n" +
+//                "    WHEN NOW()>=opentime AND NOW()<=closeTime THEN '영업중'\n" +
+//                "    ELSE '영업 종료'\n" +
+//                "    END AS status\n" +
+//                "FROM BusinessHours\n" +
+//                "WHERE storeIdx=? AND status='Y' AND day=DAYOFWEEK(NOW());";
+//
+//        String Query2 = "SELECT day, openTime\n" +
+//                "FROM BusinessHours\n" +
+//                "WHERE storeIdx=? AND status='Y';";
+//
+//        String result = this.jdbcTemplate.queryForObject(Query, String.class, storeIdx);
+//        if (result.equals("영업중")){
+//           return result;
+//        }
+//
+//        List<BusinessTime> businessTime = this.jdbcTemplate.query(Query2,
+//                (rs, rowNum) -> new BusinessTime(
+//                        rs.getInt("day"),
+//                        rs.getTime("openTime")
+//                ), storeIdx);
+//
+//
+//        Calendar cal = Calendar.getInstance();
+//        int today = cal.get(Calendar.DAY_OF_WEEK);
+//
+//
+//
+//
+//    }
 
     /**
      * 가게 상세 화면 조회 API
