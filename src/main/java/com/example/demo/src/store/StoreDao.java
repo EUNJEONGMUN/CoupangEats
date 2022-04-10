@@ -223,9 +223,14 @@ public class StoreDao {
                 "FROM MenuCategory MC\n" +
                 "WHERE MC.storeIdx=? AND MC.status='Y';";
 
-        String MenuDetailQuery = "SELECT menuIdx, menuName, menuPrice, menuDetail, menuImgUrl, isOption, status\n" +
+        String MenuDetailQuery = "SELECT menuIdx, menuName, menuPrice, menuDetail, menuImgUrl, isOption,\n" +
+                "       CASE\n" +
+                "        WHEN status='T' THEN '오늘만 품절'\n" +
+                "        WHEN status='S' THEN '품절'\n" +
+                "        ELSE '판매중'\n" +
+                "        END AS status\n" +
                 "FROM Menu\n" +
-                "WHERE status!='N' AND menuCategoryIdx=?;";
+                "WHERE status!='N' AND status != 'H' AND menuCategoryIdx=?;";
 
         String MenuImageQuery = "SELECT RankRow.menuImgUrl\n" +
                 "FROM (SELECT*, RANK() OVER (PARTITION BY M.menuIdx ORDER BY M.menuImgIdx) AS a\n" +
