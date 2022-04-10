@@ -30,5 +30,7 @@ public class PostCreateOrderReq {
 
     private String deliveryManContent;
 
+    private int deliveryFee;
+
 
 }

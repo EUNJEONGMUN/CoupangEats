@@ -52,8 +52,11 @@ public class OrderProvider {
             List<GetDeliveryListRes> getDeliveryListRes = new ArrayList<>();
 
             for (OrderList userOrder:orderList){
+                System.out.println(">>>userOrderIdx" + userOrder.getUserOrderIdx());
                 GetDeliveryListRes userOrderList = orderDao.getUserDelivery(userIdx, userOrder);
+                System.out.println(">>>userOrderList result");
                 getDeliveryListRes.add(userOrderList);
+                System.out.println("for문 안");
             }
             return getDeliveryListRes;
         } catch (Exception exception) {

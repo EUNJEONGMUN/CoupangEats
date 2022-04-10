@@ -242,7 +242,7 @@ public class OrderDao {
     public int createOrder(int userIdx, String[] cartList, PostCreateOrderReq postCreateOrderReq) {
         String InsertCartToOrderQuery = "INSERT INTO CartToOrder (userIdx, cartIdx, orderTime) VALUES (?,?,?);";
         String UpdateUserCart = "UPDATE Cart SET status='O' WHERE cartIdx=?;";
-        String InsertUserOrderQuery = "INSERT INTO UserOrder (userIdx, storeIdx, message, deliveryManOptionIdx, deliveryManContent, useCouponIdx, orderTime, userAddressIdx) VALUES (?,?,?,?,?,?,?,?);";
+        String InsertUserOrderQuery = "INSERT INTO UserOrder (userIdx, storeIdx, message, deliveryManOptionIdx, deliveryManContent, useCouponIdx, orderTime, userAddressIdx, deliveryFee) VALUES (?,?,?,?,?,?,?,?,?);";
 
         // 현재 날짜 구하기
         LocalDateTime now = LocalDateTime.now();
@@ -259,7 +259,7 @@ public class OrderDao {
 
         Object[] Params2 = new Object[]{userIdx, postCreateOrderReq.getStoreIdx(), postCreateOrderReq.getMessage(),
                 postCreateOrderReq.getDeliveryManOptionIdx(), postCreateOrderReq.getDeliveryManContent(),
-                postCreateOrderReq.getCouponIdx(), orderTime, postCreateOrderReq.getUserAddressIdx()};
+                postCreateOrderReq.getCouponIdx(), orderTime, postCreateOrderReq.getUserAddressIdx(), postCreateOrderReq.getDeliveryFee()};
         this.jdbcTemplate.update(InsertUserOrderQuery,Params2); // 주문테이블
         String lastInsertIdQuery = "select last_insert_id()";
         return this.jdbcTemplate.queryForObject(lastInsertIdQuery,int.class);
@@ -361,10 +361,10 @@ public class OrderDao {
                 "FROM UserOrder UO\n" +
                 "WHERE UO.userOrderIdx=?\n";
 
-        String isReview = "SELECT EXISTS(SELECT score FROM Review WHERE userOrderIdx=?);";
+        String isReview = "SELECT EXISTS(SELECT score FROM Review WHERE userOrderIdx=? AND status='Y');";
         String ReviewScore = "SELECT score\n" +
                 "FROM Review\n" +
-                "WHERE userOrderIdx=?;";
+                "WHERE status='Y' AND userOrderIdx=?;";
 
         String OrderMenuInfoQuery = "SELECT M.menuName, C.menuOptions, C.orderCount, OrderMenu.cartIdx, C.orderPrice*C.orderCount AS mulPrice, OrderMenu.isGood\n" +
                 "FROM Cart C JOIN (\n" +
@@ -385,7 +385,7 @@ public class OrderDao {
         }
         int reviewScore = review;
 
-
+        System.out.println(">>리뷰밑");
 
         OrderStatus orderStatus = this.jdbcTemplate.queryForObject(OrderStatus,
                 (rs, rowNum) -> new OrderStatus(
@@ -393,17 +393,26 @@ public class OrderDao {
                         rs.getString("orderTime")
                 ), orderList.getUserOrderIdx());
 
+        System.out.println(">>orderStatus");
+
         String totalPrice = this.jdbcTemplate.queryForObject(TotalPriceQuery,
                 String.class,
                 Params);
 
+        System.out.println(">>totalPrice");
 
         int userAddressIdx = this.jdbcTemplate.queryForObject("SELECT userAddressIdx FROM UserOrder WHERE userOrderIdx=?", int.class, orderList.getUserOrderIdx());
 
+        System.out.println(">>userAddressIdx");
 
         String UserAddressQuery = "SELECT userAddressIdx, buildingName, address, addressDetail, addressGuide, addressTitle, addressLongitude, addressLatitude, addressType, isNowLocation\n" +
                 "                FROM UserAddress\n" +
                 "                WHERE userAddressIdx=?;";
+
+        String FindDeliveryFee = "SELECT IFNULL(deliveryFee,0) AS deliveryFee FROM UserOrder WHERE status!='N' AND userOrderIdx=?;";
+
+        int deliveryFee = this.jdbcTemplate.queryForObject(FindDeliveryFee, int.class, orderList.getUserOrderIdx());
+        System.out.println(">>deliveryFee");
 
         CartAddressInfo  userDeliveryAddress = this.jdbcTemplate.queryForObject(UserAddressQuery,
                 (rs, rowNum) -> new CartAddressInfo(
@@ -417,6 +426,7 @@ public class OrderDao {
                         rs.getString("addressTitle"),
                         rs.getString("addressType")
                 ), userAddressIdx);
+        System.out.println(">>CartAddressInfo");
 
         return this.jdbcTemplate.queryForObject(StoreInfo,
                 (rs, rowNum) -> new GetDeliveryListRes(
@@ -429,6 +439,7 @@ public class OrderDao {
                         orderStatus.getStatus(),
                         totalPrice,
                         reviewScore,
+                        deliveryFee,
                         this.jdbcTemplate.query(OrderMenuInfoQuery,
                                 (rs2, rowNum2) -> new OrderMenuInfo(
                                         rs2.getInt("cartIdx"),
@@ -438,6 +449,7 @@ public class OrderDao {
                                         rs2.getString("isGood"),
                                         rs2.getInt("mulPrice")
                                 ),Params)
+
                 ), orderList.getStoreIdx());
 
     }

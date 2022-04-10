@@ -21,6 +21,8 @@ public class GetDeliveryListRes {
     private String status;
     private String totalPrice;
     private int ReviewScore;
+    private int deliveryFee;
     private List<OrderMenuInfo> orderMenuInfo;
+
 
 }
