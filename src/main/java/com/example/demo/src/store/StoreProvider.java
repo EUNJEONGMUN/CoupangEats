@@ -2,6 +2,7 @@ package com.example.demo.src.store;
 
 import com.example.demo.config.BaseException;
 import com.example.demo.src.store.model.GetFavoriteList;
+import com.example.demo.src.store.model.Req.GetStoreHomeReq;
 import com.example.demo.src.store.model.Res.*;
 import com.example.demo.src.store.model.StoreReviewIdx;
 import com.example.demo.src.user.model.UserLocation;
@@ -29,10 +30,10 @@ public class StoreProvider {
      * [GET] /stores/home
      * @return BaseResponse<List<GetStoreHomeRes>>
      */
-    public List<GetStoreHomeRes> getStoreHome(UserLocation userLocation, int categoryIdx) throws BaseException {
+    public List<GetStoreHomeRes> getStoreHome(UserLocation userLocation, GetStoreHomeReq getStoreHomeReq) throws BaseException {
         try {
 
-            List<Integer> StoreList = storeDao.findStoreIdxList(categoryIdx);
+            List<Integer> StoreList = storeDao.findStoreIdxList(userLocation, getStoreHomeReq);
             System.out.println("here");
             List<GetStoreHomeRes> getStoreHomeRes = new ArrayList<>();
             System.out.println("here");

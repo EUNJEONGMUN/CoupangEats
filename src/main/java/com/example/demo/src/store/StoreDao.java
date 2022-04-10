@@ -1,6 +1,7 @@
 package com.example.demo.src.store;
 
 import com.example.demo.src.store.model.*;
+import com.example.demo.src.store.model.Req.GetStoreHomeReq;
 import com.example.demo.src.store.model.Req.PostReviewReq;
 import com.example.demo.src.store.model.Req.PutReviewReq;
 import com.example.demo.src.store.model.Res.*;
@@ -1139,25 +1140,172 @@ public class StoreDao {
     }
 
     // 가게 idx 찾기
-    public List<Integer> findStoreIdxList(int categoryIdx) {
-        String Query = "SELECT storeIdx FROM Store WHERE status!='N';";
+    public List<Integer> findStoreIdxList(UserLocation userLocation, GetStoreHomeReq getStoreHomeReq) {
+//        String Query = "SELECT storeIdx FROM Store WHERE status!='N';";
+//
+//        String CategoryQuery = "SELECT S.storeIdx, SC.categoryName\n" +
+//                "FROM Store S\n" +
+//                "    JOIN StoreCategoryMapping SCM on S.storeIdx = SCM.storeIdx\n" +
+//                "    JOIN StoreCategory SC on SCM.storeCategoryIdx = SC.storeCategoryIdx\n" +
+//                "WHERE SCM.storeCategoryIdx=?;";
 
-        String CategoryQuery = "SELECT S.storeIdx, SC.categoryName\n" +
+        String OrderQuery = "SELECT S.storeIdx\n" +
+                "FROM Store S\n" +
+                "LEFT JOIN (\n" +
+                "    SELECT StoreIdx, IFNULL(MIN(deliveryFee),0) AS fee\n" +
+                "    FROM DeliveryFee\n" +
+                "    WHERE DeliveryFee.status='Y' GROUP BY storeIdx) F ON F.storeIdx = S.storeIdx\n" +
+                "LEFT JOIN (\n" +
+                "    SELECT UO.storeIdx, COUNT(UO.userOrderIdx) AS orderCount\n" +
+                "    FROM UserOrder UO\n" +
+                "    GROUP BY UO.storeIdx) OC ON OC.storeIdx=S.storeIdx\n" +
+                "WHERE (S.isCheetah='Y' OR S.isCheetah=?) AND S.minimumPrice<=? AND (S.isToGo='Y' OR S.isToGo=?) AND (S.isCoupon='Y' OR S.isCoupon=?) AND F.fee<=?\n" +
+                "ORDER BY OC.orderCount DESC;";
+
+        String DistanceQuery = "SELECT S.storeIdx\n" +
+                "FROM Store S\n" +
+                "LEFT JOIN (\n" +
+                "    SELECT StoreIdx, IFNULL(MIN(deliveryFee),0) AS fee\n" +
+                "    FROM DeliveryFee\n" +
+                "    WHERE DeliveryFee.status='Y' GROUP BY storeIdx) F ON F.storeIdx = S.storeIdx\n" +
+                "LEFT JOIN (\n" +
+                "    SELECT UO.storeIdx, ROUND(AVG(R.score),1) AS reviewScore, COUNT(R.reviewIdx) AS reviewCount\n" +
+                "    FROM Review R JOIN UserOrder UO on R.userOrderIdx=UO.userOrderIdx\n" +
+                "    GROUP BY UO.storeIdx) R ON R.storeIdx=S.storeIdx\n" +
+                "WHERE (S.isCheetah='Y' OR S.isCheetah=?) AND S.minimumPrice<=? AND (S.isToGo='Y' OR S.isToGo=?) AND (S.isCoupon='Y' OR S.isCoupon=?) AND F.fee<=?\n" +
+                "ORDER BY ROUND(ST_DISTANCE_SPHERE(POINT(S.storeLongitude,S.storeLatitude), POINT(?,?))*0.001,1);";
+
+        String ScoreQuery = "SELECT S.storeIdx\n" +
+                "FROM Store S\n" +
+                "LEFT JOIN (\n" +
+                "    SELECT StoreIdx, IFNULL(MIN(deliveryFee),0) AS fee\n" +
+                "    FROM DeliveryFee\n" +
+                "    WHERE DeliveryFee.status='Y' GROUP BY storeIdx) F ON F.storeIdx = S.storeIdx\n" +
+                "LEFT JOIN (\n" +
+                "    SELECT UO.storeIdx, ROUND(AVG(R.score),1) AS reviewScore, COUNT(R.reviewIdx) AS reviewCount\n" +
+                "    FROM Review R JOIN UserOrder UO on R.userOrderIdx=UO.userOrderIdx\n" +
+                "    GROUP BY UO.storeIdx) R ON R.storeIdx=S.storeIdx\n" +
+                "WHERE (S.isCheetah='Y' OR S.isCheetah=?) AND S.minimumPrice<=? AND (S.isToGo='Y' OR S.isToGo=?) AND (S.isCoupon='Y' OR S.isCoupon=?) AND F.fee<=?\n" +
+                "ORDER BY R.reviewScore DESC;";
+
+        String NewQuery = "SELECT S.storeIdx\n" +
+                "FROM Store S\n" +
+                "LEFT JOIN (\n" +
+                "    SELECT StoreIdx, IFNULL(MIN(deliveryFee),0) AS fee\n" +
+                "    FROM DeliveryFee\n" +
+                "    WHERE DeliveryFee.status='Y' GROUP BY storeIdx) F ON F.storeIdx = S.storeIdx\n" +
+                "WHERE (S.isCheetah='Y' OR S.isCheetah=?) AND S.minimumPrice<=? AND (S.isToGo='Y' OR S.isToGo=?) AND (S.isCoupon='Y' OR S.isCoupon=?) AND F.fee<=?\n" +
+                "ORDER BY S.createdAt DESC;";
+
+        String CategoryOrderQuery = "SELECT S.storeIdx\n" +
                 "FROM Store S\n" +
                 "    JOIN StoreCategoryMapping SCM on S.storeIdx = SCM.storeIdx\n" +
                 "    JOIN StoreCategory SC on SCM.storeCategoryIdx = SC.storeCategoryIdx\n" +
-                "WHERE SCM.storeCategoryIdx=?;";
+                "LEFT JOIN (\n" +
+                "    SELECT StoreIdx, IFNULL(MIN(deliveryFee),0) AS fee\n" +
+                "    FROM DeliveryFee\n" +
+                "    WHERE DeliveryFee.status='Y' GROUP BY storeIdx) F ON F.storeIdx = S.storeIdx\n" +
+                "LEFT JOIN (\n" +
+                "    SELECT UO.storeIdx, COUNT(UO.userOrderIdx) AS orderCount\n" +
+                "    FROM UserOrder UO\n" +
+                "    GROUP BY UO.storeIdx) OC ON OC.storeIdx=S.storeIdx\n" +
+                "WHERE SCM.storeCategoryIdx=? AND (S.isCheetah='Y' OR S.isCheetah=?) AND S.minimumPrice<=? AND (S.isToGo='Y' OR S.isToGo=?) AND (S.isCoupon='Y' OR S.isCoupon=?) AND F.fee<=?\n" +
+                "ORDER BY OC.orderCount DESC;";
 
-        if (categoryIdx==0){
-            return this.jdbcTemplate.query(Query,
+        String CategoryDistanceQuery = "SELECT S.storeIdx\n" +
+                "FROM Store S\n" +
+                "    JOIN StoreCategoryMapping SCM on S.storeIdx = SCM.storeIdx\n" +
+                "    JOIN StoreCategory SC on SCM.storeCategoryIdx = SC.storeCategoryIdx\n" +
+                "LEFT JOIN (\n" +
+                "    SELECT StoreIdx, IFNULL(MIN(deliveryFee),0) AS fee\n" +
+                "    FROM DeliveryFee\n" +
+                "    WHERE DeliveryFee.status='Y' GROUP BY storeIdx) F ON F.storeIdx = S.storeIdx\n" +
+                "LEFT JOIN (\n" +
+                "    SELECT UO.storeIdx, ROUND(AVG(R.score),1) AS reviewScore, COUNT(R.reviewIdx) AS reviewCount\n" +
+                "    FROM Review R JOIN UserOrder UO on R.userOrderIdx=UO.userOrderIdx\n" +
+                "    GROUP BY UO.storeIdx) R ON R.storeIdx=S.storeIdx\n" +
+                "WHERE SCM.storeCategoryIdx=? AND (S.isCheetah='Y' OR S.isCheetah=?) AND S.minimumPrice<=? AND (S.isToGo='Y' OR S.isToGo=?) AND (S.isCoupon='Y' OR S.isCoupon=?) AND F.fee<=?\n" +
+                "ORDER BY ROUND(ST_DISTANCE_SPHERE(POINT(S.storeLongitude,S.storeLatitude), POINT(?,?))*0.001,1);";
+
+        String CategoryScoreQuery = "SELECT S.storeIdx\n" +
+                "FROM Store S\n" +
+                "    JOIN StoreCategoryMapping SCM on S.storeIdx = SCM.storeIdx\n" +
+                "    JOIN StoreCategory SC on SCM.storeCategoryIdx = SC.storeCategoryIdx\n" +
+                "LEFT JOIN (\n" +
+                "    SELECT StoreIdx, IFNULL(MIN(deliveryFee),0) AS fee\n" +
+                "    FROM DeliveryFee\n" +
+                "    WHERE DeliveryFee.status='Y' GROUP BY storeIdx) F ON F.storeIdx = S.storeIdx\n" +
+                "LEFT JOIN (\n" +
+                "    SELECT UO.storeIdx, ROUND(AVG(R.score),1) AS reviewScore, COUNT(R.reviewIdx) AS reviewCount\n" +
+                "    FROM Review R JOIN UserOrder UO on R.userOrderIdx=UO.userOrderIdx\n" +
+                "    GROUP BY UO.storeIdx) R ON R.storeIdx=S.storeIdx\n" +
+                "WHERE SCM.storeCategoryIdx=? AND (S.isCheetah='Y' OR S.isCheetah=?) AND S.minimumPrice<=? AND (S.isToGo='Y' OR S.isToGo=?) AND (S.isCoupon='Y' OR S.isCoupon=?) AND F.fee<=?\n" +
+                "ORDER BY R.reviewScore DESC;";
+
+        String CategoryNewQuery = "SELECT S.storeIdx\n" +
+                "FROM Store S\n" +
+                "    JOIN StoreCategoryMapping SCM on S.storeIdx = SCM.storeIdx\n" +
+                "    JOIN StoreCategory SC on SCM.storeCategoryIdx = SC.storeCategoryIdx\n" +
+                "LEFT JOIN (\n" +
+                "    SELECT StoreIdx, IFNULL(MIN(deliveryFee),0) AS fee\n" +
+                "    FROM DeliveryFee\n" +
+                "    WHERE DeliveryFee.status='Y' GROUP BY storeIdx) F ON F.storeIdx = S.storeIdx\n" +
+                "WHERE SCM.storeCategoryIdx=? AND (S.isCheetah='Y' OR S.isCheetah=?) AND S.minimumPrice<=? AND (S.isToGo='Y' OR S.isToGo=?) AND (S.isCoupon='Y' OR S.isCoupon=?) AND F.fee<=?\n" +
+                "ORDER BY S.createdAt DESC;";
+
+        Object[] Params = new Object[]{getStoreHomeReq.getIsCheetah(), getStoreHomeReq.getMinimumPrice(), getStoreHomeReq.getIsToGo(),
+        getStoreHomeReq.getIsCoupon(), getStoreHomeReq.getDeliveryFee()};
+        Object[] CategoryParams = new Object[]{getStoreHomeReq.getCategoryIdx(), getStoreHomeReq.getIsCheetah(), getStoreHomeReq.getMinimumPrice(), getStoreHomeReq.getIsToGo(),
+                getStoreHomeReq.getIsCoupon(), getStoreHomeReq.getDeliveryFee()};
+        Object[] DistanceParams = new Object[]{getStoreHomeReq.getCategoryIdx(), getStoreHomeReq.getIsCheetah(), getStoreHomeReq.getMinimumPrice(), getStoreHomeReq.getIsToGo(),
+                getStoreHomeReq.getIsCoupon(), getStoreHomeReq.getDeliveryFee(), userLocation.getUserLongitude(), userLocation.getUserLatitude()};
+        Object[] DistanceCategoryParams = new Object[]{getStoreHomeReq.getCategoryIdx(), getStoreHomeReq.getIsCheetah(), getStoreHomeReq.getMinimumPrice(), getStoreHomeReq.getIsToGo(),
+                getStoreHomeReq.getIsCoupon(), getStoreHomeReq.getDeliveryFee(), userLocation.getUserLongitude(), userLocation.getUserLatitude()};
+
+        if (getStoreHomeReq.getCategoryIdx()==0){
+            if (getStoreHomeReq.getSort().equals("distance")){
+                return this.jdbcTemplate.query(DistanceQuery,
+                        (rs, rowNum) -> {
+                            return rs.getInt("storeIdx");
+                        }, DistanceParams);
+            } else if (getStoreHomeReq.getSort().equals("score")){
+                return this.jdbcTemplate.query(ScoreQuery,
+                        (rs, rowNum) -> {
+                            return rs.getInt("storeIdx");
+                        }, Params);
+            } else if (getStoreHomeReq.getSort().equals("new")){
+                return this.jdbcTemplate.query(NewQuery,
+                        (rs, rowNum) -> {
+                            return rs.getInt("storeIdx");
+                        }, Params);
+            }
+            return this.jdbcTemplate.query(OrderQuery,
                     (rs, rowNum) -> {
                         return rs.getInt("storeIdx");
-                    });
+                    }, Params);
+
         }
-        return this.jdbcTemplate.query(CategoryQuery,
+
+        if (getStoreHomeReq.getSort().equals("distance")){
+            return this.jdbcTemplate.query(CategoryDistanceQuery,
+                    (rs, rowNum) -> {
+                        return rs.getInt("storeIdx");
+                    }, DistanceCategoryParams);
+        } else if (getStoreHomeReq.getSort().equals("score")){
+            return this.jdbcTemplate.query(CategoryScoreQuery,
+                    (rs, rowNum) -> {
+                        return rs.getInt("storeIdx");
+                    }, CategoryParams);
+        } else if (getStoreHomeReq.getSort().equals("new")){
+            return this.jdbcTemplate.query(CategoryNewQuery,
+                    (rs, rowNum) -> {
+                        return rs.getInt("storeIdx");
+                    }, CategoryParams);
+        }
+        return this.jdbcTemplate.query(CategoryOrderQuery,
                 (rs, rowNum) -> {
                     return rs.getInt("storeIdx");
-                }, categoryIdx);
+                }, CategoryParams);
 
     }
 

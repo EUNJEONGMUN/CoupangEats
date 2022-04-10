@@ -55,14 +55,20 @@ public class StoreController {
     /**
      * 홈 화면 조회 API
      * [GET] /stores/home
-     * /home?&longitude=&latitude=&categoryIdx=
+     * /home?&longitude=&latitude=&categoryIdx=&sort=&isCheetah&deliveryFee=&minimumPrice&isToGo=&isCoupon=
      * @return BaseResponse<List<GetStoreHomeRes>>
      */
     @ResponseBody
     @GetMapping("/home")
     public BaseResponse<List<GetStoreHomeRes>> getStoreHome(@RequestParam(required = false, defaultValue = "0") double longitude,
                                                             @RequestParam(required = false, defaultValue = "0") double latitude,
-                                                            @RequestParam(required = false, defaultValue = "0") int categoryIdx) throws BaseException{
+                                                            @RequestParam(required = false, defaultValue = "0") int categoryIdx,
+                                                            @RequestParam(required = false, defaultValue = "order") String sort,
+                                                            @RequestParam(required = false, defaultValue = "N") String isCheetah,
+                                                            @RequestParam(required = false, defaultValue = "전체") String deliveryFee,
+                                                            @RequestParam(required = false, defaultValue = "전체") String minimumPrice,
+                                                            @RequestParam(required = false, defaultValue = "N") String isToGo,
+                                                            @RequestParam(required = false, defaultValue = "N") String isCoupon) throws BaseException{
 
         int userIdx= jwtService.getUserIdxOption();
         if (latitude==0 || longitude==0){
@@ -81,9 +87,13 @@ public class StoreController {
                 userLocation.setUserLatitude(latitude);
             }
         }
+        GetStoreHomeReq getStoreHomeReq = new GetStoreHomeReq(categoryIdx, sort, isCheetah, deliveryFee, minimumPrice, isToGo, isCoupon);
 
+        if (deliveryFee.equals("전체")){
 
-        List<GetStoreHomeRes> getStoreHomeRes = storeProvider.getStoreHome(userLocation, categoryIdx);
+        }
+
+        List<GetStoreHomeRes> getStoreHomeRes = storeProvider.getStoreHome(userLocation, getStoreHomeReq);
         return new BaseResponse<>(getStoreHomeRes);
     }
 
