@@ -534,6 +534,9 @@ public class StoreDao {
                 "     ) AS RankRow\n" +
                 "WHERE RankRow.a <= 1 AND RankRow.storeIdx=?;";
         String storeImgUrl = this.jdbcTemplate.queryForObject(StoreImageQuery, String.class, storeIdx);
+
+        String businessStatus = getBusinessHours(storeIdx);
+
 //        String MyOrderCountQuery = "SELECT COUNT(*)\n" +
 //                "FROM UserOrder\n" +
 //                "WHERE userIdx=? AND storeIdx=? AND status!='N' AND status!='F' AND status!='E';";
@@ -604,6 +607,7 @@ public class StoreDao {
                         rs1.getString("status"),
                         rs1.getDouble("reviewScore"),
                         rs1.getInt("reviewCount"),
+                        businessStatus,
                         this.jdbcTemplate.queryForObject(DeliveryFeeQuery,
                                 String.class,
                                 storeIdx),

@@ -309,6 +309,9 @@ public class OrderDao {
      */
     public GetDeliveryListRes getUserDelivery(int userIdx, OrderList orderList) {
 
+
+        String businessStatus = "";
+
         String StoreImageQuery = "SELECT RankRow.imageUrl\n" +
                 "FROM (SELECT*, RANK() OVER (PARTITION BY SI.storeIdX ORDER BY SI.storeImageIdx) AS a\n" +
                 "      FROM StoreImage SI\n" +
@@ -440,6 +443,7 @@ public class OrderDao {
                         totalPrice,
                         reviewScore,
                         deliveryFee,
+                        businessStatus,
                         this.jdbcTemplate.query(OrderMenuInfoQuery,
                                 (rs2, rowNum2) -> new OrderMenuInfo(
                                         rs2.getInt("cartIdx"),

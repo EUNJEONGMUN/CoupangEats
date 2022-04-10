@@ -21,9 +21,10 @@ public class GetFavoriteList {
     private String status;
     private double reviewScore;
     private int reviewCount;
-
+    private String businessStatus;
     private String deliveryFee;
 
     private String storeBestCoupon;
     private String isNewStore;
+
 }

@@ -4,6 +4,7 @@ import com.example.demo.config.BaseException;
 import com.example.demo.src.orders.model.OrderList;
 import com.example.demo.src.orders.model.Res.GetCartListRes;
 import com.example.demo.src.orders.model.Res.GetDeliveryListRes;
+import com.example.demo.src.store.StoreDao;
 import com.example.demo.src.user.model.UserLocation;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -19,11 +20,14 @@ import static com.example.demo.config.BaseResponseStatus.DATABASE_ERROR;
 public class OrderProvider {
 
     private final OrderDao orderDao;
+    private final StoreDao storeDao;
 
     final Logger logger = LoggerFactory.getLogger(this.getClass());
 
     @Autowired
-    public OrderProvider(OrderDao orderDao) {this.orderDao = orderDao; }
+    public OrderProvider(OrderDao orderDao, StoreDao storeDao) {
+        this.orderDao = orderDao;
+        this.storeDao = storeDao; }
 
 
     /**
@@ -54,6 +58,8 @@ public class OrderProvider {
             for (OrderList userOrder:orderList){
                 System.out.println(">>>userOrderIdx" + userOrder.getUserOrderIdx());
                 GetDeliveryListRes userOrderList = orderDao.getUserDelivery(userIdx, userOrder);
+                String businessStatus = storeDao.getBusinessHours(userOrder.getStoreIdx());
+                userOrderList.setBusinessStatus(businessStatus);
                 System.out.println(">>>userOrderList result");
                 getDeliveryListRes.add(userOrderList);
                 System.out.println("for문 안");
