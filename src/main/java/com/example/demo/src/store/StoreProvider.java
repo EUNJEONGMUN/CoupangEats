@@ -1,6 +1,7 @@
 package com.example.demo.src.store;
 
 import com.example.demo.config.BaseException;
+import com.example.demo.config.BaseResponse;
 import com.example.demo.src.store.model.GetFavoriteList;
 import com.example.demo.src.store.model.Req.GetStoreHomeReq;
 import com.example.demo.src.store.model.Res.*;
@@ -60,17 +61,22 @@ public class StoreProvider {
         }
     }
 
-
-    // getOnlyEatsStoreHome
     /**
-     * 인기있는 프랜차이즈 조회 API
-     * [GET] /stores/home/franchise
-     * /franchise?&longitude=&latitude=&categoryIdx=&sort=&isCheetah&deliveryFee=&minimumPrice&isToGo=&isCoupon=
+     * 타입별 홈화면 조회 API
+     * [GET] /stores/home/type
+     * /type?&longitude=&latitude=&categoryIdx=&sort=&isCheetah&deliveryFee=&minimumPrice&isToGo=&isCoupon=&type=
      * @return BaseResponse<List<GetStoreHomeRes>>
      */
-    public List<GetStoreHomeRes> getFranchiseStoreHome(UserLocation userLocation, GetStoreHomeReq getStoreHomeReq) throws BaseException {
+    public List<GetStoreHomeRes> getTypeStoreHome(UserLocation userLocation, GetStoreHomeReq getStoreHomeReq, String type) throws BaseException {
         try {
-            List<Integer> StoreList = storeDao.findFranchiseStoreIdxList(userLocation, getStoreHomeReq);
+            List<Integer> StoreList = new ArrayList<>();
+            if (type.equals("onlyEats")){
+                StoreList = storeDao.findOnlyEatsStoreIdxList(userLocation, getStoreHomeReq);
+            } else if (type.equals("franchise")){
+                StoreList = storeDao.findFranchiseStoreIdxList(userLocation, getStoreHomeReq);
+            } else if (type.equals("recent")) {
+                StoreList = storeDao.findNewStoreIdxList(userLocation, getStoreHomeReq);
+            }
 
             System.out.println("here");
             List<GetStoreHomeRes> getStoreHomeRes = new ArrayList<>();
@@ -89,59 +95,6 @@ public class StoreProvider {
         }
     }
 
-    /**
-     * 이츠에만 있는 맛집 조회 API
-     * [GET] /stores/home/only-eats
-     * /only-eats?&longitude=&latitude=&categoryIdx=&sort=&isCheetah&deliveryFee=&minimumPrice&isToGo=&isCoupon=
-     * @return BaseResponse<List<GetStoreHomeRes>>
-     */
-    public List<GetStoreHomeRes> getOnlyEatsStoreHome(UserLocation userLocation, GetStoreHomeReq getStoreHomeReq) throws BaseException {
-        try {
-            List<Integer> StoreList = storeDao.findOnlyEatsStoreIdxList(userLocation, getStoreHomeReq);
-
-            System.out.println("here");
-            List<GetStoreHomeRes> getStoreHomeRes = new ArrayList<>();
-            System.out.println("here");
-            for(int idx:StoreList){
-                System.out.println(">>idx>>"+idx);
-                GetStoreHomeRes storeHome = storeDao.getStoreHome(idx, userLocation);
-                System.out.println("here");
-                getStoreHomeRes.add(storeHome);
-                System.out.println("here");
-            }
-            return getStoreHomeRes;
-        } catch (Exception exception) {
-            System.out.println("storehome-> "+ exception);
-            throw new BaseException(DATABASE_ERROR);
-        }
-    }
-
-    /**
-     * 새로 들어왔어요 조회 API
-     * [GET] /stores/home/recent
-     * /recent?&longitude=&latitude=&categoryIdx=&sort=&isCheetah&deliveryFee=&minimumPrice&isToGo=&isCoupon=
-     * @return BaseResponse<List<GetStoreHomeRes>>
-     */
-    public List<GetStoreHomeRes> getNewStoreHome(UserLocation userLocation, GetStoreHomeReq getStoreHomeReq) throws BaseException {
-        try {
-            List<Integer> StoreList = storeDao.findNewStoreIdxList(userLocation, getStoreHomeReq);
-
-            System.out.println("here");
-            List<GetStoreHomeRes> getStoreHomeRes = new ArrayList<>();
-            System.out.println("here");
-            for(int idx:StoreList){
-                System.out.println(">>idx>>"+idx);
-                GetStoreHomeRes storeHome = storeDao.getStoreHome(idx, userLocation);
-                System.out.println("here");
-                getStoreHomeRes.add(storeHome);
-                System.out.println("here");
-            }
-            return getStoreHomeRes;
-        } catch (Exception exception) {
-            System.out.println("storehome-> "+ exception);
-            throw new BaseException(DATABASE_ERROR);
-        }
-    }
 
 
 

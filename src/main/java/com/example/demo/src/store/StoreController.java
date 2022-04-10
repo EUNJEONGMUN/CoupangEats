@@ -105,21 +105,22 @@ public class StoreController {
     }
 
     /**
-     * 이츠에만 있는 맛집 조회 API
-     * [GET] /stores/home/only-eats
-     * /only-eats?&longitude=&latitude=&categoryIdx=&sort=&isCheetah&deliveryFee=&minimumPrice&isToGo=&isCoupon=
+     * 타입별 홈화면 조회 API
+     * [GET] /stores/home/type
+     * /type?&longitude=&latitude=&categoryIdx=&sort=&isCheetah&deliveryFee=&minimumPrice&isToGo=&isCoupon=&type=
      * @return BaseResponse<List<GetStoreHomeRes>>
      */
     @ResponseBody
-    @GetMapping("/home/only-eats")
-    public BaseResponse<List<GetStoreHomeRes>> getOnlyEatsStoreHome(@RequestParam(required = false, defaultValue = "0") double longitude,
+    @GetMapping("/home/type")
+    public BaseResponse<List<GetStoreHomeRes>> getTypeHome(@RequestParam(required = false, defaultValue = "0") double longitude,
                                                            @RequestParam(required = false, defaultValue = "0") double latitude,
                                                            @RequestParam(required = false, defaultValue = "order") String sort,
                                                            @RequestParam(required = false, defaultValue = "N") String isCheetah,
                                                            @RequestParam(required = false, defaultValue = "전체") String deliveryFee,
                                                            @RequestParam(required = false, defaultValue = "전체") String minimumPrice,
                                                            @RequestParam(required = false, defaultValue = "N") String isToGo,
-                                                           @RequestParam(required = false, defaultValue = "N") String isCoupon) throws BaseException{
+                                                           @RequestParam(required = false, defaultValue = "N") String isCoupon,
+                                                                    @RequestParam(required = false, defaultValue = "default") String type) throws BaseException{
 
         int userIdx= jwtService.getUserIdxOption();
         if (latitude==0 || longitude==0){
@@ -146,109 +147,15 @@ public class StoreController {
             return new BaseResponse<>(INVALID_MINIMUM_PRICE_PARAM);
         }
 
-        GetStoreHomeReq getStoreHomeReq = new GetStoreHomeReq(sort, isCheetah, deliveryFee, minimumPrice, isToGo, isCoupon);
-
-
-        List<GetStoreHomeRes> getOnlyEatsStore = storeProvider.getOnlyEatsStoreHome(userLocation, getStoreHomeReq);
-        return new BaseResponse<>(getOnlyEatsStore);
-    }
-
-    /**
-     * 인기있는 프랜차이즈 조회 API
-     * [GET] /stores/home/franchise
-     * /franchise?&longitude=&latitude=&categoryIdx=&sort=&isCheetah&deliveryFee=&minimumPrice&isToGo=&isCoupon=
-     * @return BaseResponse<List<GetStoreHomeRes>>
-     */
-    @ResponseBody
-    @GetMapping("/home/franchise")
-    public BaseResponse<List<GetStoreHomeRes>> getFranchiseStoreHome(@RequestParam(required = false, defaultValue = "0") double longitude,
-                                                                    @RequestParam(required = false, defaultValue = "0") double latitude,
-                                                                    @RequestParam(required = false, defaultValue = "order") String sort,
-                                                                    @RequestParam(required = false, defaultValue = "N") String isCheetah,
-                                                                    @RequestParam(required = false, defaultValue = "전체") String deliveryFee,
-                                                                    @RequestParam(required = false, defaultValue = "전체") String minimumPrice,
-                                                                    @RequestParam(required = false, defaultValue = "N") String isToGo,
-                                                                    @RequestParam(required = false, defaultValue = "N") String isCoupon) throws BaseException{
-
-        int userIdx= jwtService.getUserIdxOption();
-        if (latitude==0 || longitude==0){
-            return new BaseResponse<>(EMPTY_POSITION_PARAM);
-        }
-
-        UserLocation userLocation = new UserLocation();
-
-        if (userIdx == 0){
-            userLocation.setUserLongitude(longitude);
-            userLocation.setUserLatitude(latitude);
-        } else{
-            userLocation = storeProvider.getNowUserLocation(userIdx);
-            if (userLocation.getUserLatitude()==0 || userLocation.getUserLatitude()==0){
-                userLocation.setUserLongitude(longitude);
-                userLocation.setUserLatitude(latitude);
-            }
-        }
-
-        if (!(deliveryFee.equals("전체") || deliveryFee.equals("무료배달") || deliveryFee.equals("1000")|| deliveryFee.equals("2000")|| deliveryFee.equals("3000"))){
-            return new BaseResponse<>(INVALID_DELIVERY_FEE_PARAM);
-        }
-        if (!(minimumPrice.equals("전체") || minimumPrice.equals("5000") ||minimumPrice.equals("10000") ||minimumPrice.equals("12000") ||minimumPrice.equals("15000"))){
-            return new BaseResponse<>(INVALID_MINIMUM_PRICE_PARAM);
+        if (!(type.equals("onlyEats") || type.equals("franchise") || type.equals("recent"))){
+            return new BaseResponse<>(INVALID_TYPE_PARAM);
         }
 
         GetStoreHomeReq getStoreHomeReq = new GetStoreHomeReq(sort, isCheetah, deliveryFee, minimumPrice, isToGo, isCoupon);
 
+        List<GetStoreHomeRes> getTypeHomeRes = storeProvider.getTypeStoreHome(userLocation, getStoreHomeReq, type);
 
-        List<GetStoreHomeRes> getOnlyEatsStore = storeProvider.getFranchiseStoreHome(userLocation, getStoreHomeReq);
-        return new BaseResponse<>(getOnlyEatsStore);
-    }
-
-    /**
-     * 새로 들어왔어요 조회 API
-     * [GET] /stores/home/recent
-     * /recent?&longitude=&latitude=&categoryIdx=&sort=&isCheetah&deliveryFee=&minimumPrice&isToGo=&isCoupon=
-     * @return BaseResponse<List<GetStoreHomeRes>>
-     */
-    @ResponseBody
-    @GetMapping("/home/recent")
-    public BaseResponse<List<GetStoreHomeRes>> getNewStoreHome(@RequestParam(required = false, defaultValue = "0") double longitude,
-                                                                     @RequestParam(required = false, defaultValue = "0") double latitude,
-                                                                     @RequestParam(required = false, defaultValue = "order") String sort,
-                                                                     @RequestParam(required = false, defaultValue = "N") String isCheetah,
-                                                                     @RequestParam(required = false, defaultValue = "전체") String deliveryFee,
-                                                                     @RequestParam(required = false, defaultValue = "전체") String minimumPrice,
-                                                                     @RequestParam(required = false, defaultValue = "N") String isToGo,
-                                                                     @RequestParam(required = false, defaultValue = "N") String isCoupon) throws BaseException{
-
-        int userIdx= jwtService.getUserIdxOption();
-        if (latitude==0 || longitude==0){
-            return new BaseResponse<>(EMPTY_POSITION_PARAM);
-        }
-
-        UserLocation userLocation = new UserLocation();
-
-        if (userIdx == 0){
-            userLocation.setUserLongitude(longitude);
-            userLocation.setUserLatitude(latitude);
-        } else{
-            userLocation = storeProvider.getNowUserLocation(userIdx);
-            if (userLocation.getUserLatitude()==0 || userLocation.getUserLatitude()==0){
-                userLocation.setUserLongitude(longitude);
-                userLocation.setUserLatitude(latitude);
-            }
-        }
-
-        if (!(deliveryFee.equals("전체") || deliveryFee.equals("무료배달") || deliveryFee.equals("1000")|| deliveryFee.equals("2000")|| deliveryFee.equals("3000"))){
-            return new BaseResponse<>(INVALID_DELIVERY_FEE_PARAM);
-        }
-        if (!(minimumPrice.equals("전체") || minimumPrice.equals("5000") ||minimumPrice.equals("10000") ||minimumPrice.equals("12000") ||minimumPrice.equals("15000"))){
-            return new BaseResponse<>(INVALID_MINIMUM_PRICE_PARAM);
-        }
-
-        GetStoreHomeReq getStoreHomeReq = new GetStoreHomeReq(sort, isCheetah, deliveryFee, minimumPrice, isToGo, isCoupon);
-
-
-        List<GetStoreHomeRes> getOnlyEatsStore = storeProvider.getNewStoreHome(userLocation, getStoreHomeReq);
-        return new BaseResponse<>(getOnlyEatsStore);
+        return new BaseResponse<>(getTypeHomeRes);
     }
 
 

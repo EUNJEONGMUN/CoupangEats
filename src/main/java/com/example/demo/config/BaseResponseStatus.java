@@ -70,6 +70,8 @@ public enum BaseResponseStatus {
     // stores
     INVALID_DELIVERY_FEE_PARAM(false, 2300, "deliveryFee 파라미터 값을 확인해주세요."),
     INVALID_MINIMUM_PRICE_PARAM(false, 2301, "minimumPrice 파라미터 값을 확인해주세요."),
+    INVALID_TYPE_PARAM(false, 2302, "type 파라미터 값을 확인해주세요."),
+
     /**
      * 3000 : Response 오류
      */
