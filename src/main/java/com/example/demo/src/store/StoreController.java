@@ -87,11 +87,15 @@ public class StoreController {
                 userLocation.setUserLatitude(latitude);
             }
         }
-        GetStoreHomeReq getStoreHomeReq = new GetStoreHomeReq(categoryIdx, sort, isCheetah, deliveryFee, minimumPrice, isToGo, isCoupon);
 
-        if (deliveryFee.equals("전체")){
-
+        if (!(deliveryFee.equals("전체") || deliveryFee.equals("무료배달") || deliveryFee.equals("1000")|| deliveryFee.equals("2000")|| deliveryFee.equals("3000"))){
+            return new BaseResponse<>(INVALID_DELIVERY_FEE_PARAM);
         }
+        if (!(minimumPrice.equals("전체") || minimumPrice.equals("5000") ||minimumPrice.equals("10000") ||minimumPrice.equals("12000") ||minimumPrice.equals("15000"))){
+            return new BaseResponse<>(INVALID_MINIMUM_PRICE_PARAM);
+        }
+
+        GetStoreHomeReq getStoreHomeReq = new GetStoreHomeReq(categoryIdx, sort, isCheetah, deliveryFee, minimumPrice, isToGo, isCoupon);
 
         List<GetStoreHomeRes> getStoreHomeRes = storeProvider.getStoreHome(userLocation, getStoreHomeReq);
         return new BaseResponse<>(getStoreHomeRes);

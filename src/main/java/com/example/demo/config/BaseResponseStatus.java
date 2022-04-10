@@ -66,6 +66,10 @@ public enum BaseResponseStatus {
     PATCH_CART_PARAM_EMPTY(false, 2205, "카트 idx를 입력하지 않았습니다."),
     EMPTY_REVIEWIDX_PARAM(false, 2206, "리뷰 idx를 입력하지 않았습니다."),
     EMPTY_DELIVERY_MAN_OPTION_IDX(false, 2207, "배달기사요청사항 idx를 입력하지 않았습니다."),
+
+    // stores
+    INVALID_DELIVERY_FEE_PARAM(false, 2300, "deliveryFee 파라미터 값을 확인해주세요."),
+    INVALID_MINIMUM_PRICE_PARAM(false, 2301, "minimumPrice 파라미터 값을 확인해주세요."),
     /**
      * 3000 : Response 오류
      */
