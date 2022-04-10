@@ -7,6 +7,9 @@ import com.example.demo.src.store.model.Res.*;
 import com.example.demo.src.user.model.UserLocation;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
+import org.springframework.jdbc.core.namedparam.SqlParameterSource;
+import org.springframework.jdbc.core.simple.SimpleJdbcCall;
 import org.springframework.stereotype.Repository;
 
 import javax.sql.DataSource;
@@ -16,6 +19,7 @@ import java.util.*;
 @Repository
 public class StoreDao {
     private JdbcTemplate jdbcTemplate;
+    private SimpleJdbcCall procReadActor;
 
     @Autowired
     public void setDataSource(DataSource dataSource){
@@ -108,6 +112,8 @@ public class StoreDao {
 
         String finalIsCoupon = isCoupon;
 
+        String businessStatus = getBusinessHours(idx);
+
         StoreInfo storeInfo = this.jdbcTemplate.queryForObject(StoreInfoQuery,
                 (rs1, rowNum1) -> new StoreInfo(
                         rs1.getInt("storeIdx"),
@@ -131,7 +137,8 @@ public class StoreDao {
                         rs1.getDouble("distance"),
                         orderCount,
                         deliveryFee,
-                        rs1.getString("isNewStore")
+                        rs1.getString("isNewStore"),
+                        businessStatus
                 ), Params);
 
 
@@ -148,71 +155,29 @@ public class StoreDao {
     public String getBusinessHours(int storeIdx){
         String CheckQuery = "SELECT EXISTS(SELECT * FROM BusinessHours BH WHERE BH.status='Y' AND BH.storeIdx=? AND BH.opentime<=NOW() AND BH.closeTime>NOW() AND BH.day= DAYOFWEEK(NOW()));";
 
-        String FindNextBusinessHoursQuery = "DELIMITER $$\n" +
-                "DROP procedure IF EXISTS business_hours_loop$$\n" +
-                "CREATE PROCEDURE business_hours_loop(IN idx INT)\n" +
-                "BEGIN\n" +
-                "    DECLARE nextOpenDay INT DEFAULT -1;\n" +
-                "    DECLARE loop_day INT DEFAULT DAYOFWEEK(NOW());\n" +
-                "    loop_label:LOOP\n" +
-                "\n" +
-                "        IF DAYOFWEEK(NOW()) = loop_day THEN\n" +
-                "            IF (SELECT EXISTS(SELECT * FROM BusinessHours BH WHERE BH.status='Y' AND BH.storeIdx=idx AND BH.opentime>NOW() AND BH.day= loop_day) = 1) THEN\n" +
-                "                SET nextOpenDay = loop_day;\n" +
-                "                LEAVE loop_label;\n" +
-                "            ELSE\n" +
-                "                SET loop_day = (loop_day+1)%7;\n" +
-                "            END IF;\n" +
-                "        ELSE\n" +
-                "            IF (SELECT EXISTS(SELECT * FROM BusinessHours BH WHERE BH.status='Y' AND BH.storeIdx=idx AND BH.day= loop_day) = 1) THEN\n" +
-                "                SET nextOpenDay = loop_day;\n" +
-                "                LEAVE loop_label;\n" +
-                "            ELSE\n" +
-                "                SET loop_day = (loop_day+1)%7;\n" +
-                "            END IF;\n" +
-                "        END IF;\n" +
-                "    END LOOP;\n" +
-                "\n" +
-                "    IF DAYOFWEEK(NOW()) = loop_day THEN\n" +
-                "        SELECT CASE WHEN DAYOFWEEK(NOW())-BH.day = 0 AND openTime<'12:00:00' THEN CONCAT('오늘 오전 ', DATE_FORMAT(BH.openTime, '%I:%i'),' 오픈')\n" +
-                "            ELSE CONCAT('오늘 오후 ', DATE_FORMAT(BH.openTime, '%I:%i'),' 오픈')\n" +
-                "            END AS nextBusinessHours\n" +
-                "            FROM BusinessHours BH WHERE BH.status='Y' AND BH.storeIdx=idx AND BH.day=loop_day AND BH.openTime>NOW()\n" +
-                "            ORDER BY openTime\n" +
-                "            LIMIT 1;\n" +
-                "    ELSE\n" +
-                "        SELECT CASE\n" +
-                "            WHEN (BH.day-DAYOFWEEK(NOW())= 1 OR BH.day-DAYOFWEEK(NOW())= -6) AND openTime<'12:00:00' THEN CONCAT('내일 오전 ', DATE_FORMAT(BH.openTime, '%I:%i'),' 오픈')\n" +
-                "            WHEN (BH.day-DAYOFWEEK(NOW())= 1 OR BH.day-DAYOFWEEK(NOW())= -6) AND openTime>='12:00:00' THEN CONCAT('내일 오후 ', DATE_FORMAT(BH.openTime, '%I:%i'),' 오픈')\n" +
-                "            WHEN BH.day=1 AND openTime<'12:00:00' THEN CONCAT(DATE_FORMAT(DATE_ADD(NOW(),INTERVAL BH.day-DAYOFWEEK(NOW()) DAY), '%c/%e'), '(일) 오전 ',DATE_FORMAT(BH.openTime, '%I:%i'),' 오픈' )\n" +
-                "            WHEN BH.day=1 AND openTime>='12:00:00' THEN CONCAT(DATE_FORMAT(DATE_ADD(NOW(),INTERVAL BH.day-DAYOFWEEK(NOW()) DAY), '%c/%e'), '(일) 오후 ',DATE_FORMAT(BH.openTime, '%I:%i'),' 오픈' )\n" +
-                "            WHEN BH.day=2 AND openTime<'12:00:00' THEN CONCAT(DATE_FORMAT(DATE_ADD(NOW(),INTERVAL BH.day-DAYOFWEEK(NOW()) DAY), '%c/%e'), '(월) 오전 ',DATE_FORMAT(BH.openTime, '%I:%i'),' 오픈' )\n" +
-                "            WHEN BH.day=2 AND openTime>='12:00:00' THEN CONCAT(DATE_FORMAT(DATE_ADD(NOW(),INTERVAL BH.day-DAYOFWEEK(NOW()) DAY), '%c/%e'), '(월) 오후 ',DATE_FORMAT(BH.openTime, '%I:%i'),' 오픈' )\n" +
-                "            WHEN BH.day=3 AND openTime<'12:00:00' THEN CONCAT(DATE_FORMAT(DATE_ADD(NOW(),INTERVAL BH.day-DAYOFWEEK(NOW()) DAY), '%c/%e'), '(화) 오전 ',DATE_FORMAT(BH.openTime, '%I:%i'),' 오픈' )\n" +
-                "            WHEN BH.day=3 AND openTime>='12:00:00' THEN CONCAT(DATE_FORMAT(DATE_ADD(NOW(),INTERVAL BH.day-DAYOFWEEK(NOW()) DAY), '%c/%e'), '(화) 오후 ',DATE_FORMAT(BH.openTime, '%I:%i'),' 오픈' )\n" +
-                "            WHEN BH.day=4 AND openTime<'12:00:00' THEN CONCAT(DATE_FORMAT(DATE_ADD(NOW(),INTERVAL BH.day-DAYOFWEEK(NOW()) DAY), '%c/%e'), '(수) 오전 ',DATE_FORMAT(BH.openTime, '%I:%i'),' 오픈' )\n" +
-                "            WHEN BH.day=4 AND openTime>='12:00:00' THEN CONCAT(DATE_FORMAT(DATE_ADD(NOW(),INTERVAL BH.day-DAYOFWEEK(NOW()) DAY), '%c/%e'), '(수) 오후 ',DATE_FORMAT(BH.openTime, '%I:%i'),' 오픈' )\n" +
-                "            WHEN BH.day=5 AND openTime<'12:00:00' THEN CONCAT(DATE_FORMAT(DATE_ADD(NOW(),INTERVAL BH.day-DAYOFWEEK(NOW()) DAY), '%c/%e'), '(목) 오전 ',DATE_FORMAT(BH.openTime, '%I:%i'),' 오픈' )\n" +
-                "            WHEN BH.day=5 AND openTime>='12:00:00' THEN CONCAT(DATE_FORMAT(DATE_ADD(NOW(),INTERVAL BH.day-DAYOFWEEK(NOW()) DAY), '%c/%e'), '(목) 오후 ',DATE_FORMAT(BH.openTime, '%I:%i'),' 오픈' )\n" +
-                "            WHEN BH.day=6 AND openTime<'12:00:00' THEN CONCAT(DATE_FORMAT(DATE_ADD(NOW(),INTERVAL BH.day-DAYOFWEEK(NOW()) DAY), '%c/%e'), '(금) 오전 ',DATE_FORMAT(BH.openTime, '%I:%i'),' 오픈' )\n" +
-                "            WHEN BH.day=6 AND openTime>='12:00:00' THEN CONCAT(DATE_FORMAT(DATE_ADD(NOW(),INTERVAL BH.day-DAYOFWEEK(NOW()) DAY), '%c/%e'), '(금) 오후 ',DATE_FORMAT(BH.openTime, '%I:%i'),' 오픈' )\n" +
-                "            WHEN BH.day=7 AND openTime<'12:00:00' THEN CONCAT(DATE_FORMAT(DATE_ADD(NOW(),INTERVAL BH.day-DAYOFWEEK(NOW()) DAY), '%c/%e'), '(토) 오전 ',DATE_FORMAT(BH.openTime, '%I:%i'),' 오픈' )\n" +
-                "            WHEN BH.day=7 AND openTime>='12:00:00' THEN CONCAT(DATE_FORMAT(DATE_ADD(NOW(),INTERVAL BH.day-DAYOFWEEK(NOW()) DAY), '%c/%e'), '(토) 오후 ',DATE_FORMAT(BH.openTime, '%I:%i'),' 오픈' )\n" +
-                "           ELSE '준비중'\n" +
-                "            END AS nextBusinessHours\n" +
-                "        FROM BusinessHours BH WHERE BH.status='Y' AND BH.storeIdx=idx AND BH.day=loop_day\n" +
-                "        ORDER BY openTime\n" +
-                "        LIMIT 1;\n" +
-                "    END IF;\n" +
-                "END;\n" +
-                "CALL business_hours_loop(?);";
+        // 프로시저 지정
+        SimpleJdbcCall simpleJdbcCall = new SimpleJdbcCall(jdbcTemplate)
+                .withProcedureName("business_hours_loop");
+
+        // 프로시저 호출
+        Map simpleJdbcCallResult = simpleJdbcCall.execute(storeIdx);
+        System.out.println(">>"+simpleJdbcCallResult);
+
+        // 프로시저 호출 결과에서 nextBusinessHours 추출
+        ArrayList arrayList = new ArrayList();
+        arrayList = (ArrayList) simpleJdbcCallResult.get("#result-set-1");
+        Map resultMap = (Map) arrayList.get(0);
+
+        System.out.println("nextBusinessHours: " + resultMap.get("nextBusinessHours"));
+        // nextBusinessHours에 저장
+        String nextBusinessHours = (String) resultMap.get("nextBusinessHours");
 
         int result = this.jdbcTemplate.queryForObject(CheckQuery, int.class, storeIdx);
         if (result == 1){
             return "영업중";
         }
         else {
-            return this.jdbcTemplate.queryForObject(FindNextBusinessHoursQuery, String.class, storeIdx);
+            return nextBusinessHours;
         }
     }
 

@@ -36,6 +36,7 @@ public class StoreInfo {
     private int orderCount;
     private String deliveryFee;
     private String isNewStore;
+    private String businessStatus;
 
 
 }
