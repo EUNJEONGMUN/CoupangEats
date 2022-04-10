@@ -153,7 +153,12 @@ public class StoreDao {
     }
 
     public String getBusinessHours(int storeIdx){
-        String CheckQuery = "SELECT EXISTS(SELECT * FROM BusinessHours BH WHERE BH.status='Y' AND BH.storeIdx=? AND BH.opentime<=NOW() AND BH.closeTime>NOW() AND BH.day= DAYOFWEEK(NOW()));";
+        String CheckQuery = "SELECT EXISTS(SELECT * FROM BusinessHours BH WHERE BH.status!='N' AND BH.storeIdx=? AND BH.opentime<=NOW() AND BH.closeTime>NOW() AND BH.day= DAYOFWEEK(NOW()));";
+        String businessStatusQuery = "SELECT CASE WHEN status='Y' THEN '영업중'\n" +
+                "    WHEN status='P' THEN '준비중'\n" +
+                "ELSE '임시 휴무'\n" +
+                "END AS status\n" +
+                "FROM Store WHERE storeIdx=? AND status!='N';";
 
         // 프로시저 지정
         SimpleJdbcCall simpleJdbcCall = new SimpleJdbcCall(jdbcTemplate)
@@ -174,7 +179,7 @@ public class StoreDao {
 
         int result = this.jdbcTemplate.queryForObject(CheckQuery, int.class, storeIdx);
         if (result == 1){
-            return "영업중";
+            return this.jdbcTemplate.queryForObject(businessStatusQuery, String.class, storeIdx);
         }
         else {
             return nextBusinessHours;
