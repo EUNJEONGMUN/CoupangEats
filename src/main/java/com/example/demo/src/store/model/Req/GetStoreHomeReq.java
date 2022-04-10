@@ -10,7 +10,6 @@ import org.springframework.web.bind.annotation.RequestParam;
 @Setter
 @NoArgsConstructor
 public class GetStoreHomeReq {
-    private int categoryIdx;
     private String sort;
     private String isCheetah;
     private int deliveryFee;
@@ -18,8 +17,7 @@ public class GetStoreHomeReq {
     private String isToGo;
     private String isCoupon;
 
-    public GetStoreHomeReq(int categoryIdx, String sort, String isCheetah, String deliveryFee, String minimumPrice, String isToGo, String isCoupon) {
-        this.categoryIdx = categoryIdx;
+    public GetStoreHomeReq(String sort, String isCheetah, String deliveryFee, String minimumPrice, String isToGo, String isCoupon) {
         this.sort = sort;
         this.isCheetah = isCheetah;
         if (deliveryFee.equals("전체")){

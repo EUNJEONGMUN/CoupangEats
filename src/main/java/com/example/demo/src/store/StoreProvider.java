@@ -30,7 +30,7 @@ public class StoreProvider {
      * [GET] /stores/home
      * @return BaseResponse<List<GetStoreHomeRes>>
      */
-    public List<GetStoreHomeRes> getStoreHome(UserLocation userLocation, GetStoreHomeReq getStoreHomeReq, String value) throws BaseException {
+    public List<GetStoreHomeRes> getStoreHome(int categoryIdx, UserLocation userLocation, GetStoreHomeReq getStoreHomeReq, String value) throws BaseException {
         try {
             List<Integer> StoreList = new ArrayList<>();
             if (value.equals("onlyEats")){
@@ -40,7 +40,7 @@ public class StoreProvider {
             } else if (value.equals("new")){
                 StoreList = storeDao.findNewStoreIdxList();
             } else {
-                StoreList = storeDao.findStoreIdxList(userLocation, getStoreHomeReq);
+                StoreList = storeDao.findStoreIdxList(categoryIdx, userLocation, getStoreHomeReq);
             }
 //            List<Integer> StoreList = storeDao.findStoreIdxList(userLocation, getStoreHomeReq);
             System.out.println("here");
@@ -59,6 +59,91 @@ public class StoreProvider {
             throw new BaseException(DATABASE_ERROR);
         }
     }
+
+
+    // getOnlyEatsStoreHome
+    /**
+     * 인기있는 프랜차이즈 조회 API
+     * [GET] /stores/home/franchise
+     * /franchise?&longitude=&latitude=&categoryIdx=&sort=&isCheetah&deliveryFee=&minimumPrice&isToGo=&isCoupon=
+     * @return BaseResponse<List<GetStoreHomeRes>>
+     */
+    public List<GetStoreHomeRes> getFranchiseStoreHome(UserLocation userLocation, GetStoreHomeReq getStoreHomeReq) throws BaseException {
+        try {
+            List<Integer> StoreList = storeDao.findFranchiseStoreIdxList(userLocation, getStoreHomeReq);
+
+            System.out.println("here");
+            List<GetStoreHomeRes> getStoreHomeRes = new ArrayList<>();
+            System.out.println("here");
+            for(int idx:StoreList){
+                System.out.println(">>idx>>"+idx);
+                GetStoreHomeRes storeHome = storeDao.getStoreHome(idx, userLocation);
+                System.out.println("here");
+                getStoreHomeRes.add(storeHome);
+                System.out.println("here");
+            }
+            return getStoreHomeRes;
+        } catch (Exception exception) {
+            System.out.println("storehome-> "+ exception);
+            throw new BaseException(DATABASE_ERROR);
+        }
+    }
+
+    /**
+     * 이츠에만 있는 맛집 조회 API
+     * [GET] /stores/home/only-eats
+     * /only-eats?&longitude=&latitude=&categoryIdx=&sort=&isCheetah&deliveryFee=&minimumPrice&isToGo=&isCoupon=
+     * @return BaseResponse<List<GetStoreHomeRes>>
+     */
+    public List<GetStoreHomeRes> getOnlyEatsStoreHome(UserLocation userLocation, GetStoreHomeReq getStoreHomeReq) throws BaseException {
+        try {
+            List<Integer> StoreList = storeDao.findOnlyEatsStoreIdxList(userLocation, getStoreHomeReq);
+
+            System.out.println("here");
+            List<GetStoreHomeRes> getStoreHomeRes = new ArrayList<>();
+            System.out.println("here");
+            for(int idx:StoreList){
+                System.out.println(">>idx>>"+idx);
+                GetStoreHomeRes storeHome = storeDao.getStoreHome(idx, userLocation);
+                System.out.println("here");
+                getStoreHomeRes.add(storeHome);
+                System.out.println("here");
+            }
+            return getStoreHomeRes;
+        } catch (Exception exception) {
+            System.out.println("storehome-> "+ exception);
+            throw new BaseException(DATABASE_ERROR);
+        }
+    }
+
+    /**
+     * 새로 들어왔어요 조회 API
+     * [GET] /stores/home/recent
+     * /recent?&longitude=&latitude=&categoryIdx=&sort=&isCheetah&deliveryFee=&minimumPrice&isToGo=&isCoupon=
+     * @return BaseResponse<List<GetStoreHomeRes>>
+     */
+    public List<GetStoreHomeRes> getNewStoreHome(UserLocation userLocation, GetStoreHomeReq getStoreHomeReq) throws BaseException {
+        try {
+            List<Integer> StoreList = storeDao.findNewStoreIdxList(userLocation, getStoreHomeReq);
+
+            System.out.println("here");
+            List<GetStoreHomeRes> getStoreHomeRes = new ArrayList<>();
+            System.out.println("here");
+            for(int idx:StoreList){
+                System.out.println(">>idx>>"+idx);
+                GetStoreHomeRes storeHome = storeDao.getStoreHome(idx, userLocation);
+                System.out.println("here");
+                getStoreHomeRes.add(storeHome);
+                System.out.println("here");
+            }
+            return getStoreHomeRes;
+        } catch (Exception exception) {
+            System.out.println("storehome-> "+ exception);
+            throw new BaseException(DATABASE_ERROR);
+        }
+    }
+
+
 
     /**
      * 가게 상세 화면 조회 조회 API
