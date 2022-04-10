@@ -60,7 +60,7 @@ public class StoreController {
      */
     @ResponseBody
     @GetMapping("/home")
-    public BaseResponse<List<GetStoreHomeRes>> getStoreHome(@RequestParam(required = false, defaultValue = "0") double longitude,
+    public BaseResponse<GetStoreHomeTotalRes> getStoreHome(@RequestParam(required = false, defaultValue = "0") double longitude,
                                                             @RequestParam(required = false, defaultValue = "0") double latitude,
                                                             @RequestParam(required = false, defaultValue = "0") int categoryIdx,
                                                             @RequestParam(required = false, defaultValue = "order") String sort,
@@ -97,8 +97,13 @@ public class StoreController {
 
         GetStoreHomeReq getStoreHomeReq = new GetStoreHomeReq(categoryIdx, sort, isCheetah, deliveryFee, minimumPrice, isToGo, isCoupon);
 
-        List<GetStoreHomeRes> getStoreHomeRes = storeProvider.getStoreHome(userLocation, getStoreHomeReq);
-        return new BaseResponse<>(getStoreHomeRes);
+
+        List<GetStoreHomeRes> getStoreHomeRes = storeProvider.getStoreHome(userLocation, getStoreHomeReq, "default");
+        List<GetStoreHomeRes> getOnlyEatsStore = storeProvider.getStoreHome(userLocation, getStoreHomeReq, "onlyEats");
+        List<GetStoreHomeRes> getFranchiseStore = storeProvider.getStoreHome(userLocation, getStoreHomeReq, "franchise");
+        List<GetStoreHomeRes> getNewStore = storeProvider.getStoreHome(userLocation, getStoreHomeReq, "new");
+        GetStoreHomeTotalRes getStoreHomeTotalRes = new GetStoreHomeTotalRes(getOnlyEatsStore, getFranchiseStore, getNewStore, getStoreHomeRes);
+        return new BaseResponse<>(getStoreHomeTotalRes);
     }
 
     /**

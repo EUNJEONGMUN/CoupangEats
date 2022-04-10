@@ -37,7 +37,7 @@ public class StoreDao {
         String StoreInfoQuery = "SELECT S.storeIdx, S.storeImgUrl,S.storeName, S.isCheetah, S.timeDelivery, R.reviewScore, R.reviewCount,\n" +
                 "                       S.isToGo, S.isCoupon, S.status, S.minimumPrice, S.buildingName, S.storeAddress, S.storeAddressDetail, DATE_FORMAT(S.createdAt, '%Y-%m-%d %H:%I:%S') AS createdAt,\n" +
                 "       ROUND(ST_DISTANCE_SPHERE(POINT(S.storeLongitude,S.storeLatitude), POINT(?,?))*0.001,1) AS distance,\n" +
-                "       CASE WHEN DATEDIFF(S.createdAt, CURRENT_DATE())>14 THEN 'N' ELSE 'Y' END AS isNewStore\n" +
+                "       CASE WHEN DATEDIFF(CURRENT_DATE(), S.createdAt)>14 THEN 'N' ELSE 'Y' END AS isNewStore\n" +
                 "                FROM Store S\n" +
                 "                LEFT JOIN (\n" +
                 "                    SELECT UO.storeIdx, ROUND(AVG(R.score),1) AS reviewScore, COUNT(R.reviewIdx) AS reviewCount\n" +
@@ -499,7 +499,7 @@ public class StoreDao {
                 "       CASE WHEN S.isToGo='Y' THEN S.timeToGo ELSE 'N' END AS timeToGo,\n" +
                 "       S.isToGo, S.isCoupon, S.status, S.minimumPrice, S.buildingName, S.storeAddress, S.storeAddressDetail,\n" +
                 "       ROUND(ST_DISTANCE_SPHERE(POINT(S.storeLongitude,S.storeLatitude), POINT(?,?))*0.001,1) AS distance,\n" +
-                "       CASE WHEN DATEDIFF(S.createdAt, CURRENT_DATE())>14 THEN 'N' ELSE 'Y' END AS isNewStore\n" +
+                "       CASE WHEN DATEDIFF(CURRENT_DATE(), S.createdAt)>14 THEN 'N' ELSE 'Y' END AS isNewStore\n" +
                 "                FROM Store S\n" +
                 "                LEFT JOIN (\n" +
                 "                    SELECT UO.storeIdx, ROUND(AVG(R.score),1) AS reviewScore, COUNT(R.reviewIdx) AS reviewCount\n" +
@@ -1137,6 +1137,37 @@ public class StoreDao {
         }
         return new UserLocation(0.0,0.0);
 
+    }
+
+    public List<Integer> findOnlyEatsStoreIdxList() {
+        String Query = "SELECT S.storeIdx\n" +
+                "FROM Store S\n" +
+                "WHERE S.status!='N' AND S.isOnlyEats='Y';";
+        return this.jdbcTemplate.query(Query,
+                (rs, rowNum) -> {
+                    return rs.getInt("storeIdx");
+                });
+
+    }
+    public List<Integer> findFranchiseStoreIdxList() {
+        String Query = "SELECT S.storeIdx\n" +
+                "FROM Store S\n" +
+                "    JOIN StoreCategoryMapping SCM on S.storeIdx = SCM.storeIdx\n" +
+                "    JOIN StoreCategory SC on SCM.storeCategoryIdx = SC.storeCategoryIdx\n" +
+                "WHERE S.status!='N' AND SCM.storeCategoryIdx=23;";
+        return this.jdbcTemplate.query(Query,
+                (rs, rowNum) -> {
+                    return rs.getInt("storeIdx");
+                });
+    }
+    public List<Integer> findNewStoreIdxList(){
+        String Query = "SELECT S.storeIdx\n" +
+                "FROM Store S\n" +
+                "WHERE S.status!='N' AND DATEDIFF(CURRENT_DATE(), S.createdAt)<=14;";
+        return this.jdbcTemplate.query(Query,
+                (rs, rowNum) -> {
+                    return rs.getInt("storeIdx");
+                });
     }
 
     // 가게 idx 찾기

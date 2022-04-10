@@ -30,10 +30,19 @@ public class StoreProvider {
      * [GET] /stores/home
      * @return BaseResponse<List<GetStoreHomeRes>>
      */
-    public List<GetStoreHomeRes> getStoreHome(UserLocation userLocation, GetStoreHomeReq getStoreHomeReq) throws BaseException {
+    public List<GetStoreHomeRes> getStoreHome(UserLocation userLocation, GetStoreHomeReq getStoreHomeReq, String value) throws BaseException {
         try {
-
-            List<Integer> StoreList = storeDao.findStoreIdxList(userLocation, getStoreHomeReq);
+            List<Integer> StoreList = new ArrayList<>();
+            if (value.equals("onlyEats")){
+                StoreList = storeDao.findOnlyEatsStoreIdxList();
+            } else if (value.equals("franchise")){
+                StoreList = storeDao.findFranchiseStoreIdxList();
+            } else if (value.equals("new")){
+                StoreList = storeDao.findNewStoreIdxList();
+            } else {
+                StoreList = storeDao.findStoreIdxList(userLocation, getStoreHomeReq);
+            }
+//            List<Integer> StoreList = storeDao.findStoreIdxList(userLocation, getStoreHomeReq);
             System.out.println("here");
             List<GetStoreHomeRes> getStoreHomeRes = new ArrayList<>();
             System.out.println("here");
