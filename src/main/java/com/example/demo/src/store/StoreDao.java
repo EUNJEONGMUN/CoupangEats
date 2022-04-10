@@ -1159,7 +1159,7 @@ public class StoreDao {
                 "    SELECT UO.storeIdx, COUNT(UO.userOrderIdx) AS orderCount\n" +
                 "    FROM UserOrder UO\n" +
                 "    GROUP BY UO.storeIdx) OC ON OC.storeIdx=S.storeIdx\n" +
-                "WHERE (S.isCheetah='Y' OR S.isCheetah=?) AND S.minimumPrice<=? AND (S.isToGo='Y' OR S.isToGo=?) AND (S.isCoupon='Y' OR S.isCoupon=?) AND F.fee<=?\n" +
+                "WHERE S.status!='N' AND (S.isCheetah='Y' OR S.isCheetah=?) AND S.minimumPrice<=? AND (S.isToGo='Y' OR S.isToGo=?) AND (S.isCoupon='Y' OR S.isCoupon=?) AND F.fee<=?\n" +
                 "ORDER BY OC.orderCount DESC;";
 
         String DistanceQuery = "SELECT S.storeIdx\n" +
@@ -1172,7 +1172,7 @@ public class StoreDao {
                 "    SELECT UO.storeIdx, ROUND(AVG(R.score),1) AS reviewScore, COUNT(R.reviewIdx) AS reviewCount\n" +
                 "    FROM Review R JOIN UserOrder UO on R.userOrderIdx=UO.userOrderIdx\n" +
                 "    GROUP BY UO.storeIdx) R ON R.storeIdx=S.storeIdx\n" +
-                "WHERE (S.isCheetah='Y' OR S.isCheetah=?) AND S.minimumPrice<=? AND (S.isToGo='Y' OR S.isToGo=?) AND (S.isCoupon='Y' OR S.isCoupon=?) AND F.fee<=?\n" +
+                "WHERE S.status!='N' AND (S.isCheetah='Y' OR S.isCheetah=?) AND S.minimumPrice<=? AND (S.isToGo='Y' OR S.isToGo=?) AND (S.isCoupon='Y' OR S.isCoupon=?) AND F.fee<=?\n" +
                 "ORDER BY ROUND(ST_DISTANCE_SPHERE(POINT(S.storeLongitude,S.storeLatitude), POINT(?,?))*0.001,1);";
 
         String ScoreQuery = "SELECT S.storeIdx\n" +
@@ -1184,8 +1184,9 @@ public class StoreDao {
                 "LEFT JOIN (\n" +
                 "    SELECT UO.storeIdx, ROUND(AVG(R.score),1) AS reviewScore, COUNT(R.reviewIdx) AS reviewCount\n" +
                 "    FROM Review R JOIN UserOrder UO on R.userOrderIdx=UO.userOrderIdx\n" +
+                "    WHERE R.status='Y'\n" +
                 "    GROUP BY UO.storeIdx) R ON R.storeIdx=S.storeIdx\n" +
-                "WHERE (S.isCheetah='Y' OR S.isCheetah=?) AND S.minimumPrice<=? AND (S.isToGo='Y' OR S.isToGo=?) AND (S.isCoupon='Y' OR S.isCoupon=?) AND F.fee<=?\n" +
+                "WHERE S.status!='N' AND (S.isCheetah='Y' OR S.isCheetah=?) AND S.minimumPrice<=? AND (S.isToGo='Y' OR S.isToGo=?) AND (S.isCoupon='Y' OR S.isCoupon=?) AND F.fee<=?\n" +
                 "ORDER BY R.reviewScore DESC;";
 
         String NewQuery = "SELECT S.storeIdx\n" +
@@ -1194,7 +1195,7 @@ public class StoreDao {
                 "    SELECT StoreIdx, IFNULL(MIN(deliveryFee),0) AS fee\n" +
                 "    FROM DeliveryFee\n" +
                 "    WHERE DeliveryFee.status='Y' GROUP BY storeIdx) F ON F.storeIdx = S.storeIdx\n" +
-                "WHERE (S.isCheetah='Y' OR S.isCheetah=?) AND S.minimumPrice<=? AND (S.isToGo='Y' OR S.isToGo=?) AND (S.isCoupon='Y' OR S.isCoupon=?) AND F.fee<=?\n" +
+                "WHERE S.status!='N' AND (S.isCheetah='Y' OR S.isCheetah=?) AND S.minimumPrice<=? AND (S.isToGo='Y' OR S.isToGo=?) AND (S.isCoupon='Y' OR S.isCoupon=?) AND F.fee<=?\n" +
                 "ORDER BY S.createdAt DESC;";
 
         String CategoryOrderQuery = "SELECT S.storeIdx\n" +
@@ -1209,7 +1210,7 @@ public class StoreDao {
                 "    SELECT UO.storeIdx, COUNT(UO.userOrderIdx) AS orderCount\n" +
                 "    FROM UserOrder UO\n" +
                 "    GROUP BY UO.storeIdx) OC ON OC.storeIdx=S.storeIdx\n" +
-                "WHERE SCM.storeCategoryIdx=? AND (S.isCheetah='Y' OR S.isCheetah=?) AND S.minimumPrice<=? AND (S.isToGo='Y' OR S.isToGo=?) AND (S.isCoupon='Y' OR S.isCoupon=?) AND F.fee<=?\n" +
+                "WHERE S.status!='N' AND SCM.storeCategoryIdx=? AND (S.isCheetah='Y' OR S.isCheetah=?) AND S.minimumPrice<=? AND (S.isToGo='Y' OR S.isToGo=?) AND (S.isCoupon='Y' OR S.isCoupon=?) AND F.fee<=?\n" +
                 "ORDER BY OC.orderCount DESC;";
 
         String CategoryDistanceQuery = "SELECT S.storeIdx\n" +
@@ -1224,7 +1225,7 @@ public class StoreDao {
                 "    SELECT UO.storeIdx, ROUND(AVG(R.score),1) AS reviewScore, COUNT(R.reviewIdx) AS reviewCount\n" +
                 "    FROM Review R JOIN UserOrder UO on R.userOrderIdx=UO.userOrderIdx\n" +
                 "    GROUP BY UO.storeIdx) R ON R.storeIdx=S.storeIdx\n" +
-                "WHERE SCM.storeCategoryIdx=? AND (S.isCheetah='Y' OR S.isCheetah=?) AND S.minimumPrice<=? AND (S.isToGo='Y' OR S.isToGo=?) AND (S.isCoupon='Y' OR S.isCoupon=?) AND F.fee<=?\n" +
+                "WHERE S.status!='N' AND SCM.storeCategoryIdx=? AND (S.isCheetah='Y' OR S.isCheetah=?) AND S.minimumPrice<=? AND (S.isToGo='Y' OR S.isToGo=?) AND (S.isCoupon='Y' OR S.isCoupon=?) AND F.fee<=?\n" +
                 "ORDER BY ROUND(ST_DISTANCE_SPHERE(POINT(S.storeLongitude,S.storeLatitude), POINT(?,?))*0.001,1);";
 
         String CategoryScoreQuery = "SELECT S.storeIdx\n" +
@@ -1238,8 +1239,9 @@ public class StoreDao {
                 "LEFT JOIN (\n" +
                 "    SELECT UO.storeIdx, ROUND(AVG(R.score),1) AS reviewScore, COUNT(R.reviewIdx) AS reviewCount\n" +
                 "    FROM Review R JOIN UserOrder UO on R.userOrderIdx=UO.userOrderIdx\n" +
+                "    WHERE R.status='Y'\n" +
                 "    GROUP BY UO.storeIdx) R ON R.storeIdx=S.storeIdx\n" +
-                "WHERE SCM.storeCategoryIdx=? AND (S.isCheetah='Y' OR S.isCheetah=?) AND S.minimumPrice<=? AND (S.isToGo='Y' OR S.isToGo=?) AND (S.isCoupon='Y' OR S.isCoupon=?) AND F.fee<=?\n" +
+                "WHERE S.status!='N' AND SCM.storeCategoryIdx=? AND (S.isCheetah='Y' OR S.isCheetah=?) AND S.minimumPrice<=? AND (S.isToGo='Y' OR S.isToGo=?) AND (S.isCoupon='Y' OR S.isCoupon=?) AND F.fee<=?\n" +
                 "ORDER BY R.reviewScore DESC;";
 
         String CategoryNewQuery = "SELECT S.storeIdx\n" +
@@ -1250,7 +1252,7 @@ public class StoreDao {
                 "    SELECT StoreIdx, IFNULL(MIN(deliveryFee),0) AS fee\n" +
                 "    FROM DeliveryFee\n" +
                 "    WHERE DeliveryFee.status='Y' GROUP BY storeIdx) F ON F.storeIdx = S.storeIdx\n" +
-                "WHERE SCM.storeCategoryIdx=? AND (S.isCheetah='Y' OR S.isCheetah=?) AND S.minimumPrice<=? AND (S.isToGo='Y' OR S.isToGo=?) AND (S.isCoupon='Y' OR S.isCoupon=?) AND F.fee<=?\n" +
+                "WHERE S.status!='N' AND SCM.storeCategoryIdx=? AND (S.isCheetah='Y' OR S.isCheetah=?) AND S.minimumPrice<=? AND (S.isToGo='Y' OR S.isToGo=?) AND (S.isCoupon='Y' OR S.isCoupon=?) AND F.fee<=?\n" +
                 "ORDER BY S.createdAt DESC;";
 
         Object[] Params = new Object[]{getStoreHomeReq.getIsCheetah(), getStoreHomeReq.getMinimumPrice(), getStoreHomeReq.getIsToGo(),
