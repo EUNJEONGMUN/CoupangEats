@@ -1678,7 +1678,7 @@ public class StoreDao {
 
         String ReviewPhotoQuery = "SELECT R.reviewIdx, R.userIdx, R.userOrderIdx\n" +
                 "FROM Review R JOIN UserOrder UO on R.userOrderIdx = UO.userOrderIdx\n" +
-                "JOIN (SELECT RL.reviewIdx, COUNT(RL.isHelped) AS isHelped\n" +
+                "LEFT JOIN (SELECT RL.reviewIdx, COUNT(RL.isHelped) AS isHelped\n" +
                 "FROM ReviewLiked RL\n" +
                 "WHERE RL.isHelped='G'\n" +
                 "GROUP BY RL.reviewIdx\n" +
@@ -1688,7 +1688,7 @@ public class StoreDao {
 
         String ReviewQuery = "SELECT R.reviewIdx, R.userIdx, R.userOrderIdx\n" +
                 "FROM Review R JOIN UserOrder UO on R.userOrderIdx = UO.userOrderIdx\n" +
-                "JOIN (SELECT RL.reviewIdx, COUNT(RL.isHelped) AS isHelped\n" +
+                "LEFT JOIN (SELECT RL.reviewIdx, COUNT(RL.isHelped) AS isHelped\n" +
                 "FROM ReviewLiked RL\n" +
                 "WHERE RL.isHelped='G'\n" +
                 "GROUP BY RL.reviewIdx\n" +
