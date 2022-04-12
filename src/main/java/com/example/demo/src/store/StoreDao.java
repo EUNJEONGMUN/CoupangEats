@@ -1684,7 +1684,7 @@ public class StoreDao {
                 "GROUP BY RL.reviewIdx\n" +
                 "ORDER BY COUNT(RL.isHelped) DESC) Liked ON Liked.reviewIdx = R.reviewIdx\n" +
                 "WHERE UO.storeIdx=? AND R.status='Y' AND R.isPhoto='Y'\n" +
-                "ORDER BY R.createdAt DESC;";
+                "ORDER BY isHelped DESC, R.createdAt DESC;";
 
         String ReviewQuery = "SELECT R.reviewIdx, R.userIdx, R.userOrderIdx\n" +
                 "FROM Review R JOIN UserOrder UO on R.userOrderIdx = UO.userOrderIdx\n" +
@@ -1694,7 +1694,7 @@ public class StoreDao {
                 "GROUP BY RL.reviewIdx\n" +
                 "ORDER BY COUNT(RL.isHelped) DESC) Liked ON Liked.reviewIdx = R.reviewIdx\n" +
                 "WHERE UO.storeIdx=? AND R.status='Y'\n" +
-                "ORDER BY R.createdAt DESC;";
+                "ORDER BY isHelped DESC, R.createdAt DESC;";
 
         String ScoreDescPhotoQuery = "SELECT R.reviewIdx, R.userIdx, R.userOrderIdx\n" +
                 "FROM Review R JOIN UserOrder UO on R.userOrderIdx = UO.userOrderIdx\n" +
