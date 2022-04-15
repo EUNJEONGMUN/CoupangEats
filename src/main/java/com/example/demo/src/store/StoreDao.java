@@ -8,19 +8,15 @@ import com.example.demo.src.store.model.Res.*;
 import com.example.demo.src.user.model.UserLocation;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
-import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
-import org.springframework.jdbc.core.namedparam.SqlParameterSource;
 import org.springframework.jdbc.core.simple.SimpleJdbcCall;
 import org.springframework.stereotype.Repository;
 
 import javax.sql.DataSource;
-import java.sql.Time;
 import java.util.*;
 
 @Repository
 public class StoreDao {
     private JdbcTemplate jdbcTemplate;
-    private SimpleJdbcCall procReadActor;
 
     @Autowired
     public void setDataSource(DataSource dataSource){

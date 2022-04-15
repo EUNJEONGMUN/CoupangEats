@@ -69,19 +69,28 @@ public class StoreController {
                                                             @RequestParam(required = false, defaultValue = "N") String isToGo,
                                                             @RequestParam(required = false, defaultValue = "N") String isCoupon) throws BaseException{
 
+        // 헤더에 사용자 idx가 있다면 추출
         int userIdx= jwtService.getUserIdxOption();
+
+        // 위치 정보가 없는지 확인
         if (latitude==0 || longitude==0){
             return new BaseResponse<>(EMPTY_POSITION_PARAM);
         }
 
+
         UserLocation userLocation = new UserLocation();
 
-        if (userIdx == 0){
+        if (userIdx == 0){ // 사용자 idx가 없을 때 userLocation을 파라미터값으로 설정
             userLocation.setUserLongitude(longitude);
             userLocation.setUserLatitude(latitude);
-        } else{
+        } else{// 사용자 idx가 있을 때
+
+            // 사용자의 현재 위치 가져오기
             userLocation = storeProvider.getNowUserLocation(userIdx);
+
+            // 사용자가 현재 주소로 설정한 값이 없을 때
             if (userLocation.getUserLatitude()==0 || userLocation.getUserLatitude()==0){
+                // userLocation을 파라미터값으로 설정
                 userLocation.setUserLongitude(longitude);
                 userLocation.setUserLatitude(latitude);
             }

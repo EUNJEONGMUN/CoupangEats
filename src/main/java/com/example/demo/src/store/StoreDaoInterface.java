@@ -8,4 +8,6 @@ public interface StoreDaoInterface {
     // 홈화면 조회 API
     GetStoreHomeRes getStoreHome(int idx, UserLocation userLocation);
 
+    // 사용자의 현재 위치 찾기
+    UserLocation getNowUserLocation(int userIdx);
 }
