@@ -17,6 +17,7 @@ import java.util.List;
 public class StoreInfo {
     private int storeIdx;
     private List<String> storeImgUrl;
+    private String storeLogoUrl;
     private String storeName;
     private String isCheetah;
     private String timeDelivery;

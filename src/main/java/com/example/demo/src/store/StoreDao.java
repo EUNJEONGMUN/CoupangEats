@@ -34,7 +34,7 @@ public class StoreDao {
      */
     public GetStoreHomeRes getStoreHome(int idx, UserLocation userLocation) {
 
-        String StoreInfoQuery = "SELECT S.storeIdx, S.storeImgUrl,S.storeName, S.isCheetah, S.timeDelivery, R.reviewScore, R.reviewCount,\n" +
+        String StoreInfoQuery = "SELECT S.storeIdx, S.storeLogoUrl,S.storeName, S.isCheetah, S.timeDelivery, R.reviewScore, R.reviewCount,\n" +
                 "                       S.isToGo, S.isCoupon, S.status, S.minimumPrice, S.buildingName, S.storeAddress, S.storeAddressDetail, DATE_FORMAT(S.createdAt, '%Y-%m-%d %H:%I:%S') AS createdAt,\n" +
                 "       ROUND(ST_DISTANCE_SPHERE(POINT(S.storeLongitude,S.storeLatitude), POINT(?,?))*0.001,1) AS distance,\n" +
                 "       CASE WHEN DATEDIFF(CURRENT_DATE(), S.createdAt)>14 THEN 'N' ELSE 'Y' END AS isNewStore\n" +
@@ -81,6 +81,10 @@ public class StoreDao {
 
         Object[] Params = new Object[]{userLocation.getUserLongitude(), userLocation.getUserLatitude(), idx};
 
+        String logo = this.jdbcTemplate.queryForObject("SELECT storeLogoUrl FROM Store WHERE status != 'N' AND storeIdx=?", String.class, idx);
+        if (logo==null){
+            logo = "N";
+        }
 
         int oc = 0;
         if (this.jdbcTemplate.queryForObject("SELECT EXISTS(SELECT * FROM UserOrder UO WHERE storeIdx=?);", int.class, idx)!=0){
@@ -115,6 +119,7 @@ public class StoreDao {
 
         String businessStatus = getBusinessHours(idx);
 
+        String storeLogoUrl = logo;
         StoreInfo storeInfo = this.jdbcTemplate.queryForObject(StoreInfoQuery,
                 (rs1, rowNum1) -> new StoreInfo(
                         rs1.getInt("storeIdx"),
@@ -122,6 +127,7 @@ public class StoreDao {
                                 (rs2, rowNum2) -> new String(
                                         rs2.getString("imageUrl")),
                                 rs1.getInt("storeIdx")),
+                        storeLogoUrl,
                         rs1.getString("storeName"),
                         rs1.getString("isCheetah"),
                         rs1.getString("timeDelivery"),
@@ -195,7 +201,7 @@ public class StoreDao {
      */
     public GetStoreDetailRes getStoreDetail(UserLocation userLocation, int storeIdx, int userIdx) {
 
-        String StoreInfoQuery = "SELECT S.storeIdx, S.storeImgUrl,S.storeName, S.isCheetah, S.timeDelivery, R.reviewScore, R.reviewCount,\n" +
+        String StoreInfoQuery = "SELECT S.storeIdx, S.storeName, S.isCheetah, S.timeDelivery, R.reviewScore, R.reviewCount,\n" +
                 "       CASE WHEN S.isToGo='Y' THEN S.timeToGo ELSE 'N' END AS timeToGo,\n" +
                 "       S.isToGo, S.isCoupon, S.status, S.minimumPrice, S.buildingName, S.storeAddress, S.storeAddressDetail, S.storeLongitude,S.storeLatitude,\n" +
                 "       ROUND(ST_DISTANCE_SPHERE(POINT(S.storeLongitude,S.storeLatitude), POINT(?,?))*0.001,1) AS distance\n" +
@@ -495,7 +501,7 @@ public class StoreDao {
      * @return BaseResponse<List<GetFavoriteListRes>>
      */
     public GetFavoriteList getFavoriteList(int userIdx, int storeIdx, UserLocation userLocation, String sort) {
-        String StoreInfoQuery = "SELECT S.storeIdx, S.storeImgUrl,S.storeName, S.isCheetah, S.timeDelivery, R.reviewScore, R.reviewCount,\n" +
+        String StoreInfoQuery = "SELECT S.storeIdx, S.storeName, S.isCheetah, S.timeDelivery, R.reviewScore, R.reviewCount,\n" +
                 "       CASE WHEN S.isToGo='Y' THEN S.timeToGo ELSE 'N' END AS timeToGo,\n" +
                 "       S.isToGo, S.isCoupon, S.status, S.minimumPrice, S.buildingName, S.storeAddress, S.storeAddressDetail,\n" +
                 "       ROUND(ST_DISTANCE_SPHERE(POINT(S.storeLongitude,S.storeLatitude), POINT(?,?))*0.001,1) AS distance,\n" +
@@ -569,31 +575,7 @@ public class StoreDao {
 
         String finalIsCoupon = isCoupon;
 
-//        return this.jdbcTemplate.queryForObject(StoreInfoQuery,
-//                (rs1, rowNum)-> new GetFavoriteListRes(
-//                        rs1.getInt("storeIdx"),
-//                        rs1.getString("storeImgUrl"),
-//                        rs1.getString("storeName"),
-//                        rs1.getString("isCheetah"),
-//                        rs1.getString("timeDelivery"),
-//                        rs1.getString("isToGo"),
-//                        finalIsCoupon,
-//                        rs1.getDouble("distance"),
-//                        rs1.getString("status"),
-//                        rs1.getDouble("reviewScore"),
-//                        rs1.getInt("reviewCount"),
-//                        this.jdbcTemplate.queryForObject(DeliveryFeeQuery,
-//                                String.class,
-//                                storeIdx),
-//                        this.jdbcTemplate.queryForObject(CouponQuery,
-//                                String.class,
-//                                storeIdx),
-//                        myOrderCount,
-//                        myLatelyOrderTime,
-//                        this.jdbcTemplate.queryForObject(addFavoriteStoreTimeQuery,
-//                                String.class,
-//                                userIdx, storeIdx))
-//                , userLocation.getUserLongitude(), userLocation.getUserLatitude(), storeIdx);
+
         return this.jdbcTemplate.queryForObject(StoreInfoQuery,
                 (rs1, rowNum)-> new GetFavoriteList(
                         rs1.getInt("storeIdx"),
