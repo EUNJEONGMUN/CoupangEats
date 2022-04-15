@@ -103,7 +103,7 @@ public class OrderDao {
         int storeIdx = this.jdbcTemplate.queryForObject(findStoreIdx, int.class, userIdx);
 
 
-        String storeInfoQuery = "SELECT S.storeIdx, S.storeImgUrl,S.storeName, S.isCheetah, S.timeDelivery,\n" +
+        String storeInfoQuery = "SELECT S.storeIdx, S.storeName, S.isCheetah, S.timeDelivery,\n" +
                 "    S.isToGo, S.isCoupon, S.status, S.minimumPrice, S.buildingName, S.storeAddress, S.storeAddressDetail,\n" +
                 "       CASE WHEN S.isToGo='Y' THEN S.timeToGo ELSE 'N' END AS timeToGo, S.storeLongitude,S.storeLatitude,\n" +
                 "    ROUND(ST_DISTANCE_SPHERE(POINT(S.storeLongitude,S.storeLatitude), POINT(?,?))*0.001,1) AS distance\n" +
@@ -320,7 +320,7 @@ public class OrderDao {
         String storeImgUrl = this.jdbcTemplate.queryForObject(StoreImageQuery, String.class, orderList.getStoreIdx());
 
 
-        String StoreInfo = "SELECT storeIdx, storeName, storeImgUrl\n" +
+        String StoreInfo = "SELECT storeIdx, storeName\n" +
                 "FROM Store\n" +
                 "WHERE storeIdx=?";
 
