@@ -9,6 +9,7 @@ import com.example.demo.src.store.model.Res.*;
 import com.example.demo.src.user.UserProvider;
 import com.example.demo.src.user.model.UserLocation;
 import com.example.demo.utils.JwtService;
+import com.fasterxml.jackson.databind.ser.Serializers;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -165,6 +166,61 @@ public class StoreController {
         List<GetStoreHomeRes> getTypeHomeRes = storeProvider.getTypeStoreHome(userLocation, getStoreHomeReq, type);
 
         return new BaseResponse<>(getTypeHomeRes);
+    }
+
+    /**
+     * 가게 검색 조회 API
+     * [GET] /stores/home/search
+     * /search?&longitude=&latitude=&categoryIdx=&sort=&isCheetah&deliveryFee=&minimumPrice&isToGo=&isCoupon=&keyword=
+     * @return BaseResponse<List<GetStoreHomeRes>>
+     */
+    @ResponseBody
+    @GetMapping("/home/search")
+    public BaseResponse<List<GetStoreHomeRes>> getSearchForStore(@RequestParam(required = false, defaultValue = "0") double longitude,
+                                                           @RequestParam(required = false, defaultValue = "0") double latitude,
+                                                           @RequestParam(required = false, defaultValue = "order") String sort,
+                                                           @RequestParam(required = false, defaultValue = "N") String isCheetah,
+                                                           @RequestParam(required = false, defaultValue = "전체") String deliveryFee,
+                                                           @RequestParam(required = false, defaultValue = "전체") String minimumPrice,
+                                                           @RequestParam(required = false, defaultValue = "N") String isToGo,
+                                                           @RequestParam(required = false, defaultValue = "N") String isCoupon,
+                                                           @RequestParam(required = false) String keyword) throws BaseException{
+
+        if (keyword==null || keyword.trim().equals("")){
+            return new BaseResponse<>(EMPTY_KEYWORD);
+        }
+
+        int userIdx= jwtService.getUserIdxOption();
+        if (latitude==0 || longitude==0){
+            return new BaseResponse<>(EMPTY_POSITION_PARAM);
+        }
+
+        UserLocation userLocation = new UserLocation();
+
+        if (userIdx == 0){
+            userLocation.setUserLongitude(longitude);
+            userLocation.setUserLatitude(latitude);
+        } else{
+            userLocation = storeProvider.getNowUserLocation(userIdx);
+            if (userLocation.getUserLatitude()==0 || userLocation.getUserLatitude()==0){
+                userLocation.setUserLongitude(longitude);
+                userLocation.setUserLatitude(latitude);
+            }
+        }
+
+        if (!(deliveryFee.equals("전체") || deliveryFee.equals("무료배달") || deliveryFee.equals("1000")|| deliveryFee.equals("2000")|| deliveryFee.equals("3000"))){
+            return new BaseResponse<>(INVALID_DELIVERY_FEE_PARAM);
+        }
+        if (!(minimumPrice.equals("전체") || minimumPrice.equals("5000") ||minimumPrice.equals("10000") ||minimumPrice.equals("12000") ||minimumPrice.equals("15000"))){
+            return new BaseResponse<>(INVALID_MINIMUM_PRICE_PARAM);
+        }
+
+
+        GetStoreHomeReq getStoreHomeReq = new GetStoreHomeReq(sort, isCheetah, deliveryFee, minimumPrice, isToGo, isCoupon);
+
+        List<GetStoreHomeRes> getSearchForStoreRes = storeProvider.getSearchForStore(userLocation, getStoreHomeReq, keyword);
+
+        return new BaseResponse<>(getSearchForStoreRes);
     }
 
 
@@ -601,12 +657,6 @@ public class StoreController {
         String result = "";
         return new BaseResponse<>(result);
     }
-
-
-
-
-
-
 
 
 

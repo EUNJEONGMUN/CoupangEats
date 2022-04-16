@@ -1410,13 +1410,6 @@ public class StoreDao {
 
     // 가게 idx 찾기
     public List<Integer> findStoreIdxList(int categoryIdx, UserLocation userLocation, GetStoreHomeReq getStoreHomeReq) {
-//        String Query = "SELECT storeIdx FROM Store WHERE status!='N';";
-//
-//        String CategoryQuery = "SELECT S.storeIdx, SC.categoryName\n" +
-//                "FROM Store S\n" +
-//                "    JOIN StoreCategoryMapping SCM on S.storeIdx = SCM.storeIdx\n" +
-//                "    JOIN StoreCategory SC on SCM.storeCategoryIdx = SC.storeCategoryIdx\n" +
-//                "WHERE SCM.storeCategoryIdx=?;";
 
         String OrderQuery = "SELECT S.storeIdx\n" +
                 "FROM Store S\n" +
@@ -1834,5 +1827,22 @@ public class StoreDao {
         return this.jdbcTemplate.queryForObject(Query, int.class, reviewIdx);
     }
 
+    // 키워드 검색 idx 찾기
+    public List<Integer> findKeywordStoreIdxList(String keyword) {
+
+        String Query = "SELECT DISTINCT S.storeIdx\n" +
+                "FROM Store S\n" +
+                "    JOIN StoreCategoryMapping SCM on S.storeIdx = SCM.storeIdx\n" +
+                "    JOIN StoreCategory SC on SCM.storeCategoryIdx = SC.storeCategoryIdx\n" +
+                "    JOIN Menu M on S.storeIdx = M.storeIdx\n" +
+                "WHERE M.status!='N' AND M.status != 'H' AND S.status!='N'\n" +
+                "  AND (INSTR(categoryName , ?) > 0 OR INSTR(S.storeName , ?) > 0) OR INSTR(M.menuName , ?) > 0;";
+
+        return this.jdbcTemplate.query(Query,
+                (rs, rowNum) -> {
+                    return rs.getInt("storeIdx");
+                }, keyword, keyword, keyword);
+
+    }
 
 }

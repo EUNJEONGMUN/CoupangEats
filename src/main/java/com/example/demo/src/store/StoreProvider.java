@@ -193,6 +193,31 @@ public class StoreProvider {
         }
     }
 
+    /**
+     * 가게 검색 조회 API
+     * [GET] /stores/home/search
+     * /search?&longitude=&latitude=&categoryIdx=&sort=&isCheetah&deliveryFee=&minimumPrice&isToGo=&isCoupon=&keyword=
+     * @return BaseResponse<List<GetStoreHomeRes>>
+     */
+    public List<GetStoreHomeRes> getSearchForStore(UserLocation userLocation, GetStoreHomeReq getStoreHomeReq, String keyword) throws BaseException  {
+        try{
+            List<Integer> StoreList = storeDao.findStoreIdxList(0, userLocation, getStoreHomeReq);
+            List<Integer> KeywordStoreList = storeDao.findKeywordStoreIdxList(keyword);
+            List<GetStoreHomeRes> getStoreHomeRes = new ArrayList<>();
+            for(int idx:StoreList){
+                if (KeywordStoreList.contains(idx)){
+                    GetStoreHomeRes storeHome = storeDao.getStoreHome(idx, userLocation);
+                    getStoreHomeRes.add(storeHome);
+                }
+            }
+            return getStoreHomeRes;
+        } catch (Exception exception) {
+            System.out.println("getSearchForStore-> "+ exception);
+            throw new BaseException(DATABASE_ERROR);
+        }
+
+    }
+
 
     // 가게 존재 여부 확인
     public int checkStore(int storeIdx) throws BaseException{
@@ -309,8 +334,6 @@ public class StoreProvider {
             throw new BaseException(DATABASE_ERROR);
         }
     }
-
-
 
 
 }
