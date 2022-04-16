@@ -78,7 +78,7 @@ public class StoreController {
             return new BaseResponse<>(EMPTY_POSITION_PARAM);
         }
 
-
+        // 사용자의 위치 정보 객체
         UserLocation userLocation = new UserLocation();
 
         if (userIdx == 0){ // 사용자 idx가 없을 때 userLocation을 파라미터값으로 설정
@@ -97,19 +97,29 @@ public class StoreController {
             }
         }
 
+        // 배달비 파라미터값 확인
         if (!(deliveryFee.equals("전체") || deliveryFee.equals("무료배달") || deliveryFee.equals("1000")|| deliveryFee.equals("2000")|| deliveryFee.equals("3000"))){
             return new BaseResponse<>(INVALID_DELIVERY_FEE_PARAM);
         }
+
+        // 최소주문금액 파라미터값 확인
         if (!(minimumPrice.equals("전체") || minimumPrice.equals("5000") ||minimumPrice.equals("10000") ||minimumPrice.equals("12000") ||minimumPrice.equals("15000"))){
             return new BaseResponse<>(INVALID_MINIMUM_PRICE_PARAM);
         }
 
+        // 파라미터값을 넣은 객체 생성
         GetStoreHomeReq getStoreHomeReq = new GetStoreHomeReq(sort, isCheetah, deliveryFee, minimumPrice, isToGo, isCoupon);
 
+
+        // 기본 홈
         List<GetStoreHomeRes> getStoreHomeRes = storeProvider.getStoreHome(categoryIdx, userLocation, getStoreHomeReq, "default");
+        // 이츠에만 있는 맛집
         List<GetStoreHomeRes> getOnlyEatsStore = storeProvider.getStoreHome(categoryIdx, userLocation, getStoreHomeReq, "onlyEats");
+        // 인기 있는 프랜차이즈
         List<GetStoreHomeRes> getFranchiseStore = storeProvider.getStoreHome(categoryIdx, userLocation, getStoreHomeReq, "franchise");
+        // 새로 들어왔어요!
         List<GetStoreHomeRes> getNewStore = storeProvider.getStoreHome(categoryIdx, userLocation, getStoreHomeReq, "new");
+        // 홈화면 객체
         GetStoreHomeTotalRes getStoreHomeTotalRes = new GetStoreHomeTotalRes(getOnlyEatsStore, getFranchiseStore, getNewStore, getStoreHomeRes);
         return new BaseResponse<>(getStoreHomeTotalRes);
     }
@@ -122,47 +132,62 @@ public class StoreController {
      */
     @ResponseBody
     @GetMapping("/home/type")
-    public BaseResponse<List<GetStoreHomeRes>> getTypeHome(@RequestParam(required = false, defaultValue = "0") double longitude,
-                                                           @RequestParam(required = false, defaultValue = "0") double latitude,
-                                                           @RequestParam(required = false, defaultValue = "order") String sort,
-                                                           @RequestParam(required = false, defaultValue = "N") String isCheetah,
-                                                           @RequestParam(required = false, defaultValue = "전체") String deliveryFee,
-                                                           @RequestParam(required = false, defaultValue = "전체") String minimumPrice,
-                                                           @RequestParam(required = false, defaultValue = "N") String isToGo,
-                                                           @RequestParam(required = false, defaultValue = "N") String isCoupon,
+    public BaseResponse<List<GetStoreHomeRes>> getTypeStoreHome(@RequestParam(required = false, defaultValue = "0") double longitude,
+                                                                   @RequestParam(required = false, defaultValue = "0") double latitude,
+                                                                   @RequestParam(required = false, defaultValue = "order") String sort,
+                                                                   @RequestParam(required = false, defaultValue = "N") String isCheetah,
+                                                                   @RequestParam(required = false, defaultValue = "전체") String deliveryFee,
+                                                                   @RequestParam(required = false, defaultValue = "전체") String minimumPrice,
+                                                                   @RequestParam(required = false, defaultValue = "N") String isToGo,
+                                                                   @RequestParam(required = false, defaultValue = "N") String isCoupon,
                                                                     @RequestParam(required = false, defaultValue = "default") String type) throws BaseException{
 
+        // 헤더에 사용자 idx가 있다면 추출
         int userIdx= jwtService.getUserIdxOption();
+
+        // 위치 정보가 없는지 확인
         if (latitude==0 || longitude==0){
             return new BaseResponse<>(EMPTY_POSITION_PARAM);
         }
 
+        // 사용자의 위치 정보 객체
         UserLocation userLocation = new UserLocation();
 
-        if (userIdx == 0){
+        if (userIdx == 0){ // 사용자 idx가 없을 때 userLocation을 파라미터값으로 설정
             userLocation.setUserLongitude(longitude);
             userLocation.setUserLatitude(latitude);
-        } else{
+        } else{// 사용자 idx가 있을 때
+
+            // 사용자의 현재 위치 가져오기
             userLocation = storeProvider.getNowUserLocation(userIdx);
+
+            // 사용자가 현재 주소로 설정한 값이 없을 때
             if (userLocation.getUserLatitude()==0 || userLocation.getUserLatitude()==0){
+                // userLocation을 파라미터값으로 설정
                 userLocation.setUserLongitude(longitude);
                 userLocation.setUserLatitude(latitude);
             }
         }
 
+        // 배달비 파라미터값 확인
         if (!(deliveryFee.equals("전체") || deliveryFee.equals("무료배달") || deliveryFee.equals("1000")|| deliveryFee.equals("2000")|| deliveryFee.equals("3000"))){
             return new BaseResponse<>(INVALID_DELIVERY_FEE_PARAM);
         }
+
+        // 최소주문금액 파라미터값 확인
         if (!(minimumPrice.equals("전체") || minimumPrice.equals("5000") ||minimumPrice.equals("10000") ||minimumPrice.equals("12000") ||minimumPrice.equals("15000"))){
             return new BaseResponse<>(INVALID_MINIMUM_PRICE_PARAM);
         }
 
+        // 타입 확인 - 이츠에만 있는 맛집, 인기있는 프랜차이즈, 새로 들어왔어요!
         if (!(type.equals("onlyEats") || type.equals("franchise") || type.equals("recent"))){
             return new BaseResponse<>(INVALID_TYPE_PARAM);
         }
 
+        // 파라미터값을 넣은 객체 생성
         GetStoreHomeReq getStoreHomeReq = new GetStoreHomeReq(sort, isCheetah, deliveryFee, minimumPrice, isToGo, isCoupon);
 
+        // 가게 객체 리스트
         List<GetStoreHomeRes> getTypeHomeRes = storeProvider.getTypeStoreHome(userLocation, getStoreHomeReq, type);
 
         return new BaseResponse<>(getTypeHomeRes);

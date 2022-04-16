@@ -29,30 +29,32 @@ public class StoreProvider {
     /**
      * 홈 화면 조회 API
      * [GET] /stores/home
+     * /home?&longitude=&latitude=&categoryIdx=&sort=&isCheetah&deliveryFee=&minimumPrice&isToGo=&isCoupon=
      * @return BaseResponse<List<GetStoreHomeRes>>
      */
     public List<GetStoreHomeRes> getStoreHome(int categoryIdx, UserLocation userLocation, GetStoreHomeReq getStoreHomeReq, String value) throws BaseException {
         try {
             List<Integer> StoreList = new ArrayList<>();
             if (value.equals("onlyEats")){
+                // 이츠에만 있는 맛집 가게 리스트
                 StoreList = storeDao.findOnlyEatsStoreIdxList();
             } else if (value.equals("franchise")){
+                // 인기있는 프랜차이즈 가게 리스트
                 StoreList = storeDao.findFranchiseStoreIdxList();
             } else if (value.equals("new")){
+                // 새로 들어왔어요 가게 리스트
                 StoreList = storeDao.findNewStoreIdxList();
             } else {
+                // 기본 홈 가게 리스트
                 StoreList = storeDao.findStoreIdxList(categoryIdx, userLocation, getStoreHomeReq);
             }
-//            List<Integer> StoreList = storeDao.findStoreIdxList(userLocation, getStoreHomeReq);
-            System.out.println("here");
+
+            // 반환될 가게 정보 객체 리스트
             List<GetStoreHomeRes> getStoreHomeRes = new ArrayList<>();
-            System.out.println("here");
+
             for(int idx:StoreList){
-                System.out.println(">>idx>>"+idx);
                 GetStoreHomeRes storeHome = storeDao.getStoreHome(idx, userLocation);
-                System.out.println("here");
                 getStoreHomeRes.add(storeHome);
-                System.out.println("here");
             }
             return getStoreHomeRes;
         } catch (Exception exception) {

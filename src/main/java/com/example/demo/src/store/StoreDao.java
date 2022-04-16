@@ -26,6 +26,7 @@ public class StoreDao {
     /**
      * 홈 화면 조회 API
      * [GET] /stores/home
+     * /home?&longitude=&latitude=&categoryIdx=&sort=&isCheetah&deliveryFee=&minimumPrice&isToGo=&isCoupon=
      * @return BaseResponse<List<GetStoreHomeRes>>
      */
     public GetStoreHomeRes getStoreHome(int idx, UserLocation userLocation) {
@@ -1121,6 +1122,7 @@ public class StoreDao {
 
     }
 
+    // 홈화면 조회 -> 이츠에만 있는 맛집 가게 리스트
     public List<Integer> findOnlyEatsStoreIdxList() {
         String Query = "SELECT S.storeIdx\n" +
                 "FROM Store S\n" +
@@ -1132,6 +1134,7 @@ public class StoreDao {
 
     }
 
+    // 타입별 홈화면 조회 -> 이츠에만 있는 맛집 가게 리스트
     public List<Integer> findOnlyEatsStoreIdxList(UserLocation userLocation, GetStoreHomeReq getStoreHomeReq) {
         String OrderQuery = "SELECT S.storeIdx\n" +
                 "FROM Store S\n" +
@@ -1213,7 +1216,7 @@ public class StoreDao {
 
     }
 
-
+    // 홈화면 조회 -> 인기있는 프랜차이즈 가게 리스트
     public List<Integer> findFranchiseStoreIdxList() {
         String Query = "SELECT S.storeIdx\n" +
                 "FROM Store S\n" +
@@ -1317,7 +1320,7 @@ public class StoreDao {
     }
 
 
-
+    // 홈화면 조회 -> 새로 들어왔어요 가게 리스트
     public List<Integer> findNewStoreIdxList(){
         String Query = "SELECT S.storeIdx\n" +
                 "FROM Store S\n" +
@@ -1408,7 +1411,7 @@ public class StoreDao {
                 }, Params);
     }
 
-    // 가게 idx 찾기
+    // 홈 화면 조회 -> 기본 홈 가게 리스트
     public List<Integer> findStoreIdxList(int categoryIdx, UserLocation userLocation, GetStoreHomeReq getStoreHomeReq) {
 
         String OrderQuery = "SELECT S.storeIdx\n" +
