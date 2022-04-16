@@ -1,33 +1,67 @@
-# coupangEatsA-test-server-haena
+# CoupangEats
 
-Rising Test
+Android 1명, Server 1명이 한 팀이 되어 쿠팡이츠 앱을 클로코딩 한 프로젝트 입니다.  
+2022.03.19일부터 2주간 진행했으며, 이후로는 프로젝트를 개선하고 있습니다.  
+  
+프로젝트 진행 기간 : 2022.03.19 ~ 진행중
+
+
+## 개선사항
+### 2022-04-04 진행상황
+- 추가할 기능
+    - 가게 영업시간 + 임시 휴무
+    - 메뉴 품절
+    - 검색기능
+    - 로그아웃
+
+- ERD 수정
+    - 영업시간(BusinessHours) 테이블추가
+    - 메뉴 판매 상태 추가 : Y: 판매중, N: 삭제, T(today): 오늘만 품절, S(sold out): 품절, H(hidden): 메뉴 숨김
+    - 옵션 판매 시작시간, 종료시간 칼럼 추가(시간한정메뉴)
+
+### 2022-04-07 진행상황
+- dao interface 생성
+
+### 2022-04-10
+- 타입별 홈화면 조회 API 구현
+- 가게 영업 시간 관련 변수 추가
+
+### 2022-04-12 진행상황
+- 리뷰 조회 쿼리문 수정
+
+### 2022-04-16 진행상황
+- 가게 검색 API 구현
+
+<details>
+<summary> 2022.03.19 ~ 2022.04.01 진행상황</summary>
+<div markdown="1">
 
 ## 2022-03-19 진행상황
 
-  - 기획서 작성
-  - EC2 인스턴스 구축
-  - RDS 데이터베이스 구축
-  - localhost:9009 포트 연결 확인
-  - ERD 설계 완료
+- 기획서 작성
+- EC2 인스턴스 구축
+- RDS 데이터베이스 구축
+- localhost:9009 포트 연결 확인
+- ERD 설계 완료
     - URL : https://aquerytool.com/aquerymain/index/?rurl=e32e1de9-4140-40e3-96d1-742fecd4e210&
     - passward : 8z6s40
 
 ## 2022-03-20 진행상황
-      
+
 ### API 리스트 관련
 - 회원가입 API 구현
 - 로그인 API 구현
 - 홈 화면 조회 API 구현 (거리 관련 제외)
-<br>
+  <br>
 - validation 구현
 - 인가 구현
-- 
+-
 
 ### 기타
 - DB 테이블 생성
 - ERD 수정
 - RESTful API 리스트업
-  - https://docs.google.com/spreadsheets/d/1VIkuCFoaXgTUkJoDqHE50YlTO9RZGANg/edit?usp=sharing&ouid=108228008875958634623&rtpof=true&sd=true
+    - https://docs.google.com/spreadsheets/d/1VIkuCFoaXgTUkJoDqHE50YlTO9RZGANg/edit?usp=sharing&ouid=108228008875958634623&rtpof=true&sd=true
 - 더미데이터 추가
 
 ### TODO
@@ -38,11 +72,11 @@ Rising Test
 
 ### API 리스트 관련
 
-- 홈화면 API 수정 
-  - 정렬, 필터 기능 추가
+- 홈화면 API 수정
+    - 정렬, 필터 기능 추가
 - 가게 상세화면 조회 API 구현
-  - storeIdx Params -> String
-  - storeIdx 존재 하지 않을 경우 예외처리 추가
+    - storeIdx Params -> String
+    - storeIdx 존재 하지 않을 경우 예외처리 추가
 
 
 ### 트러블 슈팅
@@ -50,19 +84,19 @@ Rising Test
 - storeIdx를 RequestParam으로 받을 때 int일 경우 null 값으로 처리할 수 없기 때문에 발생한 에러
     - -> String 값으로 받아 null 값을 확인한 후, 아닐 경우 int로 바꾸어 진행할 수 있게 하였다.
     - **22-03-22 수정**
-      - requestParam 값에 default 값을 설정해주면 int 형으로 받아도 해결 가능하였다.
-      - `@RequstParam(value='', required='false', defaultValue="0")`
+        - requestParam 값에 default 값을 설정해주면 int 형으로 받아도 해결 가능하였다.
+        - `@RequstParam(value='', required='false', defaultValue="0")`
 
 ### 위클리 스크럼 내용
 #### 작업한 부분 공유
-#### 구팽 
-  - 필요한 아이템은 다 정의를 해둔 상태. 가게 리스트 화면은 아직 데이터가 없어 연결하지 않음.
-  - <img src="./READMEImg/Android1.png" width="100">
-    - <img src="./READMEImg/Android2.png" width="100">
-    - <img src="./READMEImg/Android3.png" width="100">
-    - <img src="./READMEImg/Android4.png" width="100">
-    - <img src="./READMEImg/Android5.png" width="100">
-    - <img src="./READMEImg/Android6.png" width="100">
+#### 구팽
+- 필요한 아이템은 다 정의를 해둔 상태. 가게 리스트 화면은 아직 데이터가 없어 연결하지 않음.
+- <img src="./READMEImg/Android1.png" width="100">
+  - <img src="./READMEImg/Android2.png" width="100">
+  - <img src="./READMEImg/Android3.png" width="100">
+  - <img src="./READMEImg/Android4.png" width="100">
+  - <img src="./READMEImg/Android5.png" width="100">
+  - <img src="./READMEImg/Android6.png" width="100">
 
 #### 해나
 - EC2 인스턴스 구축
@@ -71,19 +105,19 @@ Rising Test
 - RESTful API 리스트업
 
 - API 관련
-  - 회원가입 API 구현
-  - 로그인 API 구현
-  - 홈 화면 조회 API 구현 (거리 관련 제외)
-  - 가게 상세화면 조회 API 구현  
-  <br>
+    - 회원가입 API 구현
+    - 로그인 API 구현
+    - 홈 화면 조회 API 구현 (거리 관련 제외)
+    - 가게 상세화면 조회 API 구현  
+      <br>
 #### 궁금한 점 공유
-  - 사장님 입장에서의 API도 만들어야 할까? -> 사장님 앱이 따로 있으므로, 더미 데이터만 집어 넣는 쪽으로 하기로 함.
-  - 회원가입 시, 사용자의 위치 정보를 쿼리 스트링으로 보내도 되는가? -> 회원 가입 시에는 필요 없을 것 같음.
-  - 로그인 시 위치정보를 Response 해주어야 하는가? -> 로그인 시에 위치 정보가, 위치 권한을 동의한 위치로 설정되므로 안 해주어도 될 것 같다.
-  - 가게 카테고리가 일대일이 아닌 일대 다이기 때문에 테이블을 따로 해주어야 할 것 같다.
-  - 가게 매장 정보, 원산지 정보 등을 저장 하는 것은 DB에서 항목별로 나누어 관리해야 하는가? -> 피드백 시간에 여쭤 보기로 함.
-  - 가격에 원 단위를 붙이는 것은 서버에서 해주어야 하는가? -> int형태로 넘겨주면 클라이언트에서 작업하기로 함
-  - 매장과 사용자와의 거리 계산 -> 매장의 위도, 경도 정보를 넘겨주면 클라이언트에서 작업해주기로 함.
+- 사장님 입장에서의 API도 만들어야 할까? -> 사장님 앱이 따로 있으므로, 더미 데이터만 집어 넣는 쪽으로 하기로 함.
+- 회원가입 시, 사용자의 위치 정보를 쿼리 스트링으로 보내도 되는가? -> 회원 가입 시에는 필요 없을 것 같음.
+- 로그인 시 위치정보를 Response 해주어야 하는가? -> 로그인 시에 위치 정보가, 위치 권한을 동의한 위치로 설정되므로 안 해주어도 될 것 같다.
+- 가게 카테고리가 일대일이 아닌 일대 다이기 때문에 테이블을 따로 해주어야 할 것 같다.
+- 가게 매장 정보, 원산지 정보 등을 저장 하는 것은 DB에서 항목별로 나누어 관리해야 하는가? -> 피드백 시간에 여쭤 보기로 함.
+- 가격에 원 단위를 붙이는 것은 서버에서 해주어야 하는가? -> int형태로 넘겨주면 클라이언트에서 작업하기로 함
+- 매장과 사용자와의 거리 계산 -> 매장의 위도, 경도 정보를 넘겨주면 클라이언트에서 작업해주기로 함.
 
 
 ## 2022-03-22 진행상황
@@ -107,13 +141,13 @@ Rising Test
 - 가게 상세 화면 API에 포토 리뷰 추가
 
 - build 성공
-  - GET메소드는 성공했지만, POST메소드에서 `Request method 'GET' not supported` 에러 발생
+    - GET메소드는 성공했지만, POST메소드에서 `Request method 'GET' not supported` 에러 발생
 
 ## 2022-03-24 진행상황
 - 배달 카드 담기 API 구현
 - 배탁 카트 새로 담기 API 구현
 - 주소 관련 API DB 수정
-  - 사용자 집, 회사 관련 정보를 기타 주소지 정보와 함게 UserAddress 테이블에 담기로 함.
+    - 사용자 집, 회사 관련 정보를 기타 주소지 정보와 함게 UserAddress 테이블에 담기로 함.
 
 ## 2022-03-25 진행상황
 - 홈화면 API 수정
@@ -123,16 +157,16 @@ Rising Test
 
 ## 2022-03-26 진행상황
 - 홈화면 API 수정
-  - 카테고리 추가
-  - 배달비, 쿠폰 상위 한 개만 선택
+    - 카테고리 추가
+    - 배달비, 쿠폰 상위 한 개만 선택
 - 가게 상세 화면 API 수정
-  - 사용자와 가게 간의 거리 추가
-  - 메뉴별 주문많음, 리뷰 최고 변수 추가
+    - 사용자와 가게 간의 거리 추가
+    - 메뉴별 주문많음, 리뷰 최고 변수 추가
 
 - 주문하기 API 구현
 - 주문 취소 API 구현
 - 주문 목록 조회 API 구현
-  
+
 <br>  
 
 - 상세 변동사항
@@ -152,7 +186,7 @@ Rising Test
 - 즐겨찾기 관련 API 구현
 - 가게별 리뷰 조회 API 구현
 - 주문 목록 조회 API 수정
-  - 메뉴 이름 변수 추가
+    - 메뉴 이름 변수 추가
 - 할인 쿠폰 조회 API 구현
 - 할인 쿠폰 받기 API 구현
 - 가게 상세 정보 조회 API 수정 : 사용자가 쿠폰을 다운 받았는지 여부를 알 수 있도록 하는 변수 추가
@@ -167,7 +201,7 @@ Rising Test
 - 배달 카트 관련 API 구현
 - 주문 관련 API 구현
 - 즐겨 찾기 API 구현
-- 할인 쿠폰 관련 API 구현 
+- 할인 쿠폰 관련 API 구현
 - 세부적인 사항은 클라이언트와 상의하면서 조금씩 수정해 나가야 함.
 
 #### 궁금한 점 공유
@@ -181,8 +215,8 @@ Rising Test
 ## 2022-03-28 진행상황
 - 배달 카트 조회 API 구현
 - 가게별 리뷰 조회 API 수정
-  - 정렬을 위한 createdAt 추가
-  - 필터를 위한 isPhotoReview 추가
+    - 정렬을 위한 createdAt 추가
+    - 필터를 위한 isPhotoReview 추가
 
 - 가게 상세 화면, 메뉴 상세화면 -> 이미지 1개 이상
 - 가게 상세 화면에서 리뷰 최다, 주문 많음 코드 수정
@@ -209,11 +243,11 @@ Rising Test
 
 ### 2022-03-30 진행상황
 - 카트 수정/삭제 API 분리
-  - 카트 수정 API 수정
-  - 카트 삭제 API 구현
-- 리뷰 수정/삭제 API 분리 
-  - 리뷰 수정 API 구현
-  - 리뷰 삭제 API 구현
+    - 카트 수정 API 수정
+    - 카트 삭제 API 구현
+- 리뷰 수정/삭제 API 분리
+    - 리뷰 수정 API 구현
+    - 리뷰 삭제 API 구현
 - 리뷰 도움 돼요 등록 API 구현
 - 리뷰 도움 돼요 해제 API 구현
 - 카카오 소셜 로그인 구현 시도 -> 구현중
@@ -230,20 +264,9 @@ Rising Test
 ## 2022-04-01 진행상황
 - 자동 로그인 API 구현
 
----
+</div>
+</details>
 
-## CoupangEats Refactoring
-### 2022-04-04 진행상황
-- 추가할 기능
-  - 가게 영업시간 + 임시 휴무
-  - 메뉴 품절
-  - 검색기능
-  - 로그아웃
-  
-- ERD 수정
-  - 영업시간(BusinessHours) 테이블추가 
-  - 메뉴 판매 상태 추가 : Y: 판매중, N: 삭제, T(today): 오늘만 품절, S(sold out): 품절, H(hidden): 메뉴 숨김 
-  - 옵션 판매 시작시간, 종료시간 칼럼 추가(시간한정메뉴)
 
-### 2022-04-07 진행상황
-- dao interface 생성
+
+
