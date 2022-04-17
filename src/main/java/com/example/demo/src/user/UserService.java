@@ -4,7 +4,6 @@ import com.example.demo.config.BaseException;
 import com.example.demo.src.user.model.Req.PostAddressReq;
 import com.example.demo.src.user.model.Req.*;
 import com.example.demo.src.user.model.Res.PostSignInRes;
-import com.example.demo.src.user.model.SignInUser;
 import com.example.demo.src.user.model.User;
 import com.example.demo.src.user.model.UserNowAddressIdx;
 import com.example.demo.src.user.model.UserNowAddressInfo;
@@ -18,6 +17,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import com.example.demo.utils.SHA256;
 
+import java.util.Date;
 import java.util.HashMap;
 
 import static com.example.demo.config.BaseResponseStatus.*;
@@ -336,5 +336,23 @@ public class UserService {
         userDao.saveUserRefreshToken(newRefreshToken, userIdx);
 
         return new PostSignInRes(userIdx,newJwtToken,newRefreshToken,userNowAddressInfo);
+    }
+
+    /**
+     * 로그아웃 API
+     * [POST] /users/sign-out
+     * @return BaseResponse<PostSignInRes>
+     * @param userIdx
+     */
+    public void signOut(int userIdx) throws BaseException {
+        try {
+            userDao.deleteRefreshToken(userIdx);
+            Date expiration = jwtService.getExpiration();
+            String accessToken = jwtService.getJwt();
+            userDao.insertBlackList(accessToken,expiration);
+        } catch (Exception exception) {
+            System.out.println("signOut"+exception);
+            throw new BaseException(DATABASE_ERROR);
+        }
     }
 }

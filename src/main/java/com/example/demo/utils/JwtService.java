@@ -3,6 +3,7 @@ package com.example.demo.utils;
 
 import com.example.demo.config.BaseException;
 import com.example.demo.config.secret.Secret;
+import com.example.demo.src.user.UserDao;
 import io.jsonwebtoken.*;
 import org.springframework.stereotype.Service;
 import org.springframework.web.context.request.RequestContextHolder;
@@ -15,6 +16,12 @@ import static com.example.demo.config.BaseResponseStatus.*;
 
 @Service
 public class JwtService {
+
+    private final UserDao userDao;
+
+    public JwtService(UserDao userDao){
+        this.userDao = userDao;
+    }
 
     /*
     JWT 생성
@@ -64,6 +71,11 @@ public class JwtService {
             throw new BaseException(EMPTY_JWT);
         }
 
+        // 로그아웃 된 토큰인지 확인
+        if (userDao.checkSignOutList(accessToken) == 1){
+            throw new BaseException(SIGN_OUT_TOKEN);
+        }
+
         // 2. JWT parsing
         Jws<Claims> claims;
         try {
@@ -81,6 +93,10 @@ public class JwtService {
     public int getUserIdxToken(String accessToken) throws BaseException{
         if (accessToken == null || accessToken.length() == 0) {
             throw new BaseException(EMPTY_JWT);
+        }
+        // 로그아웃 된 토큰인지 확인
+        if (userDao.checkSignOutList(accessToken) == 1){
+            throw new BaseException(SIGN_OUT_TOKEN);
         }
 
         // 2. JWT parsing
@@ -100,6 +116,10 @@ public class JwtService {
         String accessToken = getJwt();
         if (accessToken == null || accessToken.length() == 0) {
             return 0;
+        }
+        // 로그아웃 된 토큰인지 확인
+        if (userDao.checkSignOutList(accessToken) == 1){
+            throw new BaseException(SIGN_OUT_TOKEN);
         }
 
         // 2. JWT parsing
@@ -131,4 +151,23 @@ public class JwtService {
             return false;
         }
     }
+
+    // accesstoken 유효시간
+    public Date getExpiration() throws BaseException {
+        String accessToken = getJwt();
+        if (accessToken == null || accessToken.length() == 0) {
+            throw new BaseException(EMPTY_JWT);
+        }
+
+        Jws<Claims> claims;
+
+        claims = Jwts.parser()
+                .setSigningKey(Secret.JWT_SECRET_KEY)
+                .parseClaimsJws(accessToken);
+
+//        Long now = new Date().getTime(); // getTime은 Date 타입의 시간을 밀리초로 환산해 가져온다.
+//        return (claims.getBody().getExpiration().getTime()-now);
+        return claims.getBody().getExpiration();
+    }
+
 }

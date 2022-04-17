@@ -55,6 +55,7 @@ public enum BaseResponseStatus {
     EMPTY_USER_EMAIL(false, 2030, "존재하지 않는 이메일입니다. 회원가입을 진행해주세요."),
     EMPTY_JWT_TOKEN(false, 2031, "JWT 토큰 값이 없습니다."),
     EMPTY_REFRESH_TOKEN(false, 2032, "REFRESH 토큰 값이 없습니다."),
+    SIGN_OUT_TOKEN(false, 2033, "로그아웃 된 token 입니다."),
     // orders
     POST_CART_PARAM_EMPTY(false, 2100, "가게 idx 혹은 메뉴 idx를 입력해주세요."),
     PUT_CART_PARAM_EMPTY(false, 2101, "가게 idx 혹은 카트 idx를 입력해주세요."),

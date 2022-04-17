@@ -7,7 +7,6 @@ import com.example.demo.src.kakao.model.KakaoUserInfo;
 import com.example.demo.src.user.model.Req.PostAddressReq;
 import com.example.demo.src.user.model.Req.*;
 import com.example.demo.src.user.model.Res.*;
-import com.example.demo.src.user.model.SignInUser;
 import com.example.demo.src.user.model.User;
 import com.example.demo.src.user.model.UserNowAddressIdx;
 import com.example.demo.src.user.model.UserNowAddressInfo;
@@ -510,6 +509,12 @@ public class UserController {
 //            @ApiImplicitParam(name = "REFRESH-TOKEN", value = "refresh-token", required = true, dataType = "String", paramType = "header")
 //    })
     // 토큰이 만료되었을 때
+
+    /**
+     * 자동 로그인 API
+     * [POST] /users/sign-in/refresh
+     * @return BaseResponse<PostSignInRes>
+     */
     @ResponseBody
     @PostMapping("/sign-in/refresh")
     public BaseResponse<PostSignInRes> refreshToken(@RequestParam(value="X-ACCESS-TOKEN", required = false) String token,
@@ -526,4 +531,21 @@ public class UserController {
 
         return new BaseResponse<>(postSignInRes);
     }
+
+    /**
+     * 로그아웃 API
+     * [POST] /users/sign-out
+     * @return BaseResponse<PostSignInRes>
+     */
+    @ResponseBody
+    @PostMapping("/sign-out")
+    public BaseResponse<String> signOut() throws BaseException{
+
+        int userIdx= jwtService.getUserIdx();
+        userService.signOut(userIdx);
+        String result = "";
+        return new BaseResponse<>(result);
+
+    }
+
 }

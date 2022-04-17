@@ -10,6 +10,7 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Repository;
 
 import javax.sql.DataSource;
+import java.util.Date;
 import java.util.List;
 
 @Repository
@@ -549,5 +550,40 @@ public class UserDao {
     public String findRefreshToken(int userIdx) {
         String Query = "SELECT refreshToken FROM User WHERE userIdx=?";
         return this.jdbcTemplate.queryForObject(Query, String.class, userIdx);
+    }
+
+
+    /**
+     * 로그아웃 API
+     * [POST] /users/sign-out
+     * @return BaseResponse<PostSignInRes>
+     */
+    // RefreshToken 삭제하기
+    public void deleteRefreshToken(int userIdx) {
+        String CheckQuery = "SELECT EXISTS(SELECT * FROM User WHERE status != 'N' AND userIdx=?);";
+        String Query = "UPDATE User SET refreshToken=NULL WHERE userIdx=?;";
+
+        if (this.jdbcTemplate.queryForObject(CheckQuery, int.class, userIdx) == 1){
+            this.jdbcTemplate.update(Query, userIdx);
+        }
+        return;
+    }
+
+    /**
+     * 로그아웃 API
+     * [POST] /users/sign-out
+     * @return BaseResponse<PostSignInRes>
+     */
+    // 블랙리스트에 넣기
+    public void insertBlackList(String accessToken, Date expiration) {
+        String Query = "INSERT INTO SignOutList (token, expirationDate) VALUES (?,?);";
+
+        this.jdbcTemplate.update(Query, accessToken, expiration);
+    }
+
+    public int checkSignOutList(String accessToken){
+        String Query = "SELECT EXISTS(SELECT * FROM SignOutList WHERE token=?);";
+
+        return this.jdbcTemplate.queryForObject(Query, int.class, accessToken);
     }
 }
