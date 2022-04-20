@@ -522,6 +522,7 @@ public class OrderDao {
 
     }
 
+    // 가게 idx 찾기
     public int findStoreIdx(int userOrderIdx) {
         String Query = "SELECT storeIdx FROM UserOrder WHERE userOrderIdx=?";
         return this.jdbcTemplate.queryForObject(Query, int.class, userOrderIdx);
@@ -533,6 +534,7 @@ public class OrderDao {
         return this.jdbcTemplate.queryForObject(Query, int.class, cartIdx, userIdx);
     }
 
+    // cart에 담긴 가게 idx 확인
     public int checkCartStoreOwner(int cartIdx) {
         String Query = "SELECT storeIdx FROM Cart WHERE cartIdx=?;";
         return this.jdbcTemplate.queryForObject(Query, int.class, cartIdx);

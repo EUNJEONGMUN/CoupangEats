@@ -73,32 +73,61 @@ public class StoreProvider {
         try {
             List<Integer> StoreList = new ArrayList<>();
             if (type.equals("onlyEats")){
+                // 이츠에만 있는 맛집 가게 리스트
                 StoreList = storeDao.findOnlyEatsStoreIdxList(userLocation, getStoreHomeReq);
             } else if (type.equals("franchise")){
+                // 인기있는 프랜차이즈 가게 리스트
                 StoreList = storeDao.findFranchiseStoreIdxList(userLocation, getStoreHomeReq);
             } else if (type.equals("recent")) {
+                // 기본 홈 가게 리스트
                 StoreList = storeDao.findNewStoreIdxList(userLocation, getStoreHomeReq);
             }
 
-            System.out.println("here");
+            // 반환될 가게 정보 객체 리스트
             List<GetStoreHomeRes> getStoreHomeRes = new ArrayList<>();
-            System.out.println("here");
+
             for(int idx:StoreList){
-                System.out.println(">>idx>>"+idx);
                 GetStoreHomeRes storeHome = storeDao.getStoreHome(idx, userLocation);
-                System.out.println("here");
                 getStoreHomeRes.add(storeHome);
-                System.out.println("here");
             }
             return getStoreHomeRes;
         } catch (Exception exception) {
-            System.out.println("storehome-> "+ exception);
+            System.out.println("getTypeStoreHome-> "+ exception);
             throw new BaseException(DATABASE_ERROR);
         }
     }
 
+    /**
+     * 가게 검색 조회 API
+     * [GET] /stores/home/search
+     * /search?&longitude=&latitude=&categoryIdx=&sort=&isCheetah&deliveryFee=&minimumPrice&isToGo=&isCoupon=&keyword=
+     * @return BaseResponse<List<GetStoreHomeRes>>
+     */
+    public List<GetStoreHomeRes> getSearchForStore(UserLocation userLocation, GetStoreHomeReq getStoreHomeReq, String keyword) throws BaseException  {
+        try{
+            // 필터링 된 가게 리스트
+            List<Integer> StoreList = storeDao.findStoreIdxList(0, userLocation, getStoreHomeReq);
 
+            // 키워드에 해당하는 가게 리스트
+            List<Integer> KeywordStoreList = storeDao.findKeywordStoreIdxList(keyword);
 
+            // 반환될 가게 정보 객체 리스트
+            List<GetStoreHomeRes> getStoreHomeRes = new ArrayList<>();
+
+            for(int idx:StoreList){
+                // 키워드가 포함된 가게 리스트만 정보를 가져옴
+                if (KeywordStoreList.contains(idx)){
+                    GetStoreHomeRes storeHome = storeDao.getStoreHome(idx, userLocation);
+                    getStoreHomeRes.add(storeHome);
+                }
+            }
+            return getStoreHomeRes;
+        } catch (Exception exception) {
+            System.out.println("getSearchForStore-> "+ exception);
+            throw new BaseException(DATABASE_ERROR);
+        }
+
+    }
 
     /**
      * 가게 상세 화면 조회 조회 API
@@ -138,6 +167,7 @@ public class StoreProvider {
     public GetFavoriteListRes getFavoriteList(int userIdx, UserLocation userLocation, String sort) throws BaseException{
         try {
 
+            // 가게 idx 리스트
             List<Integer> storeList = storeDao.getFavoriteStoreIdx(userIdx, sort);
 
             List<GetFavoriteList> getFavoriteList = new ArrayList<>();
@@ -195,31 +225,6 @@ public class StoreProvider {
         }
     }
 
-    /**
-     * 가게 검색 조회 API
-     * [GET] /stores/home/search
-     * /search?&longitude=&latitude=&categoryIdx=&sort=&isCheetah&deliveryFee=&minimumPrice&isToGo=&isCoupon=&keyword=
-     * @return BaseResponse<List<GetStoreHomeRes>>
-     */
-    public List<GetStoreHomeRes> getSearchForStore(UserLocation userLocation, GetStoreHomeReq getStoreHomeReq, String keyword) throws BaseException  {
-        try{
-            List<Integer> StoreList = storeDao.findStoreIdxList(0, userLocation, getStoreHomeReq);
-            List<Integer> KeywordStoreList = storeDao.findKeywordStoreIdxList(keyword);
-            List<GetStoreHomeRes> getStoreHomeRes = new ArrayList<>();
-            for(int idx:StoreList){
-                if (KeywordStoreList.contains(idx)){
-                    GetStoreHomeRes storeHome = storeDao.getStoreHome(idx, userLocation);
-                    getStoreHomeRes.add(storeHome);
-                }
-            }
-            return getStoreHomeRes;
-        } catch (Exception exception) {
-            System.out.println("getSearchForStore-> "+ exception);
-            throw new BaseException(DATABASE_ERROR);
-        }
-
-    }
-
 
     // 가게 존재 여부 확인
     public int checkStore(int storeIdx) throws BaseException{
@@ -248,14 +253,6 @@ public class StoreProvider {
         }
     }
 
-    // 가게 카테고리 존재 여부 확인
-    public int checkStoreCategory(int categoryIdx) throws BaseException {
-        try {
-            return storeDao.checkStoreCategory(categoryIdx);
-        } catch (Exception exception) {
-            throw new BaseException(DATABASE_ERROR);
-        }
-    }
 
     // 사용자의 현재 위치 찾기
     public UserLocation getNowUserLocation(int userIdx) throws BaseException {
@@ -266,7 +263,7 @@ public class StoreProvider {
         }
     }
 
-    // 즐겨찾기 한 가게 찾기
+    // 이미 좋아요 한 가게가 있는지 확인
     public int checkFavoriteStore(int userIdx, int storeIdx) throws BaseException {
         try {
             return storeDao.checkFavoriteStore(userIdx,storeIdx);
@@ -275,7 +272,7 @@ public class StoreProvider {
         }
     }
 
-    // 리뷰 존재 확인
+    // 리뷰 존재 확인 - userIdx, userOrderIdx
     public int checkUserReview(int userIdx, int userOrderIdx) throws BaseException  {
         try {
             return storeDao.checkUserReview(userIdx,userOrderIdx);
@@ -284,6 +281,14 @@ public class StoreProvider {
         }
     }
 
+    // 리뷰가 존재하는지 확인 - reviewIdx
+    public int checkReviewExists(int reviewIdx) throws BaseException  {
+        try {
+            return storeDao.checkReviewExists(reviewIdx);
+        } catch (Exception exception) {
+            throw new BaseException(DATABASE_ERROR);
+        }
+    }
     // 리뷰 작성자 확인
     public int checkReviewOwner(int userIdx, int reviewIdx) throws BaseException  {
         try {
@@ -319,19 +324,10 @@ public class StoreProvider {
         }
     }
 
-    // 이미 리뷰 한 글인지 확인
+    // 이미 리뷰 도움이 돼요를 누른 글인지 확인
     public String checkLikedReview(int userIdx, int reviewIdx) throws BaseException {
         try {
             return storeDao.checkLikedReview(userIdx, reviewIdx);
-        } catch (Exception exception) {
-            throw new BaseException(DATABASE_ERROR);
-        }
-    }
-
-
-    public int checkReviewExists(int reviewIdx) throws BaseException  {
-        try {
-            return storeDao.checkReviewExists(reviewIdx);
         } catch (Exception exception) {
             throw new BaseException(DATABASE_ERROR);
         }

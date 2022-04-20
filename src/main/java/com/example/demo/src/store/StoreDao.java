@@ -24,14 +24,12 @@ public class StoreDao {
     }
 
     /**
-     * 홈 화면 조회 API
-     * [GET] /stores/home
-     * /home?&longitude=&latitude=&categoryIdx=&sort=&isCheetah&deliveryFee=&minimumPrice&isToGo=&isCoupon=
-     * @return BaseResponse<List<GetStoreHomeRes>>
+     * 홈 화면 조회 - 가게정보리스트
      */
     public GetStoreHomeRes getStoreHome(int idx, UserLocation userLocation) {
 
-        String StoreInfoQuery = "SELECT S.storeIdx, S.storeLogoUrl,S.storeName, S.isCheetah, S.timeDelivery, R.reviewScore, R.reviewCount,\n" +
+        // 가게 기본 정보
+        String StoreInfoQuery = "SELECT S.storeIdx, S.storeLogoUrl, S.storeName, S.isCheetah, S.timeDelivery, R.reviewScore, R.reviewCount,\n" +
                 "                       S.isToGo, S.isCoupon, S.status, S.minimumPrice, S.buildingName, S.storeAddress, S.storeAddressDetail, DATE_FORMAT(S.createdAt, '%Y-%m-%d %H:%I:%S') AS createdAt,\n" +
                 "       ROUND(ST_DISTANCE_SPHERE(POINT(S.storeLongitude,S.storeLatitude), POINT(?,?))*0.001,1) AS distance,\n" +
                 "       CASE WHEN DATEDIFF(CURRENT_DATE(), S.createdAt)>14 THEN 'N' ELSE 'Y' END AS isNewStore\n" +
@@ -43,10 +41,12 @@ public class StoreDao {
                 "                WHERE S.status != 'N' AND S.storeIdx=?;";
 
 
+        // 배달비 개수 -> 여러 개면 물결 표시 붙여야 함.
         String DeliveryFeeCount = "SELECT COUNT(*) as feeCount\n" +
                 "FROM DeliveryFee D\n" +
                 "WHERE D.storeIdx=? AND D.status='Y';";
 
+        // 최소 배달비
         String DeliveryFeeQuery = "SELECT CASE\n" +
                 "    WHEN IFNULL(MIN(deliveryFee),0) =0\n" +
                 "        THEN '무료배달'\n" +
@@ -55,12 +55,13 @@ public class StoreDao {
                 "        FROM DeliveryFee D\n" +
                 "        WHERE D.storeIdx=? AND D.status='Y';";
 
+        // 주문 횟수
         String orderCountQuery = "SELECT COUNT(UO.userOrderIdx) AS orderCount\n" +
                 "FROM UserOrder UO\n" +
                 "WHERE storeIdx=?\n" +
                 "GROUP BY UO.storeIdx;";
 
-
+        // 가게 최대 할인 쿠폰
         String StoreCouponQuery = "SELECT C.couponIdx, CONCAT(FORMAT(IFNULL(C.discountPrice,0),0),'원') AS maxDiscountPrice, IFNULL(C.couponType,'N') AS couponType\n" +
                 "FROM Store S\n" +
                 "LEFT JOIN (SELECT RankRow.storeIdx, RankRow.couponIdx, RankRow.discountPrice, RankRow.couponType\n" +
@@ -70,6 +71,7 @@ public class StoreDao {
                 "                    WHERE RankRow.a <= 1) C ON C.storeIdx = S.storeIdx\n" +
                 "WHERE S.storeIdx = ?;";
 
+        // 가게 대표 이미지 3개
         String StoreImageQuery = "SELECT RankRow.imageUrl\n" +
                 "FROM (SELECT*, RANK() OVER (PARTITION BY SI.storeIdX ORDER BY SI.storeImageIdx) AS a\n" +
                 "      FROM StoreImage SI\n" +
@@ -78,11 +80,13 @@ public class StoreDao {
 
         Object[] Params = new Object[]{userLocation.getUserLongitude(), userLocation.getUserLatitude(), idx};
 
+        // 가게 로고 이미지 -> 없으면 "N"
         String logo = this.jdbcTemplate.queryForObject("SELECT storeLogoUrl FROM Store WHERE status != 'N' AND storeIdx=?", String.class, idx);
         if (logo==null){
             logo = "N";
         }
 
+        // 주문 횟수
         int oc = 0;
         if (this.jdbcTemplate.queryForObject("SELECT EXISTS(SELECT * FROM UserOrder UO WHERE storeIdx=?);", int.class, idx)!=0){
             oc = this.jdbcTemplate.queryForObject(orderCountQuery,
@@ -91,20 +95,23 @@ public class StoreDao {
         }
         int orderCount = oc;
 
+        // 배달비 개수
         int deliveryFeeCount =  this.jdbcTemplate.queryForObject(DeliveryFeeCount,
                 int.class,
                 idx);
 
+        // 최소 배달비
         String fee = this.jdbcTemplate.queryForObject(DeliveryFeeQuery,
                 String.class,
                 idx);
 
+        // 배달비 조건이 여러 개 일 경우 배달비 뒤에 물결 표시
         if (deliveryFeeCount>1){
             fee = fee+"~";
         }
-
         String deliveryFee = fee;
 
+        // 쿠폰 존재 여부 확인
         String isStoreCouponQuery = "SELECT EXISTS(SELECT * FROM Coupon WHERE status='Y' AND DATEDIFF(endDate, CURRENT_DATE())>=0 AND storeIdx=?)";
 
         String isCoupon = "Y";
@@ -114,9 +121,11 @@ public class StoreDao {
 
         String finalIsCoupon = isCoupon;
 
+        // 가게 영업 상태 -> 영업 종료일 경우 다음 영업시간
         String businessStatus = getBusinessHours(idx);
 
         String storeLogoUrl = logo;
+
         StoreInfo storeInfo = this.jdbcTemplate.queryForObject(StoreInfoQuery,
                 (rs1, rowNum1) -> new StoreInfo(
                         rs1.getInt("storeIdx"),
@@ -156,6 +165,9 @@ public class StoreDao {
         return new GetStoreHomeRes(storeInfo, storeBestCoupon);
     }
 
+    /**
+     * 가게 영업시간
+     */
     public String getBusinessHours(int storeIdx){
         String CheckQuery = "SELECT EXISTS(SELECT * FROM BusinessHours BH WHERE BH.status!='N' AND BH.storeIdx=? AND BH.opentime<=NOW() AND BH.closeTime>NOW() AND BH.day= DAYOFWEEK(NOW()));";
         String businessStatusQuery = "SELECT CASE WHEN status='Y' THEN '영업중'\n" +
@@ -198,6 +210,7 @@ public class StoreDao {
      */
     public GetStoreDetailRes getStoreDetail(UserLocation userLocation, int storeIdx, int userIdx) {
 
+        // 가게 정보
         String StoreInfoQuery = "SELECT S.storeIdx, S.storeName, S.isCheetah, S.timeDelivery, R.reviewScore, R.reviewCount,\n" +
                 "       CASE WHEN S.isToGo='Y' THEN S.timeToGo ELSE 'N' END AS timeToGo,\n" +
                 "       S.isToGo, S.isCoupon, S.status, S.minimumPrice, S.buildingName, S.storeAddress, S.storeAddressDetail, S.storeLongitude,S.storeLatitude,\n" +
@@ -209,24 +222,29 @@ public class StoreDao {
                 "                    GROUP BY UO.storeIdx) R ON R.storeIdx=S.storeIdx\n" +
                 "                WHERE S.status != 'N' AND S.storeIdx=?;";
 
+        // 가게 쿠폰 리스트
         String StoreCouponQuery = "SELECT couponIdx, couponTitle, CONCAT(FORMAT(discountPrice,0),'원') AS discountPrice, \n" +
                 "       CONCAT(FORMAT(limitPrice,0),'원 이상 주문 시') AS limitPrice,\n" +
                 "       CONCAT(DATE_FORMAT(endDate, '%m/%d'),' 까지') AS endDate, couponType\n" +
                 "FROM Coupon WHERE status='Y' AND storeIdx=? AND DATEDIFF(endDate, CURRENT_DATE())>=0;";
 
+        // 최소주문 금액
         String MinimumDeliveryFeeQuery = "SELECT IFNULL(MIN(deliveryFee),0) as fee\n" +
                 "        FROM DeliveryFee D\n" +
                 "        WHERE D.storeIdx=? AND D.status='Y';";
 
+        // 배달비 정보
         String DeliveryFeeInfo = "SELECT storeIdx,\n" +
                 "       CASE WHEN deliveryFee=0 THEN '무료' ELSE CONCAT(FORMAT(deliveryFee,0),'원') END AS deliveryFee,\n" +
                 "       CASE WHEN maxPrice IS NULL THEN CONCAT(FORMAT(minPrice,0),'원 ~ ') ELSE CONCAT(FORMAT(minPrice,0), '원 ~ ', FORMAT(maxPrice,0),'원') END AS orderPrice\n" +
                 "FROM DeliveryFee WHERE storeIdx=?;";
 
+        // 메뉴 카테고리
         String MenuCategoryQuery = "SELECT MC.menuCategoryIdx, storeIdx, categoryName\n" +
                 "FROM MenuCategory MC\n" +
                 "WHERE MC.storeIdx=? AND MC.status='Y';";
 
+        // 메뉴 상세 정보
         String MenuDetailQuery = "SELECT menuIdx, menuName, menuPrice, menuDetail, menuImgUrl, isOption,\n" +
                 "       CASE\n" +
                 "        WHEN status='T' THEN '오늘만 품절'\n" +
@@ -236,13 +254,14 @@ public class StoreDao {
                 "FROM Menu\n" +
                 "WHERE status!='N' AND status != 'H' AND menuCategoryIdx=?;";
 
+        // 메뉴 이미지 - 1개
         String MenuImageQuery = "SELECT RankRow.menuImgUrl\n" +
                 "FROM (SELECT*, RANK() OVER (PARTITION BY M.menuIdx ORDER BY M.menuImgIdx) AS a\n" +
                 "      FROM MenuImage M\n" +
                 "     ) AS RankRow\n" +
                 "WHERE RankRow.a <= 1 AND RankRow.menuIdx=?;";
 
-
+        // 가게 리뷰가 3개 이상인지 확인 -> 3개 이상이어야 가게 상세 화면에서 보임
         String checkPhotoReviewThree = "SELECT EXISTS(SELECT S.storeIdx, PR.photoReviewCount\n" +
                 "FROM Store S JOIN (\n" +
                 "    SELECT UO.storeIdx, COUNT(storeIdx) AS photoReviewCount\n" +
@@ -251,6 +270,7 @@ public class StoreDao {
                 "    GROUP BY storeIdx) PR ON PR.storeIdx = S.storeIdx\n" +
                 "WHERE S.status='Y' AND PR.photoReviewCount>=3 AND S.storeIdx=?);";
 
+        // 포토 리뷰
         String PhotoReviewQuery = "SELECT PhotoReview.reviewIdx, PhotoReview.reviewImgUrl, PhotoReview.content, PhotoReview.score, DATE_FORMAT(PhotoReview.createdAt, '%Y-%m-%d %H:%I:%S') AS createdAt\n" +
                 "FROM UserOrder UO\n" +
                 "JOIN (SELECT R.reviewIdx,FirstPhoto.reviewImgUrl,R.content,R.score,R.userOrderIdx, R.createdAt\n" +
@@ -265,6 +285,7 @@ public class StoreDao {
                 "        AND R.status='Y') PhotoReview ON PhotoReview.userOrderIdx = UO.userOrderIdx\n" +
                 "WHERE UO.status!='Y' AND UO.storeIdx=?;";
 
+        // 가게 대표 이미지
         String StoreImageQuery = "SELECT RankRow.storeIdx, RankRow.imageUrl\n" +
                 "FROM (SELECT*, RANK() OVER (PARTITION BY SI.storeIdX ORDER BY SI.storeImageIdx) AS a\n" +
                 "      FROM StoreImage SI\n" +
@@ -277,7 +298,6 @@ public class StoreDao {
                 ),storeIdx);
 
         // 가게 총 주문량
-
         String StoreTotalOrderQuery = "SELECT ROUND(COUNT(*)*0.5) AS storeTotalOrderCount\n" +
                 "FROM UserOrder\n" +
                 "WHERE storeIdx=? AND (status!='E' AND status!='F');";
@@ -288,9 +308,11 @@ public class StoreDao {
                 "WHERE C.storeIdx=? AND CTO.isGood='G';";
         int storeTotalMenuGood = this.jdbcTemplate.queryForObject(StoreTotalMenuGood, int.class, storeIdx);
 
+        // 주문많음
         String IsManyOrderQuery = "SELECT CASE WHEN COUNT(*)>=? THEN 'Y' ELSE 'N' END AS isManyOrder\n" +
                 "FROM CartToOrder CTO JOIN Cart C on CTO.cartIdx = C.cartIdx\n" +
                 "WHERE C.menuIdx=? AND CTO.status!='N';";
+        // 리뷰 최고
         String IsManyReviewQuery = "SELECT CASE WHEN COUNT(*)>=? THEN 'Y' ELSE 'N' END AS isManyReview\n" +
                 "FROM CartToOrder CTO JOIN Cart C on CTO.cartIdx = C.cartIdx\n" +
                 "WHERE C.menuIdx=? AND CTO.isGood='G' AND CTO.status!='N';";
@@ -540,29 +562,6 @@ public class StoreDao {
 
         String businessStatus = getBusinessHours(storeIdx);
 
-//        String MyOrderCountQuery = "SELECT COUNT(*)\n" +
-//                "FROM UserOrder\n" +
-//                "WHERE userIdx=? AND storeIdx=? AND status!='N' AND status!='F' AND status!='E';";
-//        String MyLatelyOrderTimeQuery = "SELECT orderTime\n" +
-//                "FROM UserOrder\n" +
-//                "WHERE userIdx=? AND storeIdx=? AND status!='N' AND status!='F' AND status!='E'\n" +
-//                "ORDER BY orderTime DESC\n" +
-//                "LIMIT 1;";
-//        String addFavoriteStoreTimeQuery ="SELECT DATE_FORMAT(createdAt, '%Y-%m-%d %H:%i:%s')\n" +
-//                "FROM Favorite\n" +
-//                "WHERE userIdx=? AND storeIdx=? AND status='Y';";
-
-//        int myOrderCount = this.jdbcTemplate.queryForObject(MyOrderCountQuery,
-//                int.class,
-//                userIdx, storeIdx);
-//        String latelyOrderTime = "";
-//
-//        if (myOrderCount!=0){
-//            latelyOrderTime = this.jdbcTemplate.queryForObject(MyLatelyOrderTimeQuery,
-//                    String.class,
-//                    userIdx, storeIdx);
-//        }
-//        String myLatelyOrderTime = latelyOrderTime;
 
         String isStoreCouponQuery = "SELECT EXISTS(SELECT * FROM Coupon WHERE status='Y' AND DATEDIFF(endDate, CURRENT_DATE())>=0 AND storeIdx=?)";
         String isCoupon = "Y";
@@ -605,17 +604,7 @@ public class StoreDao {
      * @return BaseResponse<List<GetStoreReviewListRes>>
      */
     public GetStoreReviewListRes getStoreReviews(int userIdx, int storeIdx, StoreReviewIdx idx) {
-    
-        
-        // 추가 여부 클라이언트와 상의
-//        String ReviewStoreInfo = "SELECT S.storeIdx, S.storeName,R.reviewScore, R.reviewCount\n" +
-//                "    FROM Store S\n" +
-//                "    LEFT JOIN (\n" +
-//                "        SELECT UO.storeIdx, ROUND(AVG(R.score),1) AS reviewScore, COUNT(R.reviewIdx) AS reviewCount\n" +
-//                "        FROM Review R JOIN UserOrder UO on R.userOrderIdx=UO.userOrderIdx WHERE R.status='Y'\n" +
-//                "        GROUP BY UO.storeIdx) R ON R.storeIdx=S.storeIdx\n" +
-//                "    WHERE S.status != 'N';";
-//      
+
         // 리뷰 정보
         String ReviewInfoQuery = "SELECT R.reviewIdx, R.userIdx, R.userOrderIdx, R.score, R.content, R.isPhoto AS isPhotoReview,\n" +
                 "       CASE\n" +
@@ -976,29 +965,6 @@ public class StoreDao {
                     isPhoto, putReviewReq.getReasonForStore(), putReviewReq.getIsDeliveryManGood(),
                 putReviewReq.getReasonForDelivery(), reviewIdx);
 
-
-
-//        if (putReviewReq.getScore() > 2 && putReviewReq.getIsDeliveryManGood().equals("G")) {
-//            // 둘다 좋아요
-//            this.jdbcTemplate.update(InsertReviewInfoQuery1, putReviewReq.getScore(), putReviewReq.getContent(),
-//                    isPhoto, putReviewReq.getIsDeliveryManGood(), putReviewReq.getReviewIdx());
-//
-//        } else if (putReviewReq.getScore() <= 2 && putReviewReq.getIsDeliveryManGood().equals("G")) {
-//            // 매장만 불만
-//            this.jdbcTemplate.update(InsertReviewInfoQuery2, putReviewReq.getScore(), putReviewReq.getContent(),
-//                    isPhoto, putReviewReq.getReasonForStore(), putReviewReq.getIsDeliveryManGood(), putReviewReq.getReviewIdx());
-//
-//        } else if (putReviewReq.getScore() > 2 && putReviewReq.getIsDeliveryManGood().equals("B")){
-//            // 배달만 불만
-//            this.jdbcTemplate.update(InsertReviewInfoQuery3, putReviewReq.getScore(), putReviewReq.getContent(),
-//                    isPhoto, putReviewReq.getIsDeliveryManGood(), putReviewReq.getReasonForDelivery(), putReviewReq.getReviewIdx());
-//        } else {
-//            // 다 불만
-//            this.jdbcTemplate.update(InsertReviewInfoQuery4, putReviewReq.getScore(), putReviewReq.getContent(),
-//                    isPhoto, putReviewReq.getReasonForStore(), putReviewReq.getIsDeliveryManGood(), putReviewReq.getReasonForDelivery(), putReviewReq.getReviewIdx());
-//        }
-
-
         if (putReviewReq.getIsMenuGood().size()!=0){
             Set<Map.Entry<Integer,String>> entrySet = putReviewReq.getIsMenuGood().entrySet();
             Iterator<Map.Entry<Integer, String>> entryIterator = entrySet.iterator();
@@ -1094,14 +1060,7 @@ public class StoreDao {
                 Param);
     }
 
-    // 가게 카테고리 존재 여부 확인
-    public int checkStoreCategory(int categoryIdx) {
-        String Query = "SELECT EXISTS(SELECT * FROM StoreCategory WHERE storeCategoryIdx=? AND status='Y');";
-        int Param = categoryIdx;
-        return this.jdbcTemplate.queryForObject(Query,
-                int.class,
-                Param);
-    }
+
 
     // 사용자의 현재 위치 찾기
     public UserLocation getNowUserLocation(int userIdx) {
@@ -1576,7 +1535,7 @@ public class StoreDao {
 
     }
 
-    // 즐겨찾기 한 가게 찾기
+    // 이미 좋아요 한 가게가 있는지 확인
     public int checkFavoriteStore(int userIdx, int storeIdx) {
         String Query = "SELECT EXISTS(SELECT * FROM Favorite WHERE userIdx=? AND storeIdx=? AND status='Y');";
         return this.jdbcTemplate.queryForObject(Query, int.class, userIdx, storeIdx);
@@ -1761,7 +1720,7 @@ public class StoreDao {
                         rs.getInt("userIdx")),
                 storeIdx);
     }
-
+    // 리뷰 존재 확인 - userIdx, userOrderIdx
     public int checkUserReview(int userIdx, int userOrderIdx) {
         String Query = "SELECT EXISTS(SELECT reviewIdx\n" +
                 "FROM UserOrder UO JOIN Review R on UO.userOrderIdx = R.userOrderIdx\n" +
@@ -1825,12 +1784,13 @@ public class StoreDao {
         return this.jdbcTemplate.queryForObject(FindType, String.class, reviewIdx, userIdx);
     }
 
+    // 리뷰가 존재하는지 확인 - reviewIdx
     public int checkReviewExists(int reviewIdx) {
         String Query = "SELECT EXISTS(SELECT * FROM Review WHERE reviewIdx=? AND status='Y');";
         return this.jdbcTemplate.queryForObject(Query, int.class, reviewIdx);
     }
 
-    // 키워드 검색 idx 찾기
+    // 가게 검색 조회 -> idx 찾기
     public List<Integer> findKeywordStoreIdxList(String keyword) {
 
         String Query = "SELECT DISTINCT S.storeIdx\n" +

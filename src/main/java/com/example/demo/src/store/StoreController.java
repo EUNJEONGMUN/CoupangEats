@@ -9,7 +9,6 @@ import com.example.demo.src.store.model.Res.*;
 import com.example.demo.src.user.UserProvider;
 import com.example.demo.src.user.model.UserLocation;
 import com.example.demo.utils.JwtService;
-import com.fasterxml.jackson.databind.ser.Serializers;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -70,32 +69,8 @@ public class StoreController {
                                                             @RequestParam(required = false, defaultValue = "N") String isToGo,
                                                             @RequestParam(required = false, defaultValue = "N") String isCoupon) throws BaseException{
 
-        // 헤더에 사용자 idx가 있다면 추출
-        int userIdx= jwtService.getUserIdxOption();
-
-        // 위치 정보가 없는지 확인
-        if (latitude==0 || longitude==0){
-            return new BaseResponse<>(EMPTY_POSITION_PARAM);
-        }
-
-        // 사용자의 위치 정보 객체
-        UserLocation userLocation = new UserLocation();
-
-        if (userIdx == 0){ // 사용자 idx가 없을 때 userLocation을 파라미터값으로 설정
-            userLocation.setUserLongitude(longitude);
-            userLocation.setUserLatitude(latitude);
-        } else{// 사용자 idx가 있을 때
-
-            // 사용자의 현재 위치 가져오기
-            userLocation = storeProvider.getNowUserLocation(userIdx);
-
-            // 사용자가 현재 주소로 설정한 값이 없을 때
-            if (userLocation.getUserLatitude()==0 || userLocation.getUserLatitude()==0){
-                // userLocation을 파라미터값으로 설정
-                userLocation.setUserLongitude(longitude);
-                userLocation.setUserLatitude(latitude);
-            }
-        }
+        // userLocation -> 헤더에 사용자 아이디가 있고, 사용자가 현재 설정한 주소가 있으면 그 위도와 경도로, 없으면 파라미터로 전달받은 값으로 설정
+        UserLocation userLocation = getOptionalUserLocation(longitude,latitude);
 
         // 배달비 파라미터값 확인
         if (!(deliveryFee.equals("전체") || deliveryFee.equals("무료배달") || deliveryFee.equals("1000")|| deliveryFee.equals("2000")|| deliveryFee.equals("3000"))){
@@ -142,32 +117,8 @@ public class StoreController {
                                                                    @RequestParam(required = false, defaultValue = "N") String isCoupon,
                                                                     @RequestParam(required = false, defaultValue = "default") String type) throws BaseException{
 
-        // 헤더에 사용자 idx가 있다면 추출
-        int userIdx= jwtService.getUserIdxOption();
-
-        // 위치 정보가 없는지 확인
-        if (latitude==0 || longitude==0){
-            return new BaseResponse<>(EMPTY_POSITION_PARAM);
-        }
-
-        // 사용자의 위치 정보 객체
-        UserLocation userLocation = new UserLocation();
-
-        if (userIdx == 0){ // 사용자 idx가 없을 때 userLocation을 파라미터값으로 설정
-            userLocation.setUserLongitude(longitude);
-            userLocation.setUserLatitude(latitude);
-        } else{// 사용자 idx가 있을 때
-
-            // 사용자의 현재 위치 가져오기
-            userLocation = storeProvider.getNowUserLocation(userIdx);
-
-            // 사용자가 현재 주소로 설정한 값이 없을 때
-            if (userLocation.getUserLatitude()==0 || userLocation.getUserLatitude()==0){
-                // userLocation을 파라미터값으로 설정
-                userLocation.setUserLongitude(longitude);
-                userLocation.setUserLatitude(latitude);
-            }
-        }
+        // userLocation -> 헤더에 사용자 아이디가 있고, 사용자가 현재 설정한 주소가 있으면 그 위도와 경도로, 없으면 파라미터로 전달받은 값으로 설정
+        UserLocation userLocation = getOptionalUserLocation(longitude,latitude);
 
         // 배달비 파라미터값 확인
         if (!(deliveryFee.equals("전체") || deliveryFee.equals("무료배달") || deliveryFee.equals("1000")|| deliveryFee.equals("2000")|| deliveryFee.equals("3000"))){
@@ -211,43 +162,33 @@ public class StoreController {
                                                            @RequestParam(required = false, defaultValue = "N") String isCoupon,
                                                            @RequestParam(required = false) String keyword) throws BaseException{
 
+        // 검색 키워드 null 값이나 빈 값이 아닌지 확인
         if (keyword==null || keyword.trim().equals("")){
             return new BaseResponse<>(EMPTY_KEYWORD);
         }
 
-        int userIdx= jwtService.getUserIdxOption();
-        if (latitude==0 || longitude==0){
-            return new BaseResponse<>(EMPTY_POSITION_PARAM);
-        }
+        // userLocation -> 헤더에 사용자 아이디가 있고, 사용자가 현재 설정한 주소가 있으면 그 위도와 경도로, 없으면 파라미터로 전달받은 값으로 설정
+        UserLocation userLocation = getOptionalUserLocation(longitude,latitude);
 
-        UserLocation userLocation = new UserLocation();
-
-        if (userIdx == 0){
-            userLocation.setUserLongitude(longitude);
-            userLocation.setUserLatitude(latitude);
-        } else{
-            userLocation = storeProvider.getNowUserLocation(userIdx);
-            if (userLocation.getUserLatitude()==0 || userLocation.getUserLatitude()==0){
-                userLocation.setUserLongitude(longitude);
-                userLocation.setUserLatitude(latitude);
-            }
-        }
-
+        // 배달비 파라미터값 확인
         if (!(deliveryFee.equals("전체") || deliveryFee.equals("무료배달") || deliveryFee.equals("1000")|| deliveryFee.equals("2000")|| deliveryFee.equals("3000"))){
             return new BaseResponse<>(INVALID_DELIVERY_FEE_PARAM);
         }
+
+        // 최소주문금액 파라미터값 확인
         if (!(minimumPrice.equals("전체") || minimumPrice.equals("5000") ||minimumPrice.equals("10000") ||minimumPrice.equals("12000") ||minimumPrice.equals("15000"))){
             return new BaseResponse<>(INVALID_MINIMUM_PRICE_PARAM);
         }
 
 
+        // 파라미터값을 넣은 객체 생성
         GetStoreHomeReq getStoreHomeReq = new GetStoreHomeReq(sort, isCheetah, deliveryFee, minimumPrice, isToGo, isCoupon);
 
+        // 가게 객체 리스트
         List<GetStoreHomeRes> getSearchForStoreRes = storeProvider.getSearchForStore(userLocation, getStoreHomeReq, keyword);
 
         return new BaseResponse<>(getSearchForStoreRes);
     }
-
 
 
     /**
@@ -260,35 +201,58 @@ public class StoreController {
     public BaseResponse<GetStoreDetailRes> getStoreDetail(@RequestParam(required = false, defaultValue = "0") double longitude,
                                                           @RequestParam(required = false, defaultValue = "0") double latitude,
                                                           @RequestParam(required = false, defaultValue = "0") int storeIdx) throws BaseException{
+
+        // userLocation -> 헤더에 사용자 아이디가 있고, 사용자가 현재 설정한 주소가 있으면 그 위도와 경도로, 없으면 파라미터로 전달받은 값으로 설정
+        UserLocation userLocation = getOptionalUserLocation(longitude,latitude);
         int userIdx= jwtService.getUserIdxOption();
-        if (latitude==0 || longitude==0){
-            return new BaseResponse<>(EMPTY_POSITION_PARAM);
-        }
 
-        UserLocation userLocation = new UserLocation();
-
-        if (userIdx == 0){
-            userLocation.setUserLongitude(longitude);
-            userLocation.setUserLatitude(latitude);
-        } else{
-            userLocation = storeProvider.getNowUserLocation(userIdx);
-            if (userLocation.getUserLatitude()==0 || userLocation.getUserLatitude()==0){
-                userLocation.setUserLongitude(longitude);
-                userLocation.setUserLatitude(latitude);
-            }
-        }
-
-        // storeIdx
+        // storeIdx 확인
         if (storeIdx == 0){
             return new BaseResponse<>(EMPTY_STOREIDX_PARAM);
         }
+
+        // 가게 존재 여부 확인
         if (storeProvider.checkStore(storeIdx)==0){
             return new BaseResponse<>(EMPTY_STORE);
         }
 
-
         GetStoreDetailRes getStoreDetailRes = storeProvider.getStoreDetail(userLocation, storeIdx, userIdx);
         return new BaseResponse<>(getStoreDetailRes);
+    }
+
+    /**
+     * UserLocation 객체 생성
+     * 사용자의 위치정보가 있다면 그 값으로, 없다면 파라미터 값으로 설정 후 반환
+     */
+    public UserLocation getOptionalUserLocation(double longitude, double latitude) throws BaseException {
+
+        // 헤더에 사용자 idx가 있다면 추출
+        int userIdx= jwtService.getUserIdxOption();
+
+        // 위치 정보가 없는지 확인
+        if (latitude==0 || longitude==0){
+            throw new BaseException(EMPTY_POSITION_PARAM);
+        }
+
+        // 사용자의 위치 정보 객체
+        UserLocation userLocation = new UserLocation();
+
+        if (userIdx == 0){ // 사용자 idx가 없을 때 userLocation을 파라미터값으로 설정
+            userLocation.setUserLongitude(longitude);
+            userLocation.setUserLatitude(latitude);
+        } else {// 사용자 idx가 있을 때
+
+            // 사용자의 현재 위치 가져오기
+            userLocation = storeProvider.getNowUserLocation(userIdx);
+
+            // 사용자가 현재 주소로 설정한 값이 없을 때
+            if (userLocation.getUserLatitude() == 0 || userLocation.getUserLatitude() == 0) {
+                // userLocation을 파라미터값으로 설정
+                userLocation.setUserLongitude(longitude);
+                userLocation.setUserLatitude(latitude);
+            }
+        }
+        return userLocation;
     }
 
     /**
@@ -335,8 +299,10 @@ public class StoreController {
                                                                      @RequestParam(required = false, defaultValue = "recent") String sort,
                                                                      @RequestParam(required = false, defaultValue = "Y") String isPhoto) throws BaseException {
 
+        // 헤더에 사용자idx가 있을 경우 추출
         int userIdx= jwtService.getUserIdxOption();
-        if (storeIdx ==0){
+
+        if (storeIdx ==0){ // storeIdx가 없을 경우
             return new BaseResponse<>(EMPTY_STOREIDX_PARAM);
         }
         List<GetStoreReviewListRes> getStoreReviewListRes = storeProvider.getStoreReviews(userIdx, storeIdx, sort, isPhoto);
@@ -354,6 +320,7 @@ public class StoreController {
     @GetMapping("/review")
     public BaseResponse<GetStoreMyReviewRes> getStoreMyReview(@RequestParam(required = false, defaultValue = "0") int userOrderIdx) throws BaseException {
 
+        // userIdx 추출
         int userIdx= jwtService.getUserIdx();
 
         // 사용자 존재 여부 확인
@@ -361,7 +328,7 @@ public class StoreController {
             return new BaseResponse<>(USER_NOT_EXISTS);
         }
 
-        if (userOrderIdx ==0){
+        if (userOrderIdx ==0){ // userOrderIdx가 없을 경우
             return new BaseResponse<>(EMPTY_USER_ORDER_IDX_PARAM);
         }
 
@@ -369,6 +336,7 @@ public class StoreController {
         if (orderProvider.checkOrderOwner(userIdx, userOrderIdx) == 0){
             return new BaseResponse<>(USER_ORDER_NOT_EXISTS);
         }
+        // 리뷰 존재 확인
         if (storeProvider.checkUserReview(userIdx, userOrderIdx) == 0){
             return new BaseResponse<>(REVIEW_NOT_EXISTS);
         }
@@ -389,6 +357,7 @@ public class StoreController {
     public BaseResponse<String> createReview(PostReviewReq postReviewReq,
                                              @RequestParam(value = "image", required = false) List<MultipartFile> multipartFile) throws BaseException, IOException {
 
+        // userIdx 추출
         int userIdx= jwtService.getUserIdx();
 
         // 사용자 존재 여부 확인
@@ -396,7 +365,7 @@ public class StoreController {
             return new BaseResponse<>(USER_NOT_EXISTS);
         }
 
-        if (postReviewReq.getUserOrderIdx() ==0){
+        if (postReviewReq.getUserOrderIdx() ==0){ // userOrderIdx가 없을 경우
             return new BaseResponse<>(EMPTY_USER_ORDER_IDX_PARAM);
         }
         // 주문 존재 여부 확인
@@ -410,7 +379,6 @@ public class StoreController {
         }
 
         // 리뷰 작성여부 확인
-        //
         if (storeProvider.checkUserReview(userIdx, postReviewReq.getUserOrderIdx()) != 0){
             return new BaseResponse<>(REVIEW_ALREADY_EXISTS);
         }
@@ -420,6 +388,7 @@ public class StoreController {
             return new BaseResponse<>(EXPIRATION_OR_REVIEW);
         }
 
+        // 이미지 업로드
         List<String> imageList = new ArrayList<>();
         if (multipartFile!=null && multipartFile.size()!=0){
             for (MultipartFile file:multipartFile){
@@ -428,18 +397,12 @@ public class StoreController {
             }
         }
 
-
         storeService.createReview(userIdx, postReviewReq.getUserOrderIdx(), postReviewReq, imageList);
         String result = "";
         return new BaseResponse<>(result);
 
 
     }
-
-
-
-
-
 
 
     /**
@@ -451,6 +414,7 @@ public class StoreController {
     @PutMapping("/review")
     public BaseResponse<String> modifyReview(PutReviewReq putReviewReq,
                                              @RequestParam(value = "image", required = false) List<MultipartFile> multipartFile) throws BaseException, IOException {
+        // userIdx 추출
         int userIdx= jwtService.getUserIdx();
 
         // 사용자 존재 여부 확인
@@ -474,7 +438,7 @@ public class StoreController {
         }
 
 
-
+        // 이미지 업로드
         List<String> imageList = new ArrayList<>();
         if (multipartFile!=null && multipartFile.size()!=0){
             for (MultipartFile file:multipartFile){
@@ -500,6 +464,7 @@ public class StoreController {
     @ResponseBody
     @PatchMapping("/review/deletion")
     public BaseResponse<String> deleteReview(@Valid @RequestBody PatchReviewReq patchReviewReq) throws BaseException {
+        // userIdx 추출
         int userIdx= jwtService.getUserIdx();
 
         // 사용자 존재 여부 확인
@@ -534,7 +499,10 @@ public class StoreController {
     @PostMapping("/favorite")
     public BaseResponse<String> createFavoriteStore(@RequestParam(required = false) int storeIdx) throws BaseException {
 
+        // userIdx 추출
         int userIdx= jwtService.getUserIdx();
+
+        // 사용자 존재 여부 확인
         if (userProvider.checkUser(userIdx)==0){
             return new BaseResponse<>(USER_NOT_EXISTS);
         }
@@ -561,7 +529,11 @@ public class StoreController {
     @ResponseBody
     @PutMapping("/favorite")
     public BaseResponse<String> deleteFavoriteStore(@RequestParam(required = false) String[] storeIdx) throws BaseException {
+
+        // userIdx 추출
         int userIdx= jwtService.getUserIdx();
+
+        // 사용자 존재 여부 확인
         if (userProvider.checkUser(userIdx)==0){
             return new BaseResponse<>(USER_NOT_EXISTS);
         }
@@ -589,17 +561,23 @@ public class StoreController {
     public BaseResponse<GetFavoriteListRes> getFavoriteList(@RequestParam(required = false, defaultValue = "0") double longitude,
                                                                   @RequestParam(required = false, defaultValue = "0") double latitude,
                                                                   @RequestParam(required = false, defaultValue = "frequent") String sort) throws BaseException{
+        // userIdx 추출
         int userIdx= jwtService.getUserIdx();
+
+        // 사용자 존재 여부 확인
         if (userProvider.checkUser(userIdx)==0){
             return new BaseResponse<>(USER_NOT_EXISTS);
         }
 
+        // 위도 경도 파라미터값 확인
         if (latitude==0 || longitude==0){
             return new BaseResponse<>(EMPTY_POSITION_PARAM);
         }
 
+        // 사용자의 현재 위치 찾기
         UserLocation userLocation = storeProvider.getNowUserLocation(userIdx);
         if (userLocation.getUserLatitude()==0 || userLocation.getUserLatitude()==0){
+            // 사용자의 현재 위치가 없다면, 마라미터 값으로 갱신
             userLocation.setUserLongitude(longitude);
             userLocation.setUserLatitude(latitude);
         }
@@ -621,33 +599,38 @@ public class StoreController {
     @PostMapping("/review/liked")
     public BaseResponse<String> createReviewLiked(@Valid @RequestBody PostLikedReviewReq postLikedReviewReq) throws BaseException {
 
+        // userIdx 추출
         int userIdx= jwtService.getUserIdx();
 
+        // 사용자 존재 여부 확인
         if (userProvider.checkUser(userIdx)==0){
             return new BaseResponse<>(USER_NOT_EXISTS);
         }
-
 
         // 리뷰가 존재하는지 확인
         if (storeProvider.checkReviewExists(postLikedReviewReq.getReviewIdx())==0){
             return new BaseResponse<>(EMPTY_REVIEWIDX);
         }
 
+        // 파라미터값 확인
         if (!(postLikedReviewReq.getIsHelped().equals("G")||postLikedReviewReq.getIsHelped().equals("B"))){
             return new BaseResponse<>(INVALID_STATUS);
         }
-        // 이미 리뷰 한 글인지 확인
-        // 리뷰 한 기록이 없을 경우 "N"
+
+        // 이미 리뷰 도움이 돼요 한 글인지 확인
+        // 리뷰 도움이 돼요 한 기록이 없을 경우 "N"
         // 있을 경우 "G" or "B"
         String dbIsHelped = storeProvider.checkLikedReview(userIdx, postLikedReviewReq.getReviewIdx());
         if (dbIsHelped.equals(postLikedReviewReq.getIsHelped())){
             return new BaseResponse<>(LIKED_REVIEW_ALREADY);
         }
 
+        // 리뷰 도움이 돼요 한 기록이 없을 경우
         if (dbIsHelped.equals("N")){
             storeService.createReviewLiked(userIdx, postLikedReviewReq.getReviewIdx(), postLikedReviewReq.getIsHelped());
         }
 
+        // 리뷰 도움이 돼요 한 기록이 있을 경우 -> toggle
         storeService.createReviewLikedToggle(userIdx, postLikedReviewReq.getReviewIdx(), postLikedReviewReq.getIsHelped());
 
         String result = "";
@@ -663,8 +646,11 @@ public class StoreController {
     @ResponseBody
     @PatchMapping("/review/liked/deletion")
     public BaseResponse<String> deleteReviewLiked(@Valid @RequestBody PatchLikedReviewReq patchLikedReviewReq) throws BaseException {
+
+        // userIdx 추출
         int userIdx= jwtService.getUserIdx();
 
+        // 사용자 존재 여부 확인
         if (userProvider.checkUser(userIdx)==0){
             return new BaseResponse<>(USER_NOT_EXISTS);
         }
@@ -673,9 +659,11 @@ public class StoreController {
         if (storeProvider.checkReviewExists(patchLikedReviewReq.getReviewIdx())==0){
             return new BaseResponse<>(EMPTY_REVIEWIDX);
         }
+
+        // 리뷰 도움이 돼요 한 글인지 확인
         String dbIsHelped = storeProvider.checkLikedReview(userIdx, patchLikedReviewReq.getReviewIdx());
 
-        if (dbIsHelped.equals("N")){
+        if (dbIsHelped.equals("N")){ // 리뷰 도움이 돼요한 기록이 없다면 -> 먼저 리뷰 도움이 돼요를 눌러야 함.
             return new BaseResponse<>(EMPTY_LIKED_REVIEW);
         }
         storeService.deleteReviewLiked(userIdx, patchLikedReviewReq.getReviewIdx());
@@ -684,19 +672,9 @@ public class StoreController {
     }
 
 
-
-
-
-
-
-
-
-
-
-
-    @PostMapping("/images")
-    public String upload(@RequestParam("data") MultipartFile multipartFile) throws IOException {
-        s3Uploader.upload(multipartFile, "static");
-        return "test";
-    }
+//    @PostMapping("/images")
+//    public String upload(@RequestParam("data") MultipartFile multipartFile) throws IOException {
+//        s3Uploader.upload(multipartFile, "static");
+//        return "test";
+//    }
 }

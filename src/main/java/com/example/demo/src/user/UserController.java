@@ -133,7 +133,6 @@ public class UserController {
             return new BaseResponse<>(POST_SIGN_IN_INVALID_EMAIL);
         }
 
-        System.out.println("여기");
         PostSignInRes postSignInRes = userService.signIn(postSignInReq);
         return new BaseResponse<>(postSignInRes);
 
@@ -208,8 +207,6 @@ public class UserController {
             return new BaseResponse<>(INVALID_STATUS);
         }
 
-        String result = "";
-
         if (postAddressReq.getAddressType().equals("H") || postAddressReq.getAddressType().equals("C")){
             // 현재 주소가 있을 때
             int duplicatedAddressIdx = userProvider.checkAddressNowIdx(userIdx, postAddressReq.getAddressType());
@@ -260,9 +257,6 @@ public class UserController {
             return new BaseResponse<>(EMPTY_ADDRESS_IDX);
         }
 
-//        if (putAddressReq.getStatus()==null || putAddressReq.getStatus().equals("")){
-//            putAddressReq.setStatus("Y");
-//        }
 
         if (putAddressReq.getAddressType()==null || putAddressReq.getAddressType().equals("")){
             putAddressReq.setAddressType("O");
@@ -504,10 +498,6 @@ public class UserController {
 
     }
 
-//    @ApiImplicitParams({
-//            @ApiImplicitParam(name = "X-AUTH-TOKEN", value = "access-token", required = true, dataType = "String", paramType = "header"),
-//            @ApiImplicitParam(name = "REFRESH-TOKEN", value = "refresh-token", required = true, dataType = "String", paramType = "header")
-//    })
     // 토큰이 만료되었을 때
 
     /**
